@@ -2,430 +2,571 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRAVES-LAW | UNIVERSAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAVES-LAW SYSTEM | ECONOMIC IMPACT SIMULATOR</title>
     <style>
         :root {
-            --primary: #00ffcc;       /* Native 166 (Cyan) */
-            --artifact: #ff3333;      /* Artifact 137 (Red) */
+            --primary: #00ffcc; /* Cyan for 166-Native */
+            --artifact: #ff3333; /* Red for 137-Artifact */
             --bg: #050505;
             --panel: #0a0f0d;
+            --text-glow: 0 0 10px rgba(0, 255, 204, 0.7);
+            --artifact-glow: 0 0 10px rgba(255, 51, 51, 0.7);
         }
-
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
-
         body {
             background-color: var(--bg);
             color: var(--primary);
             font-family: 'Courier New', monospace;
             margin: 0;
-            height: 100dvh; /* Dynamic height for mobile browsers */
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
         }
-
-        /* --- HEADER --- */
+        /* HEADER */
         header {
-            height: 60px;
-            background: #080808;
-            border-bottom: 1px solid #333;
+            grid-column: 1 / -1;
+            border-bottom: 1px solid var(--primary);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px;
-            flex-shrink: 0;
+            padding: 0 20px;
+            background: rgba(0, 255, 204, 0.05);
             z-index: 10;
+            transition: border-color 0.5s, background-color 0.5s;
         }
-
-        .brand { font-weight: bold; font-size: 1em; letter-spacing: 1px; color: #fff; }
-        
         .status-badge {
-            font-size: 0.7em;
-            padding: 4px 8px;
-            border: 1px solid var(--artifact);
-            color: var(--artifact);
-            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+            border: 1px solid var(--primary);
+            padding: 5px 10px;
+            font-size: 0.8em;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
             transition: all 0.5s;
-            white-space: nowrap;
         }
-
-        /* --- MAIN LAYOUT CONTAINER --- */
-        #container {
-            display: flex;
-            flex-direction: column; /* Mobile: Stack Vertically */
-            flex-grow: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* --- VIEWPORT (CANVAS) --- */
-        #viewport {
-            position: relative;
-            flex-grow: 1; /* Takes available space */
-            background: radial-gradient(circle at center, #150505 0%, #000 100%);
-            transition: background 2s;
-            overflow: hidden;
-            min-height: 40%; /* Ensure canvas is visible on mobile */
-        }
-
-        canvas { width: 100%; height: 100%; display: block; }
-
-        /* Overlay Data */
-        .overlay {
-            position: absolute;
-            top: 10px; left: 10px;
-            pointer-events: none;
-            background: rgba(0,0,0,0.5);
-            padding: 5px;
-            border-radius: 4px;
-        }
-        .overlay-row { font-size: 0.75em; color: #888; margin-bottom: 2px; }
-        .overlay-val { color: var(--artifact); font-weight: bold; margin-left: 5px; }
-
-        /* --- SIDEBAR / CONTROLS --- */
-        #controls {
+        /* SIDEBAR */
+        #sidebar {
+            grid-row: 2 / -1;
             background: var(--panel);
-            border-top: 1px solid #333;
+            border-right: 1px solid var(--primary);
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            transition: border-color 0.5s;
+        }
+        .graves-principle-panel {
+            border: 2px solid var(--primary);
             padding: 15px;
-            gap: 15px;
-            overflow-y: auto; /* Allow scrolling if controls get tall */
-            flex-shrink: 0;
-            max-height: 50%; /* Don't let controls eat the whole screen on mobile */
+            background: rgba(0, 20, 20, 0.8);
+            box-shadow: inset 0 0 30px rgba(0, 255, 204, 0.1);
+            transition: border-color 0.5s, box-shadow 0.5s;
         }
-
-        /* The Truth Block */
-        .truth-panel {
-            font-size: 0.75em;
-            line-height: 1.4;
-            color: #ccc;
-            border: 1px solid #333;
-            padding: 10px;
-            background: rgba(255,255,255,0.02);
-            display: none; /* Hide on small mobile by default to save space */
+        .graves-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: var(--text-glow);
+            letter-spacing: 1px;
+            border-bottom: 1px dashed var(--primary);
+            padding-bottom: 10px;
+            transition: color 0.5s, text-shadow 0.5s, border-color 0.5s;
         }
-
-        /* Industry Buttons (Horizontal scroll on mobile) */
-        .industry-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+        .graves-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+            color: #ccfffa;
+            text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+            transition: color 0.5s;
         }
-        .industry-btn {
-            background: #111;
-            border: 1px solid #333;
-            color: #777;
-            padding: 10px;
-            font-family: inherit;
-            font-size: 0.75em;
-            white-space: nowrap;
-            cursor: pointer;
+        .highlight-alpha {
+            display: block;
+            margin: 10px 0;
+            font-size: 0.85em;
+            word-break: break-all;
+            color: #fff;
+            background: rgba(0, 255, 204, 0.1);
+            padding: 5px;
+            border-left: 3px solid var(--primary);
+            transition: background 0.5s, border-color 0.5s;
         }
-        .industry-btn.active {
-            border-color: var(--artifact);
-            color: var(--artifact);
-            background: rgba(255, 51, 51, 0.1);
-        }
-
-        /* Main Button */
-        #main-btn {
-            padding: 15px;
-            background: transparent;
-            border: 2px solid var(--artifact);
-            color: var(--artifact);
-            font-size: 1em;
+        .pulse-text {
+            animation: textPulse 2s infinite ease-in-out;
             font-weight: bold;
             text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s;
+        }
+        /* ECONOMIC IMPACT PANEL (NEW) */
+        #impact-panel {
+            border: 1px solid var(--primary);
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            margin-top: 5px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+            transition: all 0.5s;
+            display: none; /* Hidden until industry selected */
+        }
+        .impact-label { font-size: 0.7em; letter-spacing: 1px; opacity: 0.8; margin-bottom: 5px; }
+        .impact-val { font-size: 1.6em; font-weight: bold; color: #fff; margin: 5px 0; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .impact-sub { font-size: 0.75em; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        /* INDUSTRY SELECTOR */
+        .industry-selector h3 {
+            font-size: 0.8em;
+            color: #888;
+            border-bottom: 1px solid #333;
+            margin-bottom: 10px;
+        }
+        .industry-btn {
+            display: block;
             width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #111;
+            border: 1px solid #333;
+            color: #888;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            font-size: 0.85em;
         }
-
-        /* Data Deck (Hidden on very small mobile, shown on desktop) */
-        #data-deck {
-            display: none; 
+        .industry-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
         }
-
-        /* --- DESKTOP BREAKPOINT (>900px) --- */
-        @media (min-width: 900px) {
-            #container {
-                flex-direction: row; /* Side by side */
-            }
-
-            /* Sidebar becomes Left Column */
-            #controls {
-                width: 360px;
-                height: 100%;
-                border-top: none;
-                border-right: 1px solid #333;
-                order: 1; /* Left */
-            }
-
-            /* Viewport becomes Right Column */
-            #viewport {
-                order: 2; /* Right */
-                display: flex;
-                flex-direction: column;
-            }
-            
-            #canvas-wrapper { flex-grow: 1; position: relative; }
-            canvas { position: absolute; top:0; left:0; }
-
-            /* Show Truth Panel & Data Deck on Desktop */
-            .truth-panel { display: block; margin-bottom: auto; }
-            #data-deck {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                padding: 15px;
-                gap: 10px;
-                background: #080808;
-                border-top: 1px solid #333;
-                height: 100px;
-            }
-            
-            .industry-scroll {
-                flex-direction: column;
-                overflow-x: visible;
-            }
-            .industry-btn { width: 100%; text-align: left; }
+        .industry-btn.active {
+            background: rgba(255, 51, 51, 0.1);
+            border-color: var(--artifact);
+            color: var(--artifact);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
         }
-
-        /* Metric Styles (Desktop only) */
-        .metric { border-left: 2px solid #333; padding-left: 10px; }
-        .metric-label { font-size: 0.6em; color: #555; display: block; margin-bottom: 5px; }
-        .metric-val { font-size: 1.2em; font-weight: bold; color: var(--artifact); }
-
-        /* --- NATIVE MODE STYLES --- */
-        body.mode-native .status-badge { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px var(--primary); }
-        body.mode-native #main-btn { border-color: var(--primary); color: #000; background: var(--primary); box-shadow: 0 0 30px var(--primary); }
-        body.mode-native .overlay-val, body.mode-native .metric-val { color: var(--primary); }
-        body.mode-native #viewport { background: radial-gradient(circle at center, #001a15 0%, #000 100%); }
-
+        /* INITIATE BUTTON */
+        #initiate-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+            transition: all 0.3s;
+            margin-top: auto;
+            animation: pulseBtn 2s infinite;
+        }
+        #initiate-btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.6);
+        }
+        #initiate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+        /* MAIN VISUALIZATION */
+        #main-view {
+            grid-column: 2;
+            grid-row: 2;
+            display: grid;
+            grid-template-rows: 1fr 150px;
+            position: relative;
+        }
+        #viewport {
+            position: relative;
+            background: radial-gradient(circle at center, #1a0a0a 0%, #000 100%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 2s;
+        }
+        canvas { z-index: 1; }
+        .overlay-data {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.9em;
+            pointer-events: none;
+            z-index: 2;
+        }
+       
+        .value-label { width: 150px; display: inline-block; }
+        /* DATA DECK */
+        #datadeck {
+            border-top: 1px solid var(--primary);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 20px;
+            gap: 10px;
+            background: var(--panel);
+            z-index: 2;
+            transition: border-color 0.5s;
+        }
+        .metric {
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            padding: 10px;
+            transition: all 0.5s;
+        }
+        .metric h3 { margin: 0 0 5px 0; font-size: 0.7em; opacity: 0.7; }
+        .metric .val { font-size: 1.5em; font-weight: bold; transition: color 0.5s; }
+        .metric .unit { font-size: 0.8em; }
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.5); }
+            100% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
+        }
     </style>
 </head>
-<body>
-
-<header>
-    <div class="brand">GRAVES-LAW</div>
-    <div id="badge" class="status-badge">PHYSICS: ARTIFACT (137)</div>
+<body class="state-artifact">
+<header id="main-header">
+    <div>GRAVES-LAW SYSTEM // <span id="industry-label" style="opacity:0.8; font-weight:bold;">MACHINING</span></div>
+    <div id="header-badge" class="status-badge" style="border-color: #ff3333; color: #ff3333; box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);">PHYSICS: ARTIFACT (α⁻¹ ≈ 137.03)</div>
 </header>
-
-<div id="container">
-    
-    <div id="controls">
-        <div class="truth-panel">
-            <strong>CORE PRINCIPLE</strong><br><br>
-            Material is irrelevant. Geometry is everything.<br>
-            Any alloy locked to φ-native symmetry collapses to <span style="color:#fff; background:rgba(0,255,204,0.1)">1/α = 166.083...</span>
-        </div>
-
-        <div style="font-size:0.7em; color:#666; margin-bottom:5px;">SELECT INDUSTRY (RESET)</div>
-        <div class="industry-scroll">
-            <button class="industry-btn active" onclick="setIndustry(this)">MACHINING</button>
-            <button class="industry-btn" onclick="setIndustry(this)">AEROSPACE</button>
-            <button class="industry-btn" onclick="setIndustry(this)">MEDICAL</button>
-            <button class="industry-btn" onclick="setIndustry(this)">ENERGY</button>
-        </div>
-
-        <button id="main-btn" onclick="initiateSequence()">INITIATE SEQUENCE</button>
-    </div>
-
-    <div id="viewport">
-        <div id="canvas-wrapper" style="width:100%; height:100%; position:relative;">
-            <canvas id="sim-canvas"></canvas>
-            
-            <div class="overlay">
-                <div class="overlay-row">STATE: <span id="ov-state" class="overlay-val">NOISY</span></div>
-                <div class="overlay-row">SLACK: <span id="ov-slack" class="overlay-val">12.5nm</span></div>
-            </div>
-        </div>
-
-        <div id="data-deck">
-            <div class="metric">
-                <span class="metric-label">FINE STRUCTURE</span>
-                <div id="val-alpha" class="metric-val">137.036</div>
-            </div>
-            <div class="metric">
-                <span class="metric-label">CONVERGENCE</span>
-                <div id="val-conv" class="metric-val">0.0%</div>
-            </div>
-            <div class="metric">
-                <span class="metric-label">ENTROPY</span>
-                <div id="val-entropy" class="metric-val">HIGH</div>
-            </div>
-            <div class="metric">
-                <span class="metric-label">STATUS</span>
-                <div id="val-status" class="metric-val">VIBRATING</div>
-            </div>
+<div id="sidebar">
+   
+    <div class="graves-principle-panel" id="truth-panel" style="border-color:#ff3333; box-shadow: inset 0 0 30px rgba(255, 51, 51, 0.1);">
+        <div class="graves-title" id="truth-title" style="color:#ff3333; border-color:#ff3333; text-shadow:0 0 10px rgba(255,51,51,0.7);">GRAVES LAW CORE PRINCIPLE</div>
+        <div class="graves-text">
+            The material does not matter.<br>
+            Only the geometry matters.<br><br>
+            Any alloy, any chemistry, any substrate<br>
+            — when locked to φ-native icosahedral symmetry and the native fine-structure constant:<br>
+            <span class="highlight-alpha" id="alpha-display" style="border-left-color:#ff3333; background:rgba(255,51,51,0.1);">1/α = 137.035999...</span>
+            — collapses to the same <span class="pulse-text" id="zs-text" style="color:#ff3333;">zero-slack</span> minimum.<br><br>
+            <span style="opacity:0.8">Zero slack is universal.</span>
         </div>
     </div>
-
+    <div class="industry-selector">
+        <h3>SELECT INDUSTRY CONTEXT</h3>
+        <button class="industry-btn active" onclick="setIndustry('MACHINING', this)">>> MACHINING (SUBTRACTIVE)</button>
+        <button class="industry-btn" onclick="setIndustry('AEROSPACE', this)">>> AEROSPACE (TURBINES)</button>
+        <button class="industry-btn" onclick="setIndustry('MEDICAL', this)">>> MEDICAL (IMPLANTS)</button>
+        <button class="industry-btn" onclick="setIndustry('ENERGY', this)">>> ENERGY (FUSION)</button>
+        <button class="industry-btn" onclick="setIndustry('AUTOMOTIVE', this)">>> AUTOMOTIVE (EV)</button>
+        <button class="industry-btn" onclick="setIndustry('SEMICONDUCTOR', this)">>> SEMICONDUCTOR (LITHO)</button>
+    </div>
+    <div id="impact-panel">
+        <div class="impact-label">PROJECTED GLOBAL IMPACT</div>
+        <div id="impact-val" class="impact-val">$2.4 TRILLION</div>
+        <div id="impact-sub" class="impact-sub">GLOBAL SCRAP ELIMINATION</div>
+    </div>
+    <button id="initiate-btn" onclick="startSequence()" style="border-color:#ff3333; color:#ff3333; background:rgba(255, 51, 51, 0.1); box-shadow:0 0 20px rgba(255,51,51,0.2);">INITIATE SEQUENCE</button>
 </div>
-
+<div id="main-view">
+    <div id="viewport">
+        <div class="overlay-data">
+            <div><span class="value-label">GEOMETRY:</span> <span id="geo-status" style="color:#ff3333">UNLOCKED (CHAOTIC)</span></div>
+            <div><span class="value-label">VACUUM STATE:</span> <span id="vac-status" style="color:#ff3333">ARTIFACT (NOISY)</span></div>
+            <div><span class="value-label">SLACK:</span> <span id="slack-val" style="color:#ff3333">12.5000 nm (RMS)</span></div>
+        </div>
+        <canvas id="fieldCanvas"></canvas>
+    </div>
+    <div id="datadeck">
+        <div class="metric" id="m1">
+            <h3>GLOBAL CONVERGENCE</h3>
+            <div><span class="val" id="conv-val" style="color:#ff3333">0.00</span> <span class="unit">%</span></div>
+        </div>
+        <div class="metric" id="m2">
+            <h3>CURRENT ALPHA (1/α)</h3>
+            <div><span class="val" id="alpha-val" style="color:#ff3333">137.035...</span></div>
+        </div>
+        <div class="metric" id="m3">
+            <h3>ENTROPY</h3>
+            <div><span class="val" id="entropy-val" style="color:#ff3333">HIGH</span> <span class="unit">J/K</span></div>
+        </div>
+        <div class="metric" id="m4">
+            <h3>STATUS</h3>
+            <div><span class="val" id="status-val" style="color:#ff3333">VIBRATING</span></div>
+        </div>
+    </div>
+</div>
 <script>
-    const canvas = document.getElementById('sim-canvas');
+    const canvas = document.getElementById('fieldCanvas');
     const ctx = canvas.getContext('2d');
-    
-    // UI Refs
-    const ui = {
-        body: document.body,
-        badge: document.getElementById('badge'),
-        btn: document.getElementById('main-btn'),
-        ovState: document.getElementById('ov-state'),
-        ovSlack: document.getElementById('ov-slack'),
-        // Desktop Metrics
-        valAlpha: document.getElementById('val-alpha'),
-        valConv: document.getElementById('val-conv'),
-        valEntropy: document.getElementById('val-entropy'),
-        valStatus: document.getElementById('val-status')
+   
+    // Resize handling
+    function resizeCanvas() {
+        const parent = document.getElementById('viewport');
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    // PHYSICS CONSTANTS
+    const ALPHA_ARTIFACT = 137.035999;
+    const ALPHA_NATIVE = 166.08367699849804;
+    const PHI = 1.618033988749895;
+    // GLOBAL ECONOMIC DATA (The "Table We Discussed")
+    const IMPACT_DATA = {
+        'MACHINING': { val: "$2.4 TRILLION/YR", sub: "GLOBAL SCRAP ELIMINATION & TOOL WEAR" },
+        'AEROSPACE': { val: "$850 BILLION/YR", sub: "TURBINE EFFICIENCY & FUEL SAVINGS" },
+        'MEDICAL': { val: "$400 BILLION/YR", sub: "ZERO-REJECT IMPLANTS & MICRO-ROBOTICS" },
+        'ENERGY': { val: "$12.5 TRILLION/YR", sub: "FUSION CONTAINMENT FIELD STABILITY" },
+        'AUTOMOTIVE': { val: "$3.1 TRILLION/YR", sub: "MOTOR EFFICIENCY & BATTERY DENSITY" },
+        'SEMICONDUCTOR': { val: "$5.8 TRILLION/YR", sub: "ANGSTROM-LEVEL YIELD PERFECTION" }
     };
-
-    let w, h;
-    let state = 'ARTIFACT'; 
+    // SIMULATION STATE
+    let isRunning = false;
     let progress = 0;
-    let time = 0;
-
-    // Robust Resizing
-    function resize() {
-        const parent = canvas.parentElement;
-        w = canvas.width = parent.clientWidth;
-        h = canvas.height = parent.clientHeight;
-    }
-    window.addEventListener('resize', resize);
-    // Call resize frequently during load to catch layout settling
-    setInterval(resize, 500);
-    resize();
-
-    // Logic
-    function setIndustry(el) {
-        document.querySelectorAll('.industry-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        
-        // Reset
-        state = 'ARTIFACT';
+    let phase = 0;
+   
+    // UI Elements
+    const btn = document.getElementById('initiate-btn');
+    const headerBadge = document.getElementById('header-badge');
+    const alphaDisplay = document.getElementById('alpha-display');
+    const truthPanel = document.getElementById('truth-panel');
+    const truthTitle = document.getElementById('truth-title');
+    const zsText = document.getElementById('zs-text');
+    const impactPanel = document.getElementById('impact-panel');
+    const impactVal = document.getElementById('impact-val');
+    const impactSub = document.getElementById('impact-sub');
+    const metrics = [document.getElementById('m1'), document.getElementById('m2'), document.getElementById('m3'), document.getElementById('m4')];
+    const vals = {
+        conv: document.getElementById('conv-val'),
+        alpha: document.getElementById('alpha-val'),
+        entropy: document.getElementById('entropy-val'),
+        status: document.getElementById('status-val'),
+        geo: document.getElementById('geo-status'),
+        vac: document.getElementById('vac-status'),
+        slack: document.getElementById('slack-val')
+    };
+    function setIndustry(name, element) {
+        // Reset Logic
+        isRunning = false;
         progress = 0;
-        ui.body.classList.remove('mode-native');
-        ui.btn.innerText = "INITIATE SEQUENCE";
-        ui.btn.disabled = false;
-        ui.badge.innerText = "PHYSICS: ARTIFACT (137)";
-        
-        // Reset Metrics
-        ui.ovState.innerText = "NOISY";
-        ui.ovSlack.innerText = "12.5nm";
-        if(ui.valAlpha) {
-            ui.valAlpha.innerText = "137.036";
-            ui.valConv.innerText = "0.0%";
-            ui.valEntropy.innerText = "HIGH";
-            ui.valStatus.innerText = "VIBRATING";
-        }
+        phase = 0;
+       
+        // Update UI Text
+        document.getElementById('industry-label').innerText = name;
+       
+        // Update Economic Impact Data
+        const data = IMPACT_DATA[name] || { val: "---", sub: "SELECT INDUSTRY" };
+        impactVal.innerText = data.val;
+        impactSub.innerText = data.sub;
+        impactPanel.style.display = "block"; // Ensure visible
+       
+        // Handle Active Button State
+        document.querySelectorAll('.industry-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.borderColor = "#333";
+            b.style.color = "#888";
+            b.style.background = "#111";
+            b.style.boxShadow = "none";
+        });
+        element.classList.add('active');
+        element.style.borderColor = "#ff3333";
+        element.style.color = "#ff3333";
+        element.style.background = "rgba(255, 51, 51, 0.1)";
+       
+        resetToArtifact();
     }
-
-    function initiateSequence() {
-        if (state !== 'ARTIFACT') return;
-        state = 'RUNNING';
-        ui.btn.innerText = "ALIGNING...";
-        ui.btn.disabled = true;
+    function resetToArtifact() {
+        // Visual Reset to Red/Chaos
+        document.body.style.setProperty('--primary', '#00ffcc');
+       
+        const red = "#ff3333";
+        const redGlow = "0 0 15px rgba(255, 51, 51, 0.2)";
+        const redBg = "rgba(255, 51, 51, 0.1)";
+        // Header
+        headerBadge.style.borderColor = red;
+        headerBadge.style.color = red;
+        headerBadge.style.boxShadow = redGlow;
+        headerBadge.innerText = "PHYSICS: ARTIFACT (α⁻¹ ≈ 137.03)";
+        document.getElementById('main-header').style.background = "rgba(255, 51, 51, 0.05)";
+        document.getElementById('main-header').style.borderBottomColor = red;
+        // Sidebar Panel
+        truthPanel.style.borderColor = red;
+        truthPanel.style.boxShadow = "inset 0 0 30px rgba(255, 51, 51, 0.1)";
+        truthTitle.style.color = red;
+        truthTitle.style.borderColor = red;
+        truthTitle.style.textShadow = "0 0 10px rgba(255,51,51,0.7)";
+        alphaDisplay.innerText = "1/α = 137.035999...";
+        alphaDisplay.style.borderLeftColor = red;
+        alphaDisplay.style.background = redBg;
+        alphaDisplay.style.color = "#fff";
+        zsText.style.color = red;
+        document.getElementById('sidebar').style.borderRightColor = red;
+        // Impact Panel (Reset to Red)
+        impactPanel.style.borderColor = red;
+        impactPanel.style.borderLeftColor = red;
+        impactVal.style.textShadow = "0 0 10px rgba(255,51,51,0.5)";
+        // Button
+        btn.disabled = false;
+        btn.innerText = "INITIATE SEQUENCE";
+        btn.style.borderColor = red;
+        btn.style.color = red;
+        btn.style.background = redBg;
+        btn.style.boxShadow = "0 0 20px rgba(255, 51, 51, 0.2)";
+        // Viewport
+        document.getElementById('viewport').style.background = "radial-gradient(circle at center, #1a0a0a 0%, #000 100%)";
+        // Data Deck
+        document.getElementById('datadeck').style.borderTopColor = red;
+        metrics.forEach(m => m.style.borderColor = "rgba(255, 51, 51, 0.3)");
+       
+        // Values
+        vals.conv.style.color = red; vals.conv.innerText = "0.00";
+        vals.alpha.style.color = red; vals.alpha.innerText = "137.035...";
+        vals.entropy.style.color = red; vals.entropy.innerText = "HIGH";
+        vals.status.style.color = red; vals.status.innerText = "VIBRATING";
+       
+        vals.geo.style.color = red; vals.geo.innerText = "UNLOCKED (CHAOTIC)";
+        vals.vac.style.color = red; vals.vac.innerText = "ARTIFACT (NOISY)";
+        vals.slack.style.color = red; vals.slack.innerText = "12.5000 nm (RMS)";
     }
-
-    function loop() {
-        // Clear
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.fillRect(0, 0, w, h);
-
-        const cx = w/2;
-        const cy = h/2;
-        const rMax = Math.min(w,h) * 0.35;
-
-        // Progress Logic
-        if (state === 'RUNNING') {
-            progress += 0.008;
-            updateMetrics(progress);
-            if (progress >= 1) {
-                progress = 1;
-                state = 'LOCKED';
-                finalize();
+    function startSequence() {
+        if (isRunning) return;
+        isRunning = true;
+        btn.disabled = true;
+        btn.innerText = "ALIGNING LATTICE...";
+       
+        let startTime = null;
+        const duration = 4000;
+        function transition(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let runtime = timestamp - startTime;
+            progress = Math.min(runtime / duration, 1.0);
+            updateUI(progress);
+            if (progress < 1.0) {
+                requestAnimationFrame(transition);
+            } else {
+                finalizeNative();
             }
         }
-
-        let chaos = (state === 'ARTIFACT') ? 1 : (1 - progress);
-        let hue = 170 * (1 - chaos); // 0(Red) -> 170(Cyan)
-
-        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
-        ctx.lineWidth = 1 + (3 * chaos);
-
-        // Draw Lattice
+        requestAnimationFrame(transition);
+    }
+    function updateUI(p) {
+        let r = Math.round(255 - (255 * p));
+        let g = Math.round(51 + (204 * p));
+        let b = Math.round(51 + (153 * p));
+        let color = `rgb(${r},${g},${b})`;
+       
+        let currentAlpha = ALPHA_ARTIFACT + ((ALPHA_NATIVE - ALPHA_ARTIFACT) * p);
+        // Header
+        headerBadge.style.borderColor = color;
+        headerBadge.style.color = color;
+        headerBadge.style.boxShadow = `0 0 15px rgba(${r},${g},${b}, 0.2)`;
+        document.getElementById('main-header').style.borderBottomColor = color;
+        document.getElementById('main-header').style.background = `rgba(${r},${g},${b}, 0.05)`;
+        // Truth Panel
+        truthPanel.style.borderColor = color;
+        truthPanel.style.boxShadow = `inset 0 0 30px rgba(${r},${g},${b}, 0.1)`;
+        truthTitle.style.color = color;
+        truthTitle.style.borderColor = color;
+        truthTitle.style.textShadow = `0 0 10px rgba(${r},${g},${b}, 0.7)`;
+       
+        alphaDisplay.style.borderLeftColor = color;
+        alphaDisplay.style.background = `rgba(${r},${g},${b}, 0.1)`;
+        if(p > 0.5) alphaDisplay.innerText = "1/α = 166.083676998...";
+       
+        zsText.style.color = color;
+        document.getElementById('sidebar').style.borderRightColor = color;
+       
+        // Impact Panel (Transitions)
+        impactPanel.style.borderColor = color;
+        impactPanel.style.borderLeftColor = color;
+        impactVal.style.textShadow = `0 0 10px rgba(${r},${g},${b}, 0.5)`;
+        // Button
+        btn.style.borderColor = color;
+        btn.style.color = color;
+        btn.style.background = `rgba(${r},${g},${b}, 0.1)`;
+        btn.style.boxShadow = `0 0 20px rgba(${r},${g},${b}, 0.2)`;
+        document.getElementById('datadeck').style.borderTopColor = color;
+        metrics.forEach(m => m.style.borderColor = `rgba(${r},${g},${b}, 0.3)`);
+        // Values
+        vals.conv.style.color = color; vals.conv.innerText = (p * 100).toFixed(2);
+        vals.alpha.style.color = color; vals.alpha.innerText = currentAlpha.toFixed(3) + "...";
+       
+        if (p < 0.3) vals.entropy.innerText = "HIGH";
+        else if (p < 0.7) vals.entropy.innerText = "DROPPING";
+        else vals.entropy.innerText = "ZERO";
+        vals.entropy.style.color = color;
+        if (p < 0.3) vals.status.innerText = "VIBRATING";
+        else if (p < 0.8) vals.status.innerText = "LOCKING...";
+        else vals.status.innerText = "LOCKED";
+        vals.status.style.color = color;
+        vals.geo.style.color = color;
+        vals.vac.style.color = color;
+        vals.slack.style.color = color;
+        if (p > 0.1) {
+             document.getElementById('viewport').style.background = `radial-gradient(circle at center, rgba(${r},${g},${b},0.1) 0%, #000 100%)`;
+        }
+    }
+    function finalizeNative() {
+        btn.innerText = "ZERO-SLACK ACHIEVED";
+        btn.style.background = "#00ffcc";
+        btn.style.color = "#000";
+        btn.style.boxShadow = "0 0 50px #00ffcc";
+       
+        headerBadge.innerText = "PHYSICS: NATIVE (α⁻¹ ≈ 166.08)";
+        alphaDisplay.innerText = "1/α = 166.08367699849804007973497428707676421175761218717";
+       
+        vals.geo.innerText = "LOCKED (ICOSAHEDRAL)";
+        vals.vac.innerText = "CORRECTED (FLAT)";
+        vals.slack.innerText = "0.000000000000";
+    }
+    function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const baseRadius = Math.min(canvas.width, canvas.height) / 3;
+        let chaos = 1.0 - progress;
+        ctx.lineWidth = 1 + (2 * progress);
+       
+        let r = Math.round(255 - (255 * progress));
+        let g = Math.round(51 + (204 * progress));
+        let b = Math.round(51 + (153 * progress));
+        ctx.strokeStyle = `rgb(${r},${g},${b})`;
         ctx.beginPath();
-        for(let i=0; i<=360; i++) {
-            let rad = i * Math.PI / 180;
-            let noise = (Math.random()-0.5) * 50 * chaos;
-            
-            // Graves Function
-            let tVar = (state === 'LOCKED') ? (Date.now()/1000) : (time*0.1);
-            let geom = 30 * Math.cos(rad*5 + tVar);
-            
-            let r = rMax + noise + (geom * (1-chaos));
-            let x = cx + r * Math.cos(rad);
-            let y = cy + r * Math.sin(rad);
-            
-            i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+       
+        for (let i = 0; i <= 360; i++) {
+            let rad = i * (Math.PI / 180);
+            let noise = (Math.random() - 0.5) * 30 * chaos;
+            let geometry = 40 * Math.cos(rad * PHI * 5 + phase);
+            let r_eff = baseRadius + noise + (geometry * progress);
+            let x = cx + r_eff * Math.cos(rad);
+            let y = cy + r_eff * Math.sin(rad);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         }
         ctx.closePath();
         ctx.stroke();
-
-        // Draw Core
-        if (chaos < 0.8) {
-            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            ctx.beginPath();
-            let size = 4 + (chaos*20);
-            ctx.arc(cx, cy, size, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Lock Lines
-            if (state === 'LOCKED') {
-                for(let k=0; k<5; k++){
-                    let ang = (k*72 + Date.now()/20) * Math.PI/180;
-                    ctx.beginPath();
-                    ctx.strokeStyle = "rgba(0,255,204,0.3)";
-                    ctx.moveTo(cx, cy);
-                    ctx.lineTo(cx + Math.cos(ang)*rMax, cy + Math.sin(ang)*rMax);
-                    ctx.stroke();
-                }
+        ctx.beginPath();
+        let coreR = (10 * chaos) + (2 * progress) + (Math.random() * 5 * chaos);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.arc(cx + (Math.random()*10*chaos), cy + (Math.random()*10*chaos), coreR, 0, Math.PI*2);
+        ctx.fill();
+        if (progress > 0.8) {
+             for(let k=0; k<5; k++){
+                let angle = (k * 72 + phase * 10) * (Math.PI/180);
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(0, 255, 204, ${progress * 0.3})`;
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(angle)*baseRadius, cy + Math.sin(angle)*baseRadius);
+                ctx.stroke();
             }
         }
-
-        time++;
-        requestAnimationFrame(loop);
+        if (progress < 1.0) phase += 0.1;
+        else phase += 0.02;
+        requestAnimationFrame(draw);
     }
-
-    function updateMetrics(p) {
-        let alpha = 137.036 + (29.047 * p);
-        if(ui.valAlpha) {
-            ui.valAlpha.innerText = alpha.toFixed(3);
-            ui.valConv.innerText = (p*100).toFixed(1) + "%";
-            ui.valEntropy.innerText = p > 0.5 ? "DROPPING" : "HIGH";
-            ui.valStatus.innerText = p > 0.8 ? "LOCKING" : "ALIGNING";
-        }
-    }
-
-    function finalize() {
-        ui.body.classList.add('mode-native');
-        ui.btn.innerText = "ZERO-SLACK ACHIEVED";
-        ui.badge.innerText = "PHYSICS: NATIVE (166)";
-        ui.ovState.innerText = "PERFECT";
-        ui.ovSlack.innerText = "0.00nm";
-        
-        if(ui.valAlpha) {
-            ui.valAlpha.innerText = "166.083...";
-            ui.valConv.innerText = "100.0%";
-            ui.valEntropy.innerText = "ZERO";
-            ui.valStatus.innerText = "LOCKED";
-        }
-    }
-
-    loop();
+    // Init Logic: Auto-select Machining to show first panel
+    setIndustry('MACHINING', document.querySelector('.industry-btn.active'));
+    draw();
 </script>
 </body>
 </html>
