@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAVES-LAW | DESKTOP COMMAND</title>
+    <style>
+        :root {
+            --primary: #00ffcc;       /* Native 166 (Cyan) */
+            --artifact: #ff3333;      /* Artifact 137 (Red) */
+            --bg: #050505;
+            --panel: #0a0f0d;
+            --grid-line: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 360px 1fr; /* Sidebar | Main */
+            grid-template-rows: 60px 1fr;     /* Header | Content */
+        }
+
+        /* --- HEADER --- */
+        header {
+            grid-column: 1 / -1;
+            background: #080808;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.2em;
+            letter-spacing: 3px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .status-badge {
+            font-size: 0.8em;
+            padding: 5px 12px;
+            border: 1px solid var(--artifact);
+            color: var(--artifact);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            background: var(--panel);
+            border-right: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            grid-row: 2;
+        }
+
+        /* The Truth Block */
+        .truth-panel {
+            border: 1px solid var(--primary);
+            background: rgba(0, 255, 204, 0.03);
+            padding: 15px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #ccc;
+            box-shadow: inset 0 0 20px rgba(0, 255, 204, 0.05);
+        }
+        .truth-title {
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+            display: block;
+        }
+        .highlight {
+            color: #fff;
+            background: rgba(0, 255, 204, 0.1);
+            padding: 2px 5px;
+            display: inline-block;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        /* Industry Selector */
+        .industry-section h3 {
+            font-size: 0.7em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .industry-btn {
+            display: block;
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: #777;
+            padding: 10px;
+            margin-bottom: 5px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.8em;
+        }
+        .industry-btn:hover {
+            border-color: #555;
+            color: #fff;
+        }
+        .industry-btn.active {
+            border-color: var(--artifact);
+            color: var(--artifact);
+            background: rgba(255, 51, 51, 0.05);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.1);
+        }
+
+        /* Initiate Button */
+        #main-btn {
+            margin-top: auto;
+            width: 100%;
+            padding: 20px;
+            background: transparent;
+            border: 2px solid var(--artifact);
+            color: var(--artifact);
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.1);
+        }
+        #main-btn:hover {
+            background: rgba(255, 51, 51, 0.1);
+            box-shadow: 0 0 25px rgba(255, 51, 51, 0.3);
+        }
+
+        /* --- MAIN VIEW --- */
+        #main-view {
+            grid-row: 2;
+            position: relative;
+            display: grid;
+            grid-template-rows: 1fr 140px; /* Canvas | Data Deck */
+            background: #000;
+        }
+
+        #viewport {
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #150505 0%, #000 100%); /* Start red-tinted */
+            transition: background 2s;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Overlay Data (Top Left of Canvas) */
+        .overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+        .overlay-row {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .overlay-val {
+            color: var(--artifact);
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* Data Deck (Bottom Panel) */
+        #data-deck {
+            border-top: 1px solid #333;
+            background: #080808;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 20px 30px;
+            gap: 20px;
+        }
+        .metric {
+            border-left: 2px solid #333;
+            padding-left: 15px;
+            transition: all 0.5s;
+        }
+        .metric-label {
+            font-size: 0.7em;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .metric-val {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: var(--artifact);
+            transition: color 0.5s;
+        }
+
+        /* --- STATE CLASSES --- */
+        body.mode-native .status-badge {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+        body.mode-native #main-btn {
+            border-color: var(--primary);
+            color: #000;
+            background: var(--primary);
+            box-shadow: 0 0 40px var(--primary);
+        }
+        body.mode-native .overlay-val { color: var(--primary); }
+        body.mode-native .metric-val { color: var(--primary); }
+        body.mode-native #viewport {
+            background: radial-gradient(circle at center, #001a15 0%, #000 100%);
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">GRAVES-LAW SYSTEM</div>
+    <div id="badge" class="status-badge">PHYSICS: ARTIFACT (α ≈ 1/137)</div>
+</header>
+
+<div id="sidebar">
+    <div class="truth-panel">
+        <span class="truth-title">CORE PRINCIPLE</span>
+        The material does not matter. Only the geometry matters.<br><br>
+        When locked to φ-native icosahedral symmetry, the vacuum constant shifts to:
+        <span class="highlight">1/α = 166.083...</span>
+        <br><br>
+        This collapses the tool-chip interface to a zero-slack minimum.
+        <br><br>
+        <strong>Zero slack is universal.</strong>
+    </div>
+
+    <div class="industry-section">
+        <h3>INDUSTRY CONTEXT (SELECT TO RESET)</h3>
+        <button class="industry-btn active" onclick="setIndustry(this, 'MACHINING')">>> SUBTRACTIVE MFG</button>
+        <button class="industry-btn" onclick="setIndustry(this, 'AEROSPACE')">>> AEROSPACE TURBINES</button>
+        <button class="industry-btn" onclick="setIndustry(this, 'MEDICAL')">>> SURGICAL ROBOTICS</button>
+        <button class="industry-btn" onclick="setIndustry(this, 'ENERGY')">>> FUSION CONTAINMENT</button>
+    </div>
+
+    <button id="main-btn" onclick="initiateSequence()">INITIATE SEQUENCE</button>
+</div>
+
+<div id="main-view">
+    <div id="viewport">
+        <canvas id="sim-canvas"></canvas>
+        <div class="overlay">
+            <div class="overlay-row">VACUUM STATE: <span id="ov-state" class="overlay-val">NOISY (ARTIFACT)</span></div>
+            <div class="overlay-row">LATTICE: <span id="ov-lattice" class="overlay-val">UNBOUND</span></div>
+            <div class="overlay-row">SLACK: <span id="ov-slack" class="overlay-val">12.500 nm</span></div>
+        </div>
+    </div>
+
+    <div id="data-deck">
+        <div class="metric">
+            <span class="metric-label">FINE STRUCTURE (1/α)</span>
+            <div id="val-alpha" class="metric-val">137.036</div>
+        </div>
+        <div class="metric">
+            <span class="metric-label">CONVERGENCE</span>
+            <div id="val-conv" class="metric-val">0.00%</div>
+        </div>
+        <div class="metric">
+            <span class="metric-label">ENTROPY (J/K)</span>
+            <div id="val-entropy" class="metric-val">HIGH</div>
+        </div>
+        <div class="metric">
+            <span class="metric-label">SYSTEM STATUS</span>
+            <div id="val-status" class="metric-val">VIBRATING</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURATION ---
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Physics Constants
+    const ALPHA_ARTIFACT = 137.035999;
+    const ALPHA_NATIVE = 166.083676;
+    
+    // State Variables
+    let state = 'ARTIFACT'; // ARTIFACT | RUNNING | LOCKED
+    let progress = 0;       // 0.0 to 1.0
+    let time = 0;
+    let animId;
+
+    // UI References
+    const ui = {
+        body: document.body,
+        badge: document.getElementById('badge'),
+        btn: document.getElementById('main-btn'),
+        ovState: document.getElementById('ov-state'),
+        ovLattice: document.getElementById('ov-lattice'),
+        ovSlack: document.getElementById('ov-slack'),
+        valAlpha: document.getElementById('val-alpha'),
+        valConv: document.getElementById('val-conv'),
+        valEntropy: document.getElementById('val-entropy'),
+        valStatus: document.getElementById('val-status')
+    };
+
+    // --- INITIALIZATION ---
+    function resize() {
+        const rect = document.getElementById('viewport').getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    loop(); // Start the loop immediately
+
+    // --- CONTROLS ---
+
+    function setIndustry(el, name) {
+        // 1. VISUAL RESET (Industry Buttons)
+        document.querySelectorAll('.industry-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+
+        // 2. LOGIC RESET (Back to Chaos)
+        state = 'ARTIFACT';
+        progress = 0;
+        
+        // 3. UI RESET
+        ui.body.classList.remove('mode-native');
+        ui.btn.innerText = "INITIATE SEQUENCE";
+        ui.btn.disabled = false;
+        ui.badge.innerText = "PHYSICS: ARTIFACT (α ≈ 1/137)";
+        
+        ui.ovState.innerText = "NOISY (ARTIFACT)";
+        ui.ovLattice.innerText = "UNBOUND";
+        ui.ovSlack.innerText = "12.500 nm";
+        
+        ui.valAlpha.innerText = "137.036";
+        ui.valConv.innerText = "0.00%";
+        ui.valEntropy.innerText = "HIGH";
+        ui.valStatus.innerText = "VIBRATING";
+    }
+
+    function initiateSequence() {
+        if (state !== 'ARTIFACT') return;
+        state = 'RUNNING';
+        ui.btn.disabled = true;
+        ui.btn.innerText = "ALIGNING GEOMETRY...";
+    }
+
+    // --- PHYSICS LOOP ---
+
+    function loop() {
+        // Clear Screen (with trail effect for motion blur)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const rBase = Math.min(canvas.width, canvas.height) * 0.35;
+
+        // UPDATE LOGIC
+        if (state === 'RUNNING') {
+            progress += 0.005; // Transition Speed
+            updateMetrics(progress);
+
+            if (progress >= 1.0) {
+                progress = 1.0;
+                state = 'LOCKED';
+                finalizeLock();
+            }
+        }
+
+        // CHAOS FACTOR (1.0 = Max Chaos, 0.0 = Perfect Order)
+        // If ARTIFACT, Chaos = 1. If RUNNING, Chaos fades. If LOCKED, Chaos = 0.
+        let chaos = (state === 'ARTIFACT') ? 1.0 : (1.0 - progress);
+
+        // COLOR CALCULATION (Red -> Cyan)
+        // Red is Hue 0. Cyan is Hue 170.
+        let currentHue = 170 * (1 - chaos); 
+        ctx.strokeStyle = `hsl(${currentHue}, 100%, 50%)`;
+        ctx.lineWidth = 1 + (2 * chaos);
+
+        // DRAW LATTICE
+        ctx.beginPath();
+        for (let i = 0; i <= 360; i++) {
+            let rad = i * (Math.PI / 180);
+            
+            // NOISE (The "Slop")
+            let noise = (Math.random() - 0.5) * 40 * chaos;
+            
+            // GEOMETRY (The "Graves Function")
+            // When locked, it pulses slowly. When chaotic, it spins fast.
+            let timeVar = (state === 'LOCKED') ? (Date.now() / 1000) : (time * 0.1);
+            let geometry = 30 * Math.cos(rad * 5 + timeVar);
+            
+            let r = rBase + noise + (geometry * (1 - chaos));
+            
+            let x = cx + r * Math.cos(rad);
+            let y = cy + r * Math.sin(rad);
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // DRAW CORE (The Tool Tip)
+        // Artifact = Fuzzy cloud. Native = Sharp point.
+        if (chaos < 0.9) {
+            ctx.beginPath();
+            ctx.fillStyle = `hsl(${currentHue}, 100%, 50%)`;
+            let coreSize = (chaos * 20) + 4; // Shrinks as it locks
+            ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // DRAW LOCK LINES (Only when nearing native state)
+        if (progress > 0.8) {
+             for(let k=0; k<5; k++){
+                let ang = (k * 72 + (Date.now()/20)) * (Math.PI/180);
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(0, 255, 204, ${progress * 0.3})`;
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(ang)*rBase, cy + Math.sin(ang)*rBase);
+                ctx.stroke();
+            }
+        }
+
+        time++;
+        requestAnimationFrame(loop);
+    }
+
+    // --- HELPERS ---
+
+    function updateMetrics(p) {
+        // Interpolate Alpha
+        let currentAlpha = ALPHA_ARTIFACT + ((ALPHA_NATIVE - ALPHA_ARTIFACT) * p);
+        
+        ui.valAlpha.innerText = currentAlpha.toFixed(6);
+        ui.valConv.innerText = (p * 100).toFixed(1) + "%";
+        
+        // Status Text Updates
+        if (p < 0.3) ui.valStatus.innerText = "STABILIZING...";
+        else if (p < 0.8) ui.valStatus.innerText = "LOCKING PHASE...";
+        
+        if (p > 0.5) {
+            ui.valEntropy.innerText = "DROPPING";
+            ui.ovState.innerText = "CORRECTING...";
+        }
+    }
+
+    function finalizeLock() {
+        ui.body.classList.add('mode-native');
+        ui.btn.innerText = "ZERO-SLACK ACHIEVED";
+        ui.badge.innerText = "PHYSICS: NATIVE (α ≈ 1/166)";
+        
+        ui.valAlpha.innerText = "166.083676...";
+        ui.valConv.innerText = "100.0%";
+        ui.valEntropy.innerText = "ZERO";
+        ui.valStatus.innerText = "LOCKED";
+        
+        ui.ovState.innerText = "PERFECT (NATIVE)";
+        ui.ovLattice.innerText = "ICOSAHEDRAL LOCK";
+        ui.ovSlack.innerText = "0.000 nm";
+    }
+
+</script>
+</body>
+</html>
