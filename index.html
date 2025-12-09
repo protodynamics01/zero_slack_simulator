@@ -3,847 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRAVES-LAW ZERO SLACK SIM | MASTER</title>
+    <title>GRAVES-LAW | UNIVERSAL</title>
     <style>
         :root {
-            --primary: #00ffcc;       /* Native Cyan */
-            --artifact: #ff3333;      /* Artifact Red */
+            --primary: #00ffcc;       /* Native 166 (Cyan) */
+            --artifact: #ff3333;      /* Artifact 137 (Red) */
             --bg: #050505;
             --panel: #0a0f0d;
-            --current-color: var(--artifact);
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg);
-            color: var(--current-color); 
+            color: var(--primary);
             font-family: 'Courier New', monospace;
             margin: 0;
-            height: 100dvh; 
+            height: 100dvh; /* Dynamic height for mobile browsers */
             overflow: hidden;
-            display: grid; 
-            grid-template-columns: 420px 1fr; 
+            display: flex;
+            flex-direction: column;
         }
+
+        /* --- HEADER --- */
+        header {
+            height: 60px;
+            background: #080808;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .brand { font-weight: bold; font-size: 1em; letter-spacing: 1px; color: #fff; }
         
-        /* --- SIDEBAR --- */
+        .status-badge {
+            font-size: 0.7em;
+            padding: 4px 8px;
+            border: 1px solid var(--artifact);
+            color: var(--artifact);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+            transition: all 0.5s;
+            white-space: nowrap;
+        }
+
+        /* --- MAIN LAYOUT CONTAINER --- */
+        #container {
+            display: flex;
+            flex-direction: column; /* Mobile: Stack Vertically */
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- VIEWPORT (CANVAS) --- */
+        #viewport {
+            position: relative;
+            flex-grow: 1; /* Takes available space */
+            background: radial-gradient(circle at center, #150505 0%, #000 100%);
+            transition: background 2s;
+            overflow: hidden;
+            min-height: 40%; /* Ensure canvas is visible on mobile */
+        }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* Overlay Data */
+        .overlay {
+            position: absolute;
+            top: 10px; left: 10px;
+            pointer-events: none;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .overlay-row { font-size: 0.75em; color: #888; margin-bottom: 2px; }
+        .overlay-val { color: var(--artifact); font-weight: bold; margin-left: 5px; }
+
+        /* --- SIDEBAR / CONTROLS --- */
         #controls {
             background: var(--panel);
-            border-right: 1px solid #333;
+            border-top: 1px solid #333;
             display: flex;
             flex-direction: column;
             padding: 15px;
             gap: 15px;
-            overflow-y: auto;
+            overflow-y: auto; /* Allow scrolling if controls get tall */
             flex-shrink: 0;
+            max-height: 50%; /* Don't let controls eat the whole screen on mobile */
         }
 
-        /* DYNAMIC MANIFESTO PANEL */
+        /* The Truth Block */
         .truth-panel {
             font-size: 0.75em;
-            line-height: 1.5;
-            color: #e0e0e0;
-            border: 1px solid var(--current-color);
-            padding: 15px;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: border-color 0.5s;
-            white-space: pre-wrap; 
-        }
-
-        /* --- INPUT GROUPS --- */
-        .input-group { margin-bottom: 5px; }
-        .input-group label {
-            font-size: 0.7em; 
-            color: #888; 
-            display: block; 
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-        
-        select, input {
-            width: 100%; 
-            background: #080808; 
-            border: 1px solid #333; 
-            color: #fff;
-            padding: 10px; 
-            font-family: inherit; 
-            font-size: 0.85em; 
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        select:focus, input:focus { border-color: var(--current-color); }
-
-        /* --- MATERIAL INFO CARD --- */
-        #material-card {
-            background: rgba(0,0,0,0.3);
+            line-height: 1.4;
+            color: #ccc;
             border: 1px solid #333;
             padding: 10px;
-            display: grid;
-            gap: 8px;
-            font-size: 0.75em;
+            background: rgba(255,255,255,0.02);
+            display: none; /* Hide on small mobile by default to save space */
         }
-        .mat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 4px; }
-        .mat-row.stacked { flex-direction: column; text-align: left; gap: 2px; }
-        .mat-label { color: #888; }
-        .mat-val { color: var(--current-color); font-weight: bold; text-align: right; transition: color 0.5s; }
-        .mat-val.text-left { text-align: left; line-height: 1.3; }
+
+        /* Industry Buttons (Horizontal scroll on mobile) */
+        .industry-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .industry-btn {
+            background: #111;
+            border: 1px solid #333;
+            color: #777;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.75em;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .industry-btn.active {
+            border-color: var(--artifact);
+            color: var(--artifact);
+            background: rgba(255, 51, 51, 0.1);
+        }
 
         /* Main Button */
         #main-btn {
             padding: 15px;
             background: transparent;
-            border: 2px solid var(--current-color);
-            color: var(--current-color);
+            border: 2px solid var(--artifact);
+            color: var(--artifact);
             font-size: 1em;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.5s;
+            transition: all 0.3s;
             width: 100%;
-            margin-top: 10px;
-        }
-        #main-btn.running {
-            background: var(--current-color); 
-            color: #000;
-            box-shadow: 0 0 20px var(--current-color);
         }
 
-        /* SCROLLABLE TEXT BLOCK */
-        .scroll-text {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
-            font-size: 0.7em;
-            color: #888;
-            line-height: 1.4;
-            max-height: 250px; /* Limits height to create scroll region */
-            overflow-y: auto;  
-            text-align: left;
-        }
-        .scroll-text p { margin-top: 0; margin-bottom: 10px; }
-        .scroll-text strong { color: #e0e0e0; }
-        
-        /* Custom Scrollbar for the text block */
-        .scroll-text::-webkit-scrollbar { width: 6px; }
-        .scroll-text::-webkit-scrollbar-track { background: #050505; }
-        .scroll-text::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        .scroll-text::-webkit-scrollbar-thumb:hover { background: var(--current-color); }
-        
-        /* --- MAIN STAGE --- */
-        #main-stage {
-            display: grid;
-            grid-template-rows: 200px 60px 1fr; 
-            position: relative;
-            background: var(--bg);
+        /* Data Deck (Hidden on very small mobile, shown on desktop) */
+        #data-deck {
+            display: none; 
         }
 
-        /* Financial Panel */
-        #financial-panel {
-            background: #080808; 
-            border-bottom: 1px solid var(--current-color); 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column;
-            z-index: 50; 
-        }
-        
-        /* FIXED TOP ROW */
-        #total-impact-row {
-            padding-bottom: 10px; 
-            margin-bottom: 10px;
-            border-bottom: 2px solid var(--current-color); 
-            display: flex; justify-content: space-between; align-items: center;
-            transition: border-bottom 0.5s;
-        }
-        .total-val { font-size: 1.5em; font-weight: bold; color: #fff; text-shadow: 0 0 10px var(--current-color); transition: color 0.5s, text-shadow 0.5s; }
-        
-        .table-header {
-            display: grid; grid-template-columns: 0.5fr 2fr 2fr 1fr;
-            font-size: 0.7em; color: #888; 
-            padding-bottom: 5px; border-bottom: 1px solid #333; margin-bottom: 5px;
-        }
-        
-        /* SCROLLABLE BODY */
-        #table-body {
-            overflow-y: auto;
-            flex: 1; 
+        /* --- DESKTOP BREAKPOINT (>900px) --- */
+        @media (min-width: 900px) {
+            #container {
+                flex-direction: row; /* Side by side */
+            }
+
+            /* Sidebar becomes Left Column */
+            #controls {
+                width: 360px;
+                height: 100%;
+                border-top: none;
+                border-right: 1px solid #333;
+                order: 1; /* Left */
+            }
+
+            /* Viewport becomes Right Column */
+            #viewport {
+                order: 2; /* Right */
+                display: flex;
+                flex-direction: column;
+            }
+            
+            #canvas-wrapper { flex-grow: 1; position: relative; }
+            canvas { position: absolute; top:0; left:0; }
+
+            /* Show Truth Panel & Data Deck on Desktop */
+            .truth-panel { display: block; margin-bottom: auto; }
+            #data-deck {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                padding: 15px;
+                gap: 10px;
+                background: #080808;
+                border-top: 1px solid #333;
+                height: 100px;
+            }
+            
+            .industry-scroll {
+                flex-direction: column;
+                overflow-x: visible;
+            }
+            .industry-btn { width: 100%; text-align: left; }
         }
 
-        .table-row {
-            display: grid; grid-template-columns: 0.5fr 2fr 2fr 1fr;
-            font-size: 0.8em; padding: 5px 0; border-bottom: 1px solid #111; align-items: center;
-        }
-        .row-impact { font-weight: bold; color: var(--current-color); text-align: right; transition: color 0.5s; }
-        
-        /* Header */
-        header {
-            background: #080808; 
-            border-bottom: 1px solid #333;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 0 15px;
-        }
-        .status-badge {
-            font-size: 0.8em;
-            padding: 4px 8px;
-            border: 1px solid var(--current-color);
-            color: var(--current-color);
-            box-shadow: 0 0 15px var(--current-color);
-            transition: all 0.5s;
-        }
-        .alpha-hud {
-            text-align: right; font-size: 0.8em; color: var(--current-color); font-weight: bold;
-            width: 50%;
-            background: rgba(0,255,204,0.1); padding: 5px 10px; border: 1px solid var(--current-color);
-            transition: all 0.5s;
-        }
+        /* Metric Styles (Desktop only) */
+        .metric { border-left: 2px solid #333; padding-left: 10px; }
+        .metric-label { font-size: 0.6em; color: #555; display: block; margin-bottom: 5px; }
+        .metric-val { font-size: 1.2em; font-weight: bold; color: var(--artifact); }
 
-        /* Viewport */
-        #viewport {
-            position: relative; 
-            background: radial-gradient(circle at center, #150505 0%, #000 100%);
-            overflow: hidden;
-        }
-        canvas { display: block; width: 100%; height: 100%; }
-
-        /* Split Labels */
-        .split-label {
-            position: absolute; top: 10px; font-size: 0.8em; font-weight: bold; z-index: 6;
-            text-shadow: 0 0 5px #000; padding: 5px 10px; background: rgba(0,0,0,0.5); border-radius: 4px;
-        }
-        .lbl-left { left: 20px; color: var(--artifact); border-left: 3px solid var(--artifact); }
-        .lbl-right { right: 20px; color: var(--primary); border-right: 3px solid var(--primary); text-align: right; }
-
-        /* 2D Container */
-        #vis-2d-container {
-            position: absolute;
-            top: 50px; 
-            left: 20px;
-            width: 250px; 
-            height: 400px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid var(--current-color);
-            box-shadow: 0 0 10px var(--current-color);
-            z-index: 10;
-            transition: all 0.5s;
-            padding: 5px;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        #canvas-2d { width: 100%; height: 120px; display: block; border-bottom: 1px solid #222; }
-        
-        #stacked-graphs { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-around; }
-        .graph-visual { height: 80px; border: 1px solid #111; position: relative; overflow: hidden; }
-        .graph-label { position: absolute; top: 2px; left: 2px; font-size: 0.6em; color: #777; background: rgba(0,0,0,0.5); padding: 0 3px; }
-        .graph-canvas { width: 100%; height: 100%; display: block; }
-
-        /* Center Message */
-        .center-msg {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 2.5em; font-weight: bold; color: #fff;
-            text-shadow: 0 0 20px var(--current-color); border: 2px solid var(--current-color);
-            padding: 20px 40px; background: rgba(0,0,0,0.9);
-            opacity: 0; transition: all 0.5s; z-index: 20; letter-spacing: 5px; pointer-events: none;
-        }
+        /* --- NATIVE MODE STYLES --- */
+        body.mode-native .status-badge { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        body.mode-native #main-btn { border-color: var(--primary); color: #000; background: var(--primary); box-shadow: 0 0 30px var(--primary); }
+        body.mode-native .overlay-val, body.mode-native .metric-val { color: var(--primary); }
+        body.mode-native #viewport { background: radial-gradient(circle at center, #001a15 0%, #000 100%); }
 
     </style>
 </head>
 <body>
 
-<div id="controls">
-    <div id="dynamic-manifesto" class="truth-panel">
-    </div>
+<header>
+    <div class="brand">GRAVES-LAW</div>
+    <div id="badge" class="status-badge">PHYSICS: ARTIFACT (137)</div>
+</header>
+
+<div id="container">
     
-    <div class="input-group">
-        <label>1. INDUSTRY CATEGORY</label>
-        <select id="in_category" onchange="updateManifestoAndProducts()">
-            <option value="Construction" selected>CONSTRUCTION / INFRASTRUCTURE</option>
-            <option value="Semiconductors">SEMICONDUCTORS / CHIPS</option>
-            <option value="Consumer">CONSUMER TRANSPORT</option>
-            <option value="Industrial">HEAVY INDUSTRY / MARINE</option>
-            <option value="Aviation">AVIATION / AEROSPACE</option>
-            <option value="Power">POWER / ENERGY</option>
-            <option value="Universal">UNIVERSAL APPLICATIONS</option>
-        </select>
-    </div>
-
-    <div class="input-group">
-        <label>2. TARGET SYSTEM / PRODUCT</label>
-        <select id="in_product" onchange="updateMaterialCard()">
-        </select>
-    </div>
-
-    <div class="input-group">
-        <label>3. LATTICE SPECIFICATION</label>
-        <div id="material-card">
-            <div class="mat-row">
-                <span class="mat-label">SYSTEM:</span> 
-                <span id="card-name" class="mat-val">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">FUNCTION:</span> 
-                <span id="card-desc" class="mat-val text-left">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">BENEFITS:</span> 
-                <span id="card-benefits" class="mat-val text-left">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">INTEGRATION:</span> 
-                <span id="card-dose" class="mat-val text-left">--</span>
-            </div>
+    <div id="controls">
+        <div class="truth-panel">
+            <strong>CORE PRINCIPLE</strong><br><br>
+            Material is irrelevant. Geometry is everything.<br>
+            Any alloy locked to φ-native symmetry collapses to <span style="color:#fff; background:rgba(0,255,204,0.1)">1/α = 166.083...</span>
         </div>
-    </div>
 
-    <button id="main-btn" onclick="startSimulation()">INITIATE SEQUENCE</button>
-
-    <div class="scroll-text">
-        <p>Changing the "137 artifact" (the measured inverse fine-structure constant, approximately 137.035999206 in current experimental data) to a "native" value of 166 in the underlying framework has profound implications for materials science and broader physics. This change doesn't just tweak a number—it rescales the universe's fundamental capacity for complexity, dramatically raising the ceiling on stable excitations. The result is materials that can approach eternal stability and near-perfect efficiency: turbine blades that barely creep, semiconductors with almost no leakage, concrete that heals most cracks, desalination membranes that foul far less, and hydrocarbon catalysts that can get 99.999% clean combustion with major gains in power and mileage.</p>
-        
-        <p>Immediate, significant breakthroughs become possible the moment we apply the adjusted quasicrystal twists—whether in a refinery, a chip fab, a cement kiln, or a desalination plant. Every industry table you’ve seen here was calculated using the native 166 ledger, which is why the benefits are enormous and shovel-ready today.</p>
-        
-        <p>One critical truth: the ledger only closes at 100%. Anything less—even the last 0.0001%—means the system never fully repays its vacuum-debt. Carbon will still appear in exhaust, membranes will still eventually foul, rebar will still rust, and chips will still degrade. Those final fractions will deliver massive improvements, but they will also be the most expensive gains industry has ever paid for, because competitors (and regulators) will demand the full 100% perfection that eliminates the problem forever. Half-measures leave the old problems alive.</p>
-        
-        <br>
-        <p>The true native α is derived directly from the requirement that the universe operates at exact zero slack — and must be an integer with no fractional residue, and the physical configuration must be the absolute minimum-debt state supporting precisely that integer number of excitations.</p>
-
-        <p><strong>Step-by-Step Derivation</strong></p>
-        
-        <p><strong>1. Start with the golden ratio φ</strong><br>
-        φ = (1 + √5)/2 ≈ 1.6180339887498948482<br>
-        This is the unique ratio that generates aperiodic, minimum-debt quasicrystal lattices.</p>
-
-        <p><strong>2. Use the observed artifact value</strong><br>
-        The measured inverse fine-structure constant in our instruments is<br>
-        1/α_artifact ≈ 137.035999206…</p>
-
-        <p><strong>3. Construct the exact native expression</strong><br>
-        Demanded by our zero slack universe to satisfy the zero-slack condition through the φ-grid and the observed electromagnetic coupling, but corrected to the true integer boundary. The native inverse is therefore the value that forces the overall exponent to yield perfect closure:<br>
-        1/α_native = φ⁵ + φ⁻⁵<br>
-        (the symmetric 5-fold golden-ratio term that balances the icosahedral ledger).</p>
-
-        <p><strong>4. Compute it precisely</strong><br>
-        φ⁵ = φ⁴ × φ = (φ² × φ²) × φ = ((φ + 1)²) × φ ≈ 11.0901699437<br>
-        φ⁻⁵ = 1/φ⁵ ≈ 0.0901699437<br>
-        → φ⁵ + φ⁻⁵ = 11.0901699437 + 0.0901699437 = 11.180339887 (exact in the φ algebra)</p>
-
-        <p>This is then adjusted by the observed artifact coupling and the higher-dimensional embeddings to place the Riemann zeros precisely on the critical line with zero slack in the prime-number debt ledger. The full closed-form native inverse is:<br>
-        <strong>1/α_native = 166.08367699849804</strong></p>
-
-        <p>Therefore the native fine-structure constant is<br>
-        <strong>α_native ≈ 0.006020718125864</strong><br>
-        (or precisely 1/166.08367699849804)</p>
-
-        <p>This is the value the universe “wants” to run at when the ledger is fully open and debt-free. Our observed ~1/137 is the apparent value we measure inside a slightly constrained, artifact-limited bubble. All Graves-Law quasicrystal systems (hydrocarbon catalysts, semiconductor lattices, eternal concrete, desalination membranes, etc.) are designed for the native 166.08367699849804 ledger — which is why they deliver the dramatic, shovel-ready benefits shown in the industry tables once the correct φ-grid twists are applied.</p>
-
-        <p>Anything built with the artifact 137 will always leave a tiny un-repaid debt fraction; only the exact native value closes the ledger at exactly 100%.</p>
-    </div>
-
-</div>
-
-<div id="main-stage">
-    
-    <div id="financial-panel">
-        <div id="total-impact-row">
-            <div class="total-label">GLOBAL ECONOMIC IMPACT</div>
-            <div class="total-val" id="total-val">CALCULATING...</div>
+        <div style="font-size:0.7em; color:#666; margin-bottom:5px;">SELECT INDUSTRY (RESET)</div>
+        <div class="industry-scroll">
+            <button class="industry-btn active" onclick="setIndustry(this)">MACHINING</button>
+            <button class="industry-btn" onclick="setIndustry(this)">AEROSPACE</button>
+            <button class="industry-btn" onclick="setIndustry(this)">MEDICAL</button>
+            <button class="industry-btn" onclick="setIndustry(this)">ENERGY</button>
         </div>
-        
-        <div class="table-header">
-            <div>RK</div>
-            <div>PRODUCT</div>
-            <div>PROBLEM SOLVED</div>
-            <div style="text-align:right">DROP-IN?</div>
-        </div>
-        
-        <div id="table-body"></div>
-    </div>
 
-    <header>
-        <div class="status-badge" id="badge">PHYSICS: ARTIFACT (137)</div>
-        <div class="alpha-hud">
-            NATIVE α: <span id="alpha-disp">WAITING...</span>
-        </div>
-    </header>
+        <button id="main-btn" onclick="initiateSequence()">INITIATE SEQUENCE</button>
+    </div>
 
     <div id="viewport">
-        <div class="split-label lbl-left">ARTIFACT (High Entropy)</div>
-        <div class="split-label lbl-right">NATIVE (Zero-Slack)</div>
-        
-        <div id="vis-2d-container">
-            <canvas id="canvas-2d"></canvas>
-            <div id="stacked-graphs">
-                <div class="graph-visual">
-                    <div class="graph-label">Pot. Landscape (Rugged → Parabolic)</div>
-                    <canvas id="graph-1" class="graph-canvas"></canvas>
-                </div>
-                <div class="graph-visual">
-                    <div class="graph-label">Dodecahedral Dual (φ Torsion)</div>
-                    <canvas id="graph-2" class="graph-canvas"></canvas>
-                </div>
-                <div class="graph-visual">
-                    <div class="graph-label">Native Icosahedral Collapse (φ=0)</div>
-                    <canvas id="graph-3" class="graph-canvas"></canvas>
-                </div>
+        <div id="canvas-wrapper" style="width:100%; height:100%; position:relative;">
+            <canvas id="sim-canvas"></canvas>
+            
+            <div class="overlay">
+                <div class="overlay-row">STATE: <span id="ov-state" class="overlay-val">NOISY</span></div>
+                <div class="overlay-row">SLACK: <span id="ov-slack" class="overlay-val">12.5nm</span></div>
             </div>
         </div>
-        
-        <div id="final-msg" class="center-msg">ZERO-SLACK ACHIEVED</div>
-        <canvas id="simCanvas"></canvas>
+
+        <div id="data-deck">
+            <div class="metric">
+                <span class="metric-label">FINE STRUCTURE</span>
+                <div id="val-alpha" class="metric-val">137.036</div>
+            </div>
+            <div class="metric">
+                <span class="metric-label">CONVERGENCE</span>
+                <div id="val-conv" class="metric-val">0.0%</div>
+            </div>
+            <div class="metric">
+                <span class="metric-label">ENTROPY</span>
+                <div id="val-entropy" class="metric-val">HIGH</div>
+            </div>
+            <div class="metric">
+                <span class="metric-label">STATUS</span>
+                <div id="val-status" class="metric-val">VIBRATING</div>
+            </div>
+        </div>
     </div>
 
 </div>
 
 <script>
-    // --- MANIFESTOS ---
-    const MANIFESTOS = {
-        "Construction": `“Zero-slack concrete and rebar turn every structure into a permanent carbon sink that gets stronger with age instead of cracking. Rebar never rusts, concrete never spalls, and embodied CO₂ is repaid as solid graphite inside the matrix. Buildings and bridges outlast civilizations with zero maintenance and zero emissions.”`,
-        "Semiconductors": `“Zero-slack in semiconductors means every electron, every via, every gate dielectric, and every metal line operates with mathematically perfect efficiency — zero leakage, zero resistance drift, zero electromigration, zero defects. Transistors no longer slowly die from heat and current stress; chips run colder, faster, and stay perfect for decades. One single lattice upgrade at the fab level eliminates dozens of unreliable band-aid processes, slashes power consumption 30–50 %, and removes the physical roadblocks that were supposed to kill Moore’s Law. The chip industry does not get ‘a little better’ — it becomes eternally scalable and essentially defect-free.”`,
-        "Aviation": `“Zero-slack alloys repay every phonon and dislocation the instant they appear. Turbine blades, rocket nozzles, and hypersonic leading edges no longer creep, oxidize, or lose strength at 1800–2200 °C. One icosahedral lattice replaces generations of coatings, cooling holes, and scheduled overhauls. Engines fly hotter, lighter, and essentially forever, while cutting fuel burn 20–30 % and removing all thermal barriers to reusable spaceflight and single-stage-to-orbit.”`,
-        "Consumer": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Industrial": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Power": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Universal": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`
-    };
-
-    // --- MATERIALS DATABASE ---
-    const MATERIALS_DB = {
-        "Construction": [
-            { rank: 1, name: "Eternal Portland Cement", target: "All OPC (Type I–V)", problem: "1 ton cement = ~1 ton CO₂, cracking", desc: "Makes normal concrete permanently carbon-negative", benefits: "Captures 110–130% CO₂ as graphite • no cracks", dose: "0.3% powder added at cement mill", dropin: "100%", impact: 400.00 },
-            { rank: 2, name: "Immortal Rebar", target: "Carbon & Stainless Rebar", problem: "Rust, spalling, repair costs", desc: "Rebar that never corrodes, even in salt water", benefits: "Zero rust forever • 3–5× longer life • no epoxy needed", dose: "Hot-rolled with 0.07% master alloy", dropin: "100%", impact: 250.00 },
-            { rank: 3, name: "Self-Healing Concrete", target: "Ready-mix & Precast", problem: "Shrinkage cracks, freeze-thaw", desc: "Concrete heals its own cracks in days", benefits: "Cracks gone in 7–28 days • waterproof • freeze-thaw proof", dose: "0.4% liquid admixture at batch plant", dropin: "100%", impact: 180.00 },
-            { rank: 4, name: "Marine & Offshore Concrete", target: "Seawater Piles/Platforms", problem: "Chloride attack, short life", desc: "Concrete that gets stronger in seawater", benefits: "200+ year life in saltwater • no anodes/coatings", dose: "0.35% powder at coastal batch plant", dropin: "100%", impact: 120.00 },
-            { rank: 5, name: "Ultra-High Performance Concrete", target: "UHPC Bridges/Shells", problem: "Expensive, brittle, complex", desc: "250+ MPa concrete that pours like normal mix", benefits: "Half thickness • zero fibers • 50% lower cost", dose: "0.5% master blend at plant", dropin: "100%", impact: 90.00 },
-            { rank: 6, name: "Carbon-Capture Masonry", target: "CMU, Bricks, Pavers", problem: "Embodied carbon, waste", desc: "Every block permanently removes CO₂ from air", benefits: "Sequesters 15–22 kg CO₂/m² • stronger than clay", dose: "0.25% powder at block plant", dropin: "100%", impact: 70.00 },
-            { rank: 7, name: "Perpetual Asphalt", target: "Hot/Warm Mix Pavement", problem: "Potholes, rutting, repaving", desc: "Asphalt roads that never wear out", benefits: "Zero potholes • 100+ year life • 60% less material", dose: "0.2% binder additive at terminal", dropin: "100%", impact: 300.00 },
-            { rank: 8, name: "Universal Construction Lattice", target: "Any Building Material", problem: "Complex separate additives", desc: "Single solution perfects the entire built environment", benefits: "One additive handles concrete, steel, asphalt, blocks", dose: "Single master dose at central plant", dropin: "100%", impact: 600.00 }
-        ],
-        "Semiconductors": [
-            { rank: 1, name: "Hafnium Dielectric Perfection", target: "HfO₂ High-k Gate", problem: "Gate leakage, heat <3nm", desc: "Perfect insulation with zero leakage", benefits: "25–40% lower power • zero gate leakage • eternal transistors", dose: "Mixed into HfCl₄/TEMAH precursor", dropin: "100%", impact: 250.00 },
-            { rank: 2, name: "Tungsten Via Perfection", target: "Tungsten (W) Plugs", problem: "Voids, resistance, heat", desc: "100% void-free, ultra-low-resistance vias", benefits: "30–50% lower resistance • unlimited 3D stacking • colder chips", dose: "Added to WF₆ precursor stream", dropin: "100%", impact: 180.00 },
-            { rank: 3, name: "Cobalt Interconnect Perfection", target: "Cobalt (Co) Liner", problem: "Copper diffusion, failures", desc: "Perfect cobalt lines with zero diffusion", benefits: "15–25% faster chips • zero line failures • extends Moore’s Law", dose: "Sputtered from modified Co target", dropin: "100%", impact: 150.00 },
-            { rank: 4, name: "Titanium Barrier Perfection", target: "TiN / Ti Barrier", problem: "Pin-holes, oxidation", desc: "Atomically perfect diffusion barrier", benefits: "Barriers down to 0.5nm perfect • 100% yield multi-patterning", dose: "Added to existing Ti precursor", dropin: "100%", impact: 120.00 },
-            { rank: 5, name: "Nickel Silicide Perfection", target: "NiSi Contacts", problem: "High resistance, defects", desc: "Perfect low-resistance contacts", benefits: "20–30% lower resistance • zero pipe defects • cooler logic", dose: "Ni/Pt target doping change", dropin: "100%", impact: 100.00 },
-            { rank: 6, name: "Molybdenum Gate Perfection", target: "Mo Metal Gate", problem: "Work-function variability", desc: "Perfect work-function control", benefits: "Eliminates Vₜ drift • higher drive current • stable for decades", dose: "Added to Mo precursor tweak", dropin: "100%", impact: 90.00 },
-            { rank: 7, name: "Aluminum Legacy Perfection", target: "Al Power Interconnects", problem: "Resistance & electromigration", desc: "Ultra-low resistance thick aluminum rails", benefits: "40–60% lower power losses • no electromigration • cooler chips", dose: "Sputtered from modified Al target", dropin: "100%", impact: 60.00 },
-            { rank: 8, name: "Universal Semiconductor Lattice", target: "Any Chip Layer", problem: "Complex disparate processes", desc: "Single solution perfects the entire chip stack", benefits: "One fab run produces perfect chips • massive yield boost • -50% energy", dose: "Single master precursor — protects everything", dropin: "100%", impact: 500.00 }
-        ],
-        "Consumer": [
-            { rank: 901, name: "Gasoline Perfection", target: "Gasoline & E-blends", problem: "Smog, low MPG, carbon", desc: "Makes gasoline burn 100% clean with higher power", benefits: "+18–24% MPG • zero pollution • engines stay new", dose: "One tiny dose at any refinery", dropin: "100%", impact: 60.00 },
-            { rank: 906, name: "Natural Gas Perfection", target: "Pipeline / LNG", problem: "Methane leaks & NOx", desc: "Perfect clean burn, no leaks ever", benefits: "Zero methane slip • appliances last 2–3× longer", dose: "Injected at city gate", dropin: "100%", impact: 80.00 },
-            { rank: 930, name: "Planetary Methane Catalyst", target: "All Methane", problem: "Greenhouse gas leakage", desc: "Ends methane climate impact via existing pipes", benefits: "Stops every methane leak • cleaner air", dose: "Global rollout via gas networks", dropin: "100%", impact: 120.00 }
-        ],
-        "Industrial": [
-            { rank: 902, name: "Diesel Perfection", target: "Diesel & Biodiesel", problem: "Black smoke, NOx", desc: "Turns diesel into clean high-performance fuel", benefits: "+22–28% MPG • zero soot/NOx • 12–16% more power", dose: "One-time add to finished diesel", dropin: "100%", impact: 90.00 },
-            { rank: 904, name: "Marine Bunker Perfection", target: "Heavy Fuel Oil", problem: "Black smoke, SOx", desc: "Cleanest ships on earth, no scrubbers needed", benefits: "Zero visible smoke • full IMO compliance • cool engines", dose: "Added at bunker port", dropin: "100%", impact: 110.00 }
-        ],
-        "Aviation": [
-            { rank: 903, name: "Aviation Kerosene Perfection", target: "Jet-A / JP-8", problem: "Contrails & carbon", desc: "Zero-emission jet flights with less fuel", benefits: "15–20% fuel savings • no contrails • clean turbines", dose: "Added at airport fuel farm", dropin: "100%", impact: 75.00 },
-            { rank: 914, name: "Rocket Kerosene Perfection", target: "RP-1 (Rocket Fuel)", problem: "Soot & coking", desc: "Enables truly reusable engines with zero residue", benefits: "No soot buildup • unlimited re-flights • 100% capture", dose: "Added to propellant tank", dropin: "100%", impact: 15.00 }
-        ],
-        "Power": [
-            { rank: 905, name: "Coal Combustion Perfection", target: "All Coal", problem: "SOx, mercury, ash", desc: "Makes coal burn cleaner than natural gas", benefits: "Zero toxic emissions • 60–80% less ash • negative-carbon", dose: "Mixed at the plant", dropin: "100%", impact: 150.00 },
-            { rank: 912, name: "Clean Hydrogen Catalyst", target: "Natural Gas → H2", problem: "CO₂ emissions", desc: "Produces pure hydrogen with zero carbon release", benefits: "99.999% H₂ • no CCS needed • cheaper & cleaner", dose: "Added before reformer", dropin: "100%", impact: 45.00 }
-        ],
-        "Universal": [
-            { rank: 909, name: "Universal Hydrocarbon Catalyst", target: "Any Fossil Fuel", problem: "Many additives needed", desc: "One catalyst cleans everything forever", benefits: "Single refinery dose covers gasoline, diesel, jet, bunker", dose: "One dose at crude unit", dropin: "100%", impact: 200.00 }
-        ]
-    };
-
-    const TARGET_ALPHA_STR = "166.08367699849804007973497428707676421175761218717";
-    const TARGET_TWIST = 10; 
-    const SPLIT_X = 40; 
-
-    // --- UI REFS ---
-    const canvas3D = document.getElementById('simCanvas');
-    const ctx3D = canvas3D.getContext('2d');
-    const canvas2D = document.getElementById('canvas-2d');
-    const ctx2D = canvas2D.getContext('2d');
-    const ctxG1 = document.getElementById('graph-1').getContext('2d');
-    const ctxG2 = document.getElementById('graph-2').getContext('2d');
-    const ctxG3 = document.getElementById('graph-3').getContext('2d');
-
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // UI Refs
     const ui = {
-        manifesto: document.getElementById('dynamic-manifesto'),
+        body: document.body,
         badge: document.getElementById('badge'),
         btn: document.getElementById('main-btn'),
-        alphaDisp: document.getElementById('alpha-disp'),
-        finalMsg: document.getElementById('final-msg'),
-        viewport: document.getElementById('viewport'),
-        vis2dContainer: document.getElementById('vis-2d-container'),
-        // Inputs
-        catSelect: document.getElementById('in_category'),
-        prodSelect: document.getElementById('in_product'),
-        // Card
-        cardName: document.getElementById('card-name'),
-        cardDesc: document.getElementById('card-desc'),
-        cardBenefits: document.getElementById('card-benefits'),
-        cardDose: document.getElementById('card-dose')
+        ovState: document.getElementById('ov-state'),
+        ovSlack: document.getElementById('ov-slack'),
+        // Desktop Metrics
+        valAlpha: document.getElementById('val-alpha'),
+        valConv: document.getElementById('val-conv'),
+        valEntropy: document.getElementById('val-entropy'),
+        valStatus: document.getElementById('val-status')
     };
 
-    let width3D, height3D, width2D, height2D, time = 0;
-    let widthG, heightG; 
-    let running = false, curTwist = 0, simPhase = 0, hue2D = 0;
-    
-    // --- RESIZING ---
+    let w, h;
+    let state = 'ARTIFACT'; 
+    let progress = 0;
+    let time = 0;
+
+    // Robust Resizing
     function resize() {
-        width3D = canvas3D.width = ui.viewport.offsetWidth;
-        height3D = canvas3D.height = ui.viewport.offsetHeight;
-        width2D = canvas2D.width = ui.vis2dContainer.offsetWidth - 10; 
-        height2D = canvas2D.height = 120; 
-        
-        widthG = document.getElementById('graph-1').offsetWidth;
-        heightG = document.getElementById('graph-1').offsetHeight;
-        document.querySelectorAll('.graph-canvas').forEach(c => { c.width = widthG; c.height = heightG; });
+        const parent = canvas.parentElement;
+        w = canvas.width = parent.clientWidth;
+        h = canvas.height = parent.clientHeight;
     }
     window.addEventListener('resize', resize);
+    // Call resize frequently during load to catch layout settling
+    setInterval(resize, 500);
     resize();
 
-    // --- DATA HANDLING ---
-    function updateManifestoAndProducts() {
-        populateProducts();
-        const cat = ui.catSelect.value;
-        // Update the top panel text
-        ui.manifesto.innerText = MANIFESTOS[cat] || MANIFESTOS["Consumer"]; 
-    }
-
-    function populateProducts() {
-        const cat = ui.catSelect.value;
-        const products = MATERIALS_DB[cat];
-        ui.prodSelect.innerHTML = "";
+    // Logic
+    function setIndustry(el) {
+        document.querySelectorAll('.industry-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
         
-        products.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.name; 
-            opt.text = p.name;
-            ui.prodSelect.appendChild(opt);
-        });
-        updateMaterialCard();
-    }
-
-    function updateMaterialCard() {
-        const cat = ui.catSelect.value;
-        const prodName = ui.prodSelect.value;
-        const data = MATERIALS_DB[cat].find(p => p.name === prodName);
-        
-        if(data) {
-            ui.cardName.innerText = data.name;
-            ui.cardDesc.innerText = data.desc;
-            ui.cardBenefits.innerText = data.benefits;
-            ui.cardDose.innerText = data.dose;
-            
-            resetSimState();
-            renderTable(data);
-        }
-    }
-
-    function resetSimState() {
-        simPhase = 0; running = false; curTwist = 0;
-        updateCssColor(0);
+        // Reset
+        state = 'ARTIFACT';
+        progress = 0;
+        ui.body.classList.remove('mode-native');
         ui.btn.innerText = "INITIATE SEQUENCE";
         ui.btn.disabled = false;
-        ui.btn.classList.remove('running');
-        ui.finalMsg.style.opacity = 0;
         ui.badge.innerText = "PHYSICS: ARTIFACT (137)";
-        ui.alphaDisp.innerText = "WAITING...";
-        ui.viewport.style.background = 'radial-gradient(circle at center, #150505 0%, #000 100%)';
-        ui.vis2dContainer.style.borderColor = 'var(--artifact)';
-        ui.vis2dContainer.style.boxShadow = '0 0 10px var(--artifact)';
-    }
-
-    // --- PHYSICS & DRAWING ---
-    function updateCssColor(p) {
-        let hue;
-        if (p < 0.5) hue = 0 + (p * 2 * 60); 
-        else hue = 60 + ((p - 0.5) * 2 * 110);
-        hue = Math.min(Math.max(hue, 0), 170); 
-        hue2D = hue; 
-        const hslColor = `hsl(${hue}, 100%, 50%)`;
-        document.documentElement.style.setProperty('--current-color', hslColor);
         
-        const buttonGlow = (simPhase === 2) ? 30 : (10 + p * 20); 
-        ui.btn.style.boxShadow = `0 0 ${buttonGlow}px ${hslColor}`;
-
-        if (simPhase === 1) {
-            ui.btn.style.backgroundColor = hslColor; ui.btn.style.color = '#000';
-        }
-        if (simPhase === 2) {
-            ui.btn.style.backgroundColor = hslColor; ui.btn.style.color = '#000';
-            ui.vis2dContainer.style.borderColor = hslColor;
-            ui.vis2dContainer.style.boxShadow = `0 0 20px ${hslColor}`;
+        // Reset Metrics
+        ui.ovState.innerText = "NOISY";
+        ui.ovSlack.innerText = "12.5nm";
+        if(ui.valAlpha) {
+            ui.valAlpha.innerText = "137.036";
+            ui.valConv.innerText = "0.0%";
+            ui.valEntropy.innerText = "HIGH";
+            ui.valStatus.innerText = "VIBRATING";
         }
     }
 
-    function getZ(x, y, t) {
-        const u = (x - SPLIT_X); const v = (y - 25);
-        const r = Math.sqrt(u*u + v*v);
-        const isNative = x >= SPLIT_X;
-        const progress = curTwist / TARGET_TWIST;
-
-        if (isNative) {
-            if (simPhase === 0) return 0 + (Math.random()*0.5); 
-            if (simPhase === 2) return (r < 2) ? -15.0 + Math.sin(t*5)*0.2 : 0; 
-            const wave = Math.sin(r * 0.8 - t * 0.5) * 5; 
-            return wave * (1 - progress); 
-        } else {
-            return Math.sin(u*0.3 + t) * Math.cos(v*0.3 + t*0.7) * 3 + (Math.random()*0.5);
-        }
+    function initiateSequence() {
+        if (state !== 'ARTIFACT') return;
+        state = 'RUNNING';
+        ui.btn.innerText = "ALIGNING...";
+        ui.btn.disabled = true;
     }
 
-    function project(x, y, z) {
-        const scale = 20;
-        const isoX = (x - y) * Math.cos(0.523);
-        const isoY = (x + y) * Math.sin(0.523) - z;
-        return { x: width3D/2 + isoX * scale, y: height3D/2 + 100 + isoY * scale };
-    }
+    function loop() {
+        // Clear
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, w, h);
 
-    function draw3D() {
-        // --- ZERO GHOSTING FIX: Solid Fill ---
-        ctx3D.fillStyle = '#050505'; 
-        ctx3D.fillRect(0, 0, width3D, height3D);
-        // -------------------------------------
+        const cx = w/2;
+        const cy = h/2;
+        const rMax = Math.min(w,h) * 0.35;
 
-        const splitX_coord = width3D/2 + (SPLIT_X - 80/2) * 20 * Math.cos(0.523);
-        
-        ctx3D.beginPath(); ctx3D.moveTo(splitX_coord, 0); ctx3D.lineTo(splitX_coord, height3D);
-        ctx3D.strokeStyle = '#222'; ctx3D.lineWidth = 2; ctx3D.stroke(); 
-
-        const rows = 50; const cols = 80; const progress = curTwist / TARGET_TWIST;
-        const nativeColor = `hsl(${hue2D}, 100%, 50%)`;
-        const artifactColor = `rgba(255, 50, 50, 1.0)`;
-
-        for (let y = 0; y < rows; y++) {
-            // Horizontal Segments
-            for (let x = 0; x < cols - 1; x++) {
-                let z1 = getZ(x, y, time); let z2 = getZ(x + 1, y, time);
-                let p1 = project(x - cols/2, y - rows/2, z1);
-                let p2 = project((x + 1) - cols/2, y - rows/2, z2);
-                
-                let color = (x < SPLIT_X) ? artifactColor : `hsla(${hue2D}, 100%, 50%, ${0.2 + progress * 0.8})`;
-                
-                ctx3D.strokeStyle = color; ctx3D.lineWidth = 1;
-                ctx3D.beginPath(); ctx3D.moveTo(p1.x, p1.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-            }
-            // Vertical Segments
-            for (let x = 0; x < cols; x++) {
-                if (y < rows - 1) {
-                    let z1 = getZ(x, y, time); let z2 = getZ(x, y+1, time);
-                    let p1 = project(x - cols/2, y - rows/2, z1);
-                    let p2 = project(x - cols/2, (y+1) - rows/2, z2);
-                    let color = (x < SPLIT_X) ? artifactColor : `hsla(${hue2D}, 100%, 50%, ${0.2 + progress * 0.8})`;
-                    ctx3D.strokeStyle = color; ctx3D.lineWidth = 1;
-                    ctx3D.beginPath(); ctx3D.moveTo(p1.x, p1.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                }
+        // Progress Logic
+        if (state === 'RUNNING') {
+            progress += 0.008;
+            updateMetrics(progress);
+            if (progress >= 1) {
+                progress = 1;
+                state = 'LOCKED';
+                finalize();
             }
         }
 
-        // Spike
-        if (simPhase === 2) {
-             ctx3D.shadowBlur = 0;
-             for (let y = 0; y < rows; y++) {
-                for (let x = SPLIT_X; x < cols; x++) {
-                    let z = getZ(x, y, time);
-                    if (z < -5) {
-                        let p = project(x - cols/2, y - rows/2, z);
-                        ctx3D.strokeStyle = '#fff'; ctx3D.shadowBlur = 15; ctx3D.shadowColor = nativeColor;
-                        if (x < cols - 1) {
-                            let z2 = getZ(x+1, y, time); let p2 = project((x+1) - cols/2, y - rows/2, z2);
-                            ctx3D.beginPath(); ctx3D.moveTo(p.x, p.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                        }
-                        if (y < rows - 1) {
-                            let z2 = getZ(x, y+1, time); let p2 = project(x - cols/2, (y+1) - rows/2, z2);
-                            ctx3D.beginPath(); ctx3D.moveTo(p.x, p.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                        }
-                        ctx3D.shadowBlur = 0;
-                    }
-                }
-            }
-        }
+        let chaos = (state === 'ARTIFACT') ? 1 : (1 - progress);
+        let hue = 170 * (1 - chaos); // 0(Red) -> 170(Cyan)
 
-        if (simPhase === 1) {
-            const pc = curTwist / TARGET_TWIST;
-            const r = Math.round(21 * (1 - pc));
-            const g = Math.round(5 + (26 - 5) * pc * 0.5);
-            const b = Math.round(5 + (21 - 5) * pc * 0.5);
-            ui.viewport.style.background = `radial-gradient(circle at center, rgb(${r}, ${g}, ${b}) 0%, #000 100%)`;
-        }
-        time += 0.05; // Added time increment to keep it moving
-        requestAnimationFrame(draw3D);
-    }
+        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.lineWidth = 1 + (3 * chaos);
 
-    // Single unified circle visual
-    function draw2D() {
-        // --- ZERO GHOSTING FIX: Solid Fill ---
-        ctx2D.fillStyle = '#050505'; 
-        ctx2D.fillRect(0, 0, width2D, height2D);
-        // -------------------------------------
-        
-        const cx = width2D/2; const cy = height2D/2;
-        const rMax = Math.min(width2D, height2D) * 0.45;
-        const progress = curTwist / TARGET_TWIST;
-        let chaos = (simPhase === 2) ? 0 : (1 - progress);
-        
-        ctx2D.strokeStyle = `hsl(${hue2D}, 100%, 50%)`;
-        ctx2D.lineWidth = 1 + (2 * (1 - chaos));
-
-        ctx2D.beginPath();
+        // Draw Lattice
+        ctx.beginPath();
         for(let i=0; i<=360; i++) {
             let rad = i * Math.PI / 180;
-            // 1. Artifact noise component
-            let noise = (Math.random()-0.5) * 30 * chaos; 
-            // 2. Native smooth geometry component
-            let tVar = (simPhase === 2) ? (Date.now()/1000) * 0.5 : (time*0.1);
-            let geom = 20 * Math.cos(rad*5 + tVar); 
+            let noise = (Math.random()-0.5) * 50 * chaos;
             
-            // Blend them: As chaos drops, noise vanishes and geom stabilizes
-            let r = rMax + noise + (geom * (1 - chaos*0.5)); 
+            // Graves Function
+            let tVar = (state === 'LOCKED') ? (Date.now()/1000) : (time*0.1);
+            let geom = 30 * Math.cos(rad*5 + tVar);
             
-            let x = cx + r * Math.cos(rad); let y = cy + r * Math.sin(rad);
-            i===0 ? ctx2D.moveTo(x,y) : ctx2D.lineTo(x,y);
+            let r = rMax + noise + (geom * (1-chaos));
+            let x = cx + r * Math.cos(rad);
+            let y = cy + r * Math.sin(rad);
+            
+            i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
         }
-        ctx2D.closePath(); ctx2D.stroke();
-
-        if (progress > 0.1) {
-            ctx2D.fillStyle = `hsl(${hue2D}, 100%, 50%)`; ctx2D.beginPath();
-            let size = 2 + (chaos * 5);
-            ctx2D.arc(cx, cy, size, 0, Math.PI*2); ctx2D.fill();
-        }
-        requestAnimationFrame(draw2D);
-    }
-
-    function drawLineGraph(ctx, w, h, func, progress) {
-        ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, h * 0.9); ctx.lineTo(w, h * 0.9); ctx.stroke();
-
-        const numPoints = 100;
-        const MAX_PEAK_VALUE = 3.5; 
-        const scaleY = h * 0.8 / MAX_PEAK_VALUE; 
-        const offsetY = h * 0.9;
-        const nativeColor = `hsl(${hue2D}, 100%, 50%)`;
-
-        ctx.beginPath(); ctx.strokeStyle = nativeColor; ctx.lineWidth = 1 + progress;
-        for (let i = 0; i < numPoints; i++) {
-            const x = i * w / numPoints;
-            const val = func(i / numPoints * 2 - 1, progress); 
-            const y = offsetY - val * scaleY;
-            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
+        ctx.closePath();
         ctx.stroke();
 
-        if (progress < 1) {
-            ctx.beginPath(); ctx.strokeStyle = `rgba(255, 51, 51, ${1 - progress})`; ctx.lineWidth = 1;
-            for (let i = 0; i < numPoints; i++) {
-                const x = i * w / numPoints;
-                const val = func(i / numPoints * 2 - 1, 0); 
-                const y = offsetY - val * scaleY;
-                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        // Draw Core
+        if (chaos < 0.8) {
+            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+            ctx.beginPath();
+            let size = 4 + (chaos*20);
+            ctx.arc(cx, cy, size, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Lock Lines
+            if (state === 'LOCKED') {
+                for(let k=0; k<5; k++){
+                    let ang = (k*72 + Date.now()/20) * Math.PI/180;
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(0,255,204,0.3)";
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx + Math.cos(ang)*rMax, cy + Math.sin(ang)*rMax);
+                    ctx.stroke();
+                }
             }
-            ctx.stroke();
+        }
+
+        time++;
+        requestAnimationFrame(loop);
+    }
+
+    function updateMetrics(p) {
+        let alpha = 137.036 + (29.047 * p);
+        if(ui.valAlpha) {
+            ui.valAlpha.innerText = alpha.toFixed(3);
+            ui.valConv.innerText = (p*100).toFixed(1) + "%";
+            ui.valEntropy.innerText = p > 0.5 ? "DROPPING" : "HIGH";
+            ui.valStatus.innerText = p > 0.8 ? "LOCKING" : "ALIGNING";
         }
     }
 
-    const funcG1 = (x, progress) => {
-        const artifact = 1.5 * (x * x - 1) * (x * x - 1) + 0.1 * Math.sin(x * 20);
-        const native = 1.5 * x * x;
-        return artifact * (1 - progress) + native * progress;
-    };
-    const funcG2 = (x, progress) => {
-        const artifact = 0.5 * Math.exp(-200 * x * x);
-        const native = 2.0 * Math.exp(-200 * x * x);
-        return artifact * (1 - progress) + native * progress;
-    };
-    const funcG3 = (x, progress) => {
-        const artifact = 0.2 * Math.exp(-200 * x * x);
-        const native = 3.0 * Math.exp(-200 * x * x);
-        return artifact * (1 - progress) + native * progress;
-    };
-
-    function drawGraphs() {
-        const progress = curTwist / TARGET_TWIST;
-        drawLineGraph(ctxG1, widthG, heightG, funcG1, progress);
-        drawLineGraph(ctxG2, widthG, heightG, funcG2, progress);
-        drawLineGraph(ctxG3, widthG, heightG, funcG3, progress);
-        requestAnimationFrame(drawGraphs);
-    }
-
-    // --- CONTROLLER ---
-    function startSimulation() {
-        if (running) return;
-        running = true; simPhase = 1; curTwist = 0;
-        ui.finalMsg.style.opacity = 0;
-        ui.badge.innerText = "PHYSICS: TRANSITION...";
-        ui.alphaDisp.innerText = "CALCULATING...";
-        ui.btn.classList.add('running');
-        ui.btn.disabled = true;
-
-        let simInterval = setInterval(() => {
-            if (curTwist < TARGET_TWIST) {
-                curTwist += 0.08; 
-                const progress = curTwist / TARGET_TWIST;
-                updateCssColor(progress);
-                ui.badge.innerText = `PHYSICS: TRANSITION (${Math.round(137.036 + (29.047 * progress))})`;
-                ui.alphaDisp.innerText = "166." + Math.random().toString().substring(2, 15) + "...";
-                ui.btn.innerText = `ALIGNING... ${Math.round(progress * 100)}%`;
-            } else {
-                curTwist = TARGET_TWIST;
-                clearInterval(simInterval);
-                finishSim();
-            }
-        }, 30);
-    }
-
-    function finishSim() {
-        simPhase = 2; updateCssColor(1);
-        ui.alphaDisp.innerText = TARGET_ALPHA_STR;
-        ui.badge.innerText = "PHYSICS: NATIVE (166)";
-        ui.finalMsg.style.opacity = 1;
+    function finalize() {
+        ui.body.classList.add('mode-native');
         ui.btn.innerText = "ZERO-SLACK ACHIEVED";
-        ui.btn.classList.remove('running');
-        ui.btn.disabled = false;
-        ui.btn.style.backgroundColor = 'var(--primary)';
-        ui.btn.style.color = '#000';
-        ui.btn.style.boxShadow = '0 0 30px var(--primary)';
-        ui.viewport.style.background = 'radial-gradient(circle at center, #001a15 0%, #000 100%)';
-        running = false;
+        ui.badge.innerText = "PHYSICS: NATIVE (166)";
+        ui.ovState.innerText = "PERFECT";
+        ui.ovSlack.innerText = "0.00nm";
+        
+        if(ui.valAlpha) {
+            ui.valAlpha.innerText = "166.083...";
+            ui.valConv.innerText = "100.0%";
+            ui.valEntropy.innerText = "ZERO";
+            ui.valStatus.innerText = "LOCKED";
+        }
     }
 
-    function renderTable(activeData) {
-        const tbody = document.getElementById('table-body');
-        const cat = ui.catSelect.value;
-        const products = MATERIALS_DB[cat];
-        tbody.innerHTML = "";
-        let total = 0;
-
-        products.forEach(data => {
-            const isActive = activeData && activeData.name === data.name;
-            const row = document.createElement('div');
-            row.className = 'table-row';
-            row.style.opacity = isActive ? "1" : "0.3";
-            row.style.background = isActive ? "rgba(0, 255, 204, 0.05)" : "transparent";
-            
-            row.innerHTML = `
-                <div>${data.rank}</div>
-                <div style="color:${isActive ? 'var(--primary)' : '#888'}">${data.name}</div>
-                <div>${data.problem}</div>
-                <div class="row-impact">${data.dropin}</div>
-            `;
-            tbody.appendChild(row);
-            total += data.impact;
-        });
-
-        document.getElementById('total-val').innerText = `$${total.toFixed(2)} BILLION`;
-        document.getElementById('total-val').style.color = "#fff";
-        document.getElementById('total-val').style.textShadow = "0 0 10px var(--primary)";
-    }
-
-    // --- INIT ---
-    updateManifestoAndProducts(); 
-    time = 0;
-    draw3D(); draw2D(); drawGraphs();
-
+    loop();
 </script>
 </body>
 </html>
