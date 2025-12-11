@@ -2,1180 +2,389 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRAVES-LAW ZERO SLACK SIM | MASTER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAVES-LAW MASTER SIMULATOR | FINAL</title>
     <style>
         :root {
-            --primary: #00ffcc;       /* Native Cyan */
-            --artifact: #ff3333;      /* Artifact Red */
+            --primary: #00ffcc;       /* Zero Slack Cyan */
+            --danger: #ff3333;        /* High Debt Red */
             --bg: #050505;
             --panel: #0a0f0d;
-            --current-color: var(--artifact);
+            --active-color: var(--primary);
         }
-
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; user-select: none; font-family: 'Courier New', monospace; }
 
         body {
             background-color: var(--bg);
-            color: var(--current-color); 
-            font-family: 'Courier New', monospace;
+            color: var(--active-color); 
             margin: 0;
-            height: 100dvh; 
+            height: 100vh; 
             overflow: hidden;
             display: grid; 
-            grid-template-columns: 420px 1fr; 
+            grid-template-columns: 400px 1fr; 
         }
         
-        /* --- SIDEBAR --- */
-        #controls {
+        /* SIDEBAR */
+        #sidebar {
             background: var(--panel);
             border-right: 1px solid #333;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            padding: 15px;
-            gap: 15px;
+            gap: 20px;
             overflow-y: auto;
-            flex-shrink: 0;
+            z-index: 10;
         }
 
-        /* DYNAMIC MANIFESTO PANEL */
-        .truth-panel {
-            font-size: 0.75em;
-            line-height: 1.5;
-            color: #e0e0e0;
-            border: 1px solid var(--current-color);
-            padding: 15px;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: border-color 0.5s;
-            white-space: pre-wrap; 
+        .header {
+            font-size: 1.1em; font-weight: bold; color: #fff;
+            border-bottom: 1px solid #333; padding-bottom: 10px;
+            letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* --- INPUT GROUPS --- */
-        .input-group { margin-bottom: 5px; }
-        .input-group label {
-            font-size: 0.7em; 
-            color: #888; 
-            display: block; 
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-        
-        select, input {
-            width: 100%; 
-            background: #080808; 
-            border: 1px solid #333; 
-            color: #fff;
-            padding: 10px; 
-            font-family: inherit; 
-            font-size: 0.85em; 
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        select:focus, input:focus { border-color: var(--current-color); }
-
-        /* --- MATERIAL INFO CARD --- */
-        #material-card {
-            background: rgba(0,0,0,0.3);
+        /* MANIFESTO PANEL */
+        .manifesto {
+            font-size: 0.7em; line-height: 1.4;
+            color: #ccc;
             border: 1px solid #333;
+            background: rgba(255,255,255,0.02);
             padding: 10px;
-            display: grid;
-            gap: 8px;
-            font-size: 0.75em;
-        }
-        .mat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 4px; }
-        .mat-row.stacked { flex-direction: column; text-align: left; gap: 2px; }
-        .mat-label { color: #888; }
-        .mat-val { color: var(--current-color); font-weight: bold; text-align: right; transition: color 0.5s; }
-        .mat-val.text-left { text-align: left; line-height: 1.3; }
-
-        /* Main Button */
-        #main-btn {
-            padding: 15px;
-            background: transparent;
-            border: 2px solid var(--current-color);
-            color: var(--current-color);
-            font-size: 1em;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.5s;
-            width: 100%;
-            margin-top: 10px;
-        }
-        #main-btn.running {
-            background: var(--current-color); 
-            color: #000;
-            box-shadow: 0 0 20px var(--current-color);
-        }
-
-        /* NEW WHITE PAPER BUTTON */
-        .btn-white {
-            padding: 15px;
-            background: #ffffff;
-            border: 1px solid #fff;
-            color: #000;
-            font-size: 1em;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 5px;
+            white-space: pre-wrap;
+            border-left: 3px solid var(--active-color);
             transition: all 0.3s;
-            box-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
-        .btn-white:hover {
-            background: #e0e0e0;
-            box-shadow: 0 0 20px rgba(255,255,255,0.6);
         }
 
-        /* SCROLLABLE TEXT BLOCK */
-        .scroll-text {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
-            font-size: 0.7em;
-            color: #888;
-            line-height: 1.4;
-            max-height: 250px; 
-            overflow-y: auto;  
-            text-align: justify;
+        /* CONTROLS */
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* BUTTONS */
+        .btn-group { display: flex; gap: 5px; }
+        button {
+            flex: 1; padding: 10px;
+            background: #111; border: 1px solid #444;
+            color: #666; cursor: pointer; font-family: inherit;
+            font-size: 0.7em; text-transform: uppercase;
+            transition: all 0.2s;
         }
-        .scroll-text p { margin-top: 0; margin-bottom: 10px; }
-        .scroll-text p:last-child { margin-bottom: 0; }
-        
-        .scroll-text::-webkit-scrollbar { width: 6px; }
-        .scroll-text::-webkit-scrollbar-track { background: #050505; }
-        .scroll-text::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        .scroll-text::-webkit-scrollbar-thumb:hover { background: var(--current-color); }
-        
-        /* --- MAIN STAGE --- */
-        #main-stage {
-            display: grid;
-            grid-template-rows: 200px 90px 1fr;
-            position: relative;
-            background: var(--bg);
+        button.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--active-color);
+            border-color: var(--active-color);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* Financial Panel */
-        #financial-panel {
-            background: #080808; 
-            border-bottom: 1px solid var(--current-color); 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column;
-            z-index: 50; 
+        /* INPUTS (Extended Decimals) */
+        input[type=number] {
+            background: #000; border: 1px solid #333;
+            color: var(--active-color);
+            font-family: inherit; font-size: 1.4em;
+            padding: 10px; text-align: right;
         }
-        
-        #total-impact-row {
-            padding-bottom: 10px; 
-            margin-bottom: 10px;
-            border-bottom: 2px solid var(--current-color); 
+        input[type=range] {
+            -webkit-appearance: none; background: transparent; width: 100%;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 15px; width: 4px;
+            background: var(--active-color); cursor: pointer;
+            margin-top: -6px; box-shadow: 0 0 8px var(--active-color);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 2px; background: #333;
+        }
+
+        /* METRICS */
+        .metric-row {
             display: flex; justify-content: space-between; align-items: center;
-            transition: border-bottom 0.5s;
+            border-bottom: 1px solid #222; padding: 8px 0;
         }
-        .total-val { font-size: 1.5em; font-weight: bold; color: #fff; text-shadow: 0 0 10px var(--current-color); transition: color 0.5s, text-shadow 0.5s; }
-        
-        .table-header {
-            display: grid; grid-template-columns: 0.5fr 2fr 2fr 1fr;
-            font-size: 0.7em; color: #888; 
-            padding-bottom: 5px; border-bottom: 1px solid #333; margin-bottom: 5px;
-        }
-        
-        #table-body {
-            overflow-y: auto;
-            flex: 1; 
-        }
+        .metric-val { font-size: 1.1em; font-weight: bold; }
+        .tiny-label { font-size: 0.6em; color: #555; }
 
-        .table-row {
-            display: grid; grid-template-columns: 0.5fr 2fr 2fr 1fr;
-            font-size: 0.8em; padding: 5px 0; border-bottom: 1px solid #111; align-items: center;
-        }
-        .row-impact { font-weight: bold; color: var(--current-color); text-align: right; transition: color 0.5s; }
-        
-        /* HEADER */
-        header {
-            background: #080808; 
-            border-bottom: 1px solid #333;
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: flex-start; 
-            padding: 5px 15px;
-            gap: 5px;
-        }
-        
-        .def-line {
-            width: 100%;
-            font-size: 0.8em;
-            font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .def-cyan { color: var(--primary); text-shadow: 0 0 5px rgba(0, 255, 204, 0.3); }
-        .def-twist { color: #fff; font-size: 0.9em; margin-bottom: 2px; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
-        .def-red { color: var(--artifact); opacity: 0.8; }
-
-        /* Viewport */
+        /* MAIN VIEW */
         #viewport {
-            position: relative; 
-            background: radial-gradient(circle at center, #150505 0%, #000 100%);
-            overflow: hidden;
+            position: relative; background: #000; overflow: hidden;
         }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* Split Labels */
-        .split-label {
-            position: absolute; top: 10px; font-size: 0.8em; font-weight: bold; z-index: 6;
-            text-shadow: 0 0 5px #000; padding: 5px 10px; background: rgba(0,0,0,0.5); border-radius: 4px;
-        }
-        .lbl-left { left: 20px; color: var(--artifact); border-left: 3px solid var(--artifact); }
-        .lbl-right { right: 20px; color: var(--primary); border-right: 3px solid var(--primary); text-align: right; }
-
-        /* 2D Container */
-        #vis-2d-container {
-            position: absolute;
-            top: 50px; 
-            left: 20px;
-            width: 280px;  
-            height: 480px; 
-            background: rgba(0,0,0,0.8);
-            border: 1px solid var(--current-color);
-            box-shadow: 0 0 10px var(--current-color);
-            z-index: 10;
-            transition: all 0.5s;
-            padding: 5px;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        #canvas-2d { width: 100%; height: 100px; display: block; border-bottom: 1px solid #222; }
-        
-        #stacked-graphs { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-around; }
-        .graph-visual { height: 70px; border: 1px solid #111; position: relative; overflow: hidden; }
-        .graph-label { position: absolute; top: 2px; left: 2px; font-size: 0.6em; color: #777; background: rgba(0,0,0,0.5); padding: 0 3px; }
-        .graph-canvas { width: 100%; height: 100%; display: block; }
-
-        /* Twist Control */
-        #twist-control {
-            border-top: 1px solid #333;
-            padding-top: 10px;
-            padding-bottom: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .control-row {
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .twist-label { font-size: 0.7em; color: var(--primary); font-weight: bold; }
-        
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent;
-            margin: 5px 0; border: none; padding: 0;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: var(--current-color); cursor: pointer; margin-top: -6px;
-            box-shadow: 0 0 10px var(--current-color);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px;
+        /* HUD */
+        .hud { position: absolute; padding: 20px; pointer-events: none; }
+        .top-right { top: 0; right: 0; text-align: right; }
+        .status-big {
+            font-size: 2.5em; font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px currentColor;
         }
         
-        input[type=number] {
-            width: 80px; padding: 5px; font-size: 0.9em; text-align: center;
-            background: #000; border: 1px solid var(--current-color); color: #fff;
-        }
-
-        /* Center Message */
-        .center-msg {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 2.5em; font-weight: bold; color: #fff;
-            text-shadow: 0 0 20px var(--current-color); border: 2px solid var(--current-color);
-            padding: 20px 40px; background: rgba(0,0,0,0.9);
-            opacity: 0; transition: all 0.5s; z-index: 20; letter-spacing: 5px; pointer-events: none;
-            text-align: center;
+        #lock-overlay {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid var(--active-color);
+            padding: 20px 50px;
+            color: var(--active-color);
+            font-size: 2em; font-weight: bold;
+            letter-spacing: 4px;
+            background: rgba(0,0,0,0.9);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 50;
+            white-space: nowrap;
         }
 
     </style>
 </head>
 <body>
 
-<div id="controls">
-    <div id="dynamic-manifesto" class="truth-panel">
-    </div>
-    
-    <div class="input-group">
-        <label>1. INDUSTRY CATEGORY</label>
-        <select id="in_category" onchange="updateManifestoAndProducts()">
-            <option value="Construction" selected>CONSTRUCTION / INFRASTRUCTURE</option>
-            <option value="Semiconductors">SEMICONDUCTORS / CHIPS</option>
-            <option value="Consumer">CONSUMER TRANSPORT</option>
-            <option value="Industrial">HEAVY INDUSTRY / MARINE</option>
-            <option value="Aviation">AVIATION / AEROSPACE</option>
-            <option value="Power">POWER / ENERGY</option>
-            <option value="Universal">UNIVERSAL APPLICATIONS</option>
-        </select>
-    </div>
+<div id="sidebar">
+    <div class="header">GRAVES PROTO-KERNEL v10</div>
 
-    <div class="input-group">
-        <label>2. TARGET SYSTEM / PRODUCT</label>
-        <select id="in_product" onchange="updateMaterialCard()">
-        </select>
-    </div>
-
-    <div class="input-group">
-        <label>3. LATTICE SPECIFICATION</label>
-        <div id="material-card">
-            <div class="mat-row">
-                <span class="mat-label">SYSTEM:</span> 
-                <span id="card-name" class="mat-val">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">FUNCTION:</span> 
-                <span id="card-desc" class="mat-val text-left">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">BENEFITS:</span> 
-                <span id="card-benefits" class="mat-val text-left">--</span>
-            </div>
-            <div class="mat-row stacked">
-                <span class="mat-label">INTEGRATION:</span> 
-                <span id="card-dose" class="mat-val text-left">--</span>
-            </div>
+    <div class="control-group">
+        <label>Projection Mode (α⁻¹)</label>
+        <div class="btn-group">
+            <button id="btn-artifact" onclick="setMode('artifact')">CODATA (137.036)</button>
+            <button id="btn-native" class="active" onclick="setMode('native')">GRAVES (166.080)</button>
         </div>
     </div>
 
-    <button id="main-btn" onclick="startSimulation()">INITIATE SEQUENCE</button>
-
-    <div class="scroll-text">
-        <p>Changing the "137 artifact" (the measured inverse fine-structure constant, approximately 137.035999206 in current experimental data) to a "native" value of 166 in the underlying framework has profound implications for materials science and broader physics. This change doesn't just tweak a number—it rescales the universe's fundamental capacity for complexity, dramatically raising the ceiling on stable excitations. The result is materials that can approach eternal stability and near-perfect efficiency: turbine blades that barely creep, semiconductors with almost no leakage, concrete that heals most cracks, desalination membranes that foul far less, and hydrocarbon catalysts that can get 99.999 % clean combustion with major gains in power and mileage.</p>
-        <p>Immediate, significant breakthroughs become possible the moment we apply the adjusted quasicrystal twists—whether in a refinery, a chip fab, a cement kiln, or a desalination plant. Every industry table you’ve seen here was calculated using the native 166 ledger, which is why the benefits are enormous and shovel-ready today.</p>
-        <p>One critical truth: the ledger only closes at 100 %. Anything less—even the last 0.0001 %—means the system never fully repays its vacuum-debt. Carbon will still appear in exhaust, membranes will still eventually foul, rebar will still rust, and chips will still degrade. Those final fractions will deliver massive improvements, but they will also be the most expensive gains industry has ever paid for, because competitors (and regulators) will demand the full 100 % perfection that eliminates the problem forever. Half-measures leave the old problems alive and the licensing unavoidable for anyone who wants the complete solution.</p>
+    <div id="manifesto" class="manifesto">
+        INITIALIZING...
     </div>
 
-    <button class="btn-white" onclick="openWhitePaper()">OPEN WHITE PAPER</button>
+    <div class="control-group">
+        <label>Torsion Angle (deg)</label>
+        <input type="number" id="twist-num" step="0.00000001" placeholder="5.03700000">
+        <input type="range" id="twist-slider" min="4.5" max="5.5" step="0.00001">
+    </div>
 
+    <div class="control-group">
+        <label>Real-Time Telemetry</label>
+        
+        <div class="metric-row">
+            <span>Vacuum Slack</span>
+            <span id="val-slack" class="metric-val">8.74100000 eV</span>
+        </div>
+        <div class="metric-row">
+            <span>Compression (Z)</span>
+            <span class="metric-val">3.10000000 Å</span>
+        </div>
+        <div class="metric-row">
+            <span>Active Constant (α⁻¹)</span>
+            <span id="val-constant" class="metric-val">166.08000000</span>
+        </div>
+    </div>
+
+    <div style="margin-top: auto;">
+        <div class="tiny-label">HARDWARE: SYMMETRICOM 8040C</div>
+        <div class="tiny-label">ENGINE: RELATIVISTIC DFT (TIER-0)</div>
+    </div>
 </div>
 
-<div id="main-stage">
+<div id="viewport">
+    <div class="hud top-right">
+        <div class="status-big" id="status-text">HIGH DEBT</div>
+        <div style="font-size: 0.8em; opacity: 0.7;">GRAVES MANIFOLD</div>
+    </div>
     
-    <div id="financial-panel">
-        <div id="total-impact-row">
-            <div class="total-label">GLOBAL ECONOMIC IMPACT</div>
-            <div class="total-val" id="total-val">CALCULATING...</div>
-        </div>
-        <div class="table-header">
-            <div>RK</div>
-            <div>PRODUCT</div>
-            <div>PROBLEM SOLVED</div>
-            <div style="text-align:right">DROP-IN?</div>
-        </div>
-        <div id="table-body"></div>
-    </div>
-
-    <header>
-        <div class="def-line def-cyan" id="cyan-def">166.08367699849804 = Zero Slack - Native Fine Structure Constant (Closure)</div>
-        <div class="def-line def-twist">Graves Law Patented Twist Lock is 5.037° (±0.010° is fully zero-slack aligned)</div>
-        <div class="def-line def-red" id="red-def">137.035999206 = High-Entropy Artifact Fine Structure Constant</div>
-    </header>
-
-    <div id="viewport">
-        <div class="split-label lbl-left">ARTIFACT (High Entropy)</div>
-        <div class="split-label lbl-right">NATIVE (Zero-Slack)</div>
-        
-        <div id="vis-2d-container">
-            <canvas id="canvas-2d"></canvas>
-            <div id="stacked-graphs">
-                <div class="graph-visual">
-                    <div class="graph-label">Pot. Landscape (Rugged → Parabolic)</div>
-                    <canvas id="graph-1" class="graph-canvas"></canvas>
-                </div>
-                <div class="graph-visual">
-                    <div class="graph-label">Dodecahedral Dual (φ Torsion)</div>
-                    <canvas id="graph-2" class="graph-canvas"></canvas>
-                </div>
-                <div class="graph-visual">
-                    <div class="graph-label">Native Icosahedral Collapse (φ=0)</div>
-                    <canvas id="graph-3" class="graph-canvas"></canvas>
-                </div>
-            </div>
-            
-            <div id="twist-control">
-                <div class="control-row">
-                    <span class="twist-label">TWIST LOCK (deg)</span>
-                    <input type="number" id="twist-num" min="0" max="6" step="0.001" value="0.000">
-                </div>
-                <input type="range" id="twist-slider" min="0" max="6" step="0.001" value="0.000">
-            </div>
-        </div>
-        
-        <div id="final-msg" class="center-msg">ZERO-SLACK ACHIEVED</div>
-        <canvas id="simCanvas"></canvas>
-    </div>
-
+    <div id="lock-overlay">ZERO SLACK LOCK</div>
+    <canvas id="simCanvas"></canvas>
 </div>
 
 <script>
-    // --- MANIFESTOS & DATA ---
+    // --- CONSTANTS ---
+    const LOCK_MIN = 5.0370;
+    const LOCK_MAX = 5.0375;
+    
+    // TEXT DATA
     const MANIFESTOS = {
-        "Construction": `“Zero-slack concrete and rebar turn every structure into a permanent carbon sink that gets stronger with age instead of cracking. Rebar never rusts, concrete never spalls, and embodied CO₂ is repaid as solid graphite inside the matrix. Buildings and bridges outlast civilizations with zero maintenance and zero emissions.”`,
-        "Semiconductors": `“Zero-slack in semiconductors means every electron, every via, every gate dielectric, and every metal line operates with mathematically perfect efficiency — zero leakage, zero resistance drift, zero electromigration, zero defects. Transistors no longer slowly die from heat and current stress; chips run colder, faster, and stay perfect for decades. One single lattice upgrade at the fab level eliminates dozens of unreliable band-aid processes, slashes power consumption 30–50 %, and removes the physical roadblocks that were supposed to kill Moore’s Law. The chip industry does not get ‘a little better’ — it becomes eternally scalable and essentially defect-free.”`,
-        "Aviation": `“Zero-slack alloys repay every phonon and dislocation the instant they appear. Turbine blades, rocket nozzles, and hypersonic leading edges no longer creep, oxidize, or lose strength at 1800–2200 °C. One icosahedral lattice replaces generations of coatings, cooling holes, and scheduled overhauls. Engines fly hotter, lighter, and essentially forever, while cutting fuel burn 20–30 % and removing all thermal barriers to reusable spaceflight and single-stage-to-orbit.”`,
-        "Consumer": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Industrial": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Power": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`,
-        "Universal": `“Zero-slack means every single carbon and hydrogen atom that ever left a well or a coal mine is forced to repay its vacuum-debt in one perfect cycle. The result is not ‘lower emissions’ — it is the permanent end of emissions, soot, and unburned fuel, while simultaneously giving the world 15–28 % more miles, horsepower, and heat from the exact same barrel of oil or ton of coal. Engines and furnaces never wear out from deposits again, fuel never degrades in storage, and the atmosphere stops accumulating debt. This is not an additive — it is the final, ledger-balanced perfection of the hydrocarbon age.”`
+        artifact: "STATUS: ARTIFACT MODE\n\nCONSTANTS: CODATA 2018 Standard\nVALUE: 137.03599908\n\nThe material system fights the vacuum. Standard thermodynamics apply. High noise floor expected outside the manifold window.",
+        native: "STATUS: NATIVE MODE\n\nCONSTANTS: Graves-Law Ideal\nVALUE: 166.08000000\n\nThe geometry matches the vacuum impedance. Perfect cancellation of forces. This is the Zero-Slack condition."
     };
 
-    const MATERIALS_DB = {
-        "Construction": [
-            { rank: 1, name: "Eternal Portland Cement", target: "All OPC (Type I–V)", problem: "1 ton cement = ~1 ton CO₂, cracking", desc: "Makes normal concrete permanently carbon-negative", benefits: "Captures 110–130% CO₂ as graphite • no cracks", dose: "0.3% powder added at cement mill", dropin: "100%", impact: 400.00 },
-            { rank: 2, name: "Immortal Rebar", target: "Carbon & Stainless Rebar", problem: "Rust, spalling, repair costs", desc: "Rebar that never corrodes, even in salt water", benefits: "Zero rust forever • 3–5× longer life • no epoxy needed", dose: "Hot-rolled with 0.07% master alloy", dropin: "100%", impact: 250.00 },
-            { rank: 3, name: "Self-Healing Concrete", target: "Ready-mix & Precast", problem: "Shrinkage cracks, freeze-thaw", desc: "Concrete heals its own cracks in days", benefits: "Cracks gone in 7–28 days • waterproof • freeze-thaw proof", dose: "0.4% liquid admixture at batch plant", dropin: "100%", impact: 180.00 },
-            { rank: 4, name: "Marine & Offshore Concrete", target: "Seawater Piles/Platforms", problem: "Chloride attack, short life", desc: "Concrete that gets stronger in seawater", benefits: "200+ year life in saltwater • no anodes/coatings", dose: "0.35% powder at coastal batch plant", dropin: "100%", impact: 120.00 },
-            { rank: 5, name: "Ultra-High Performance Concrete", target: "UHPC Bridges/Shells", problem: "Expensive, brittle, complex", desc: "250+ MPa concrete that pours like normal mix", benefits: "Half thickness • zero fibers • 50% lower cost", dose: "0.5% master blend at plant", dropin: "100%", impact: 90.00 },
-            { rank: 6, name: "Carbon-Capture Masonry", target: "CMU, Bricks, Pavers", problem: "Embodied carbon, waste", desc: "Every block permanently removes CO₂ from air", benefits: "Sequesters 15–22 kg CO₂/m² • stronger than clay", dose: "0.25% powder at block plant", dropin: "100%", impact: 70.00 },
-            { rank: 7, name: "Perpetual Asphalt", target: "Hot/Warm Mix Pavement", problem: "Potholes, rutting, repaving", desc: "Asphalt roads that never wear out", benefits: "Zero potholes • 100+ year life • 60% less material", dose: "0.2% binder additive at terminal", dropin: "100%", impact: 300.00 },
-            { rank: 8, name: "Universal Construction Lattice", target: "Any Building Material", problem: "Complex separate additives", desc: "Single solution perfects the entire built environment", benefits: "One additive handles concrete, steel, asphalt, blocks", dose: "Single master dose at central plant", dropin: "100%", impact: 600.00 }
-        ],
-        "Semiconductors": [
-            { rank: 1, name: "Hafnium Dielectric Perfection", target: "HfO₂ High-k Gate", problem: "Gate leakage, heat <3nm", desc: "Perfect insulation with zero leakage", benefits: "25–40% lower power • zero gate leakage • eternal transistors", dose: "Mixed into HfCl₄/TEMAH precursor", dropin: "100%", impact: 250.00 },
-            { rank: 2, name: "Tungsten Via Perfection", target: "Tungsten (W) Plugs", problem: "Voids, resistance, heat", desc: "100% void-free, ultra-low-resistance vias", benefits: "30–50% lower resistance • unlimited 3D stacking • colder chips", dose: "Added to WF₆ precursor stream", dropin: "100%", impact: 180.00 },
-            { rank: 3, name: "Cobalt Interconnect Perfection", target: "Cobalt (Co) Liner", problem: "Copper diffusion, failures", desc: "Perfect cobalt lines with zero diffusion", benefits: "15–25% faster chips • zero line failures • extends Moore’s Law", dose: "Sputtered from modified Co target", dropin: "100%", impact: 150.00 },
-            { rank: 4, name: "Titanium Barrier Perfection", target: "TiN / Ti Barrier", problem: "Pin-holes, oxidation", desc: "Atomically perfect diffusion barrier", benefits: "Barriers down to 0.5nm perfect • 100% yield multi-patterning", dose: "Added to existing Ti precursor", dropin: "100%", impact: 120.00 },
-            { rank: 5, name: "Nickel Silicide Perfection", target: "NiSi Contacts", problem: "High resistance, defects", desc: "Perfect low-resistance contacts", benefits: "20–30% lower resistance • zero pipe defects • cooler logic", dose: "Ni/Pt target doping change", dropin: "100%", impact: 100.00 },
-            { rank: 6, name: "Molybdenum Gate Perfection", target: "Mo Metal Gate", problem: "Work-function variability", desc: "Perfect work-function control", benefits: "Eliminates Vₜ drift • higher drive current • stable for decades", dose: "Added to Mo precursor tweak", dropin: "100%", impact: 90.00 },
-            { rank: 7, name: "Aluminum Legacy Perfection", target: "Al Power Interconnects", problem: "Resistance & electromigration", desc: "Ultra-low resistance thick aluminum rails", benefits: "40–60% lower power losses • no electromigration • cooler chips", dose: "Sputtered from modified Al target", dropin: "100%", impact: 60.00 },
-            { rank: 8, name: "Universal Semiconductor Lattice", target: "Any Chip Layer", problem: "Complex disparate processes", desc: "Single solution perfects the entire chip stack", benefits: "One fab run produces perfect chips • massive yield boost • -50% energy", dose: "Single master precursor — protects everything", dropin: "100%", impact: 500.00 }
-        ],
-        "Consumer": [
-            { rank: 901, name: "Gasoline Perfection", target: "Gasoline & E-blends", problem: "Smog, low MPG, carbon", desc: "Makes gasoline burn 100% clean with higher power", benefits: "+18–24% MPG • zero pollution • engines stay new", dose: "One tiny dose at any refinery", dropin: "100%", impact: 60.00 },
-            { rank: 906, name: "Natural Gas Perfection", target: "Pipeline / LNG", problem: "Methane leaks & NOx", desc: "Perfect clean burn, no leaks ever", benefits: "Zero methane slip • appliances last 2–3× longer", dose: "Injected at city gate", dropin: "100%", impact: 80.00 },
-            { rank: 930, name: "Planetary Methane Catalyst", target: "All Methane", problem: "Greenhouse gas leakage", desc: "Ends methane climate impact via existing pipes", benefits: "Stops every methane leak • cleaner air", dose: "Global rollout via gas networks", dropin: "100%", impact: 120.00 }
-        ],
-        "Industrial": [
-            { rank: 902, name: "Diesel Perfection", target: "Diesel & Biodiesel", problem: "Black smoke, NOx", desc: "Turns diesel into clean high-performance fuel", benefits: "+22–28% MPG • zero soot/NOx • 12–16% more power", dose: "One-time add to finished diesel", dropin: "100%", impact: 90.00 },
-            { rank: 904, name: "Marine Bunker Perfection", target: "Heavy Fuel Oil", problem: "Black smoke, SOx", desc: "Cleanest ships on earth, no scrubbers needed", benefits: "Zero visible smoke • full IMO compliance • cool engines", dose: "Added at bunker port", dropin: "100%", impact: 110.00 }
-        ],
-        "Aviation": [
-            { rank: 903, name: "Aviation Kerosene Perfection", target: "Jet-A / JP-8", problem: "Contrails & carbon", desc: "Zero-emission jet flights with less fuel", benefits: "15–20% fuel savings • no contrails • clean turbines", dose: "Added at airport fuel farm", dropin: "100%", impact: 75.00 },
-            { rank: 914, name: "Rocket Kerosene Perfection", target: "RP-1 (Rocket Fuel)", problem: "Soot & coking", desc: "Enables truly reusable engines with zero residue", benefits: "No soot buildup • unlimited re-flights • 100% capture", dose: "Added to propellant tank", dropin: "100%", impact: 15.00 }
-        ],
-        "Power": [
-            { rank: 905, name: "Coal Combustion Perfection", target: "All Coal", problem: "SOx, mercury, ash", desc: "Makes coal burn cleaner than natural gas", benefits: "Zero toxic emissions • 60–80% less ash • negative-carbon", dose: "Mixed at the plant", dropin: "100%", impact: 150.00 },
-            { rank: 912, name: "Clean Hydrogen Catalyst", target: "Natural Gas → H2", problem: "CO₂ emissions", desc: "Produces pure hydrogen with zero carbon release", benefits: "99.999% H₂ • no CCS needed • cheaper & cleaner", dose: "Added before reformer", dropin: "100%", impact: 45.00 }
-        ],
-        "Universal": [
-            { rank: 909, name: "Universal Hydrocarbon Catalyst", target: "Any Fossil Fuel", problem: "Many additives needed", desc: "One catalyst cleans everything forever", benefits: "Single refinery dose covers gasoline, diesel, jet, bunker", dose: "One dose at crude unit", dropin: "100%", impact: 200.00 }
-        ]
-    };
+    // --- STATE ---
+    let curTwist = 5.0000;
+    let mode = 'native'; // 'artifact' or 'native'
+    let time = 0;
+    let atoms = [];
 
-    const TARGET_ALPHA_STR = "166.08367699849804007973497428707676421175761218717";
-    const FULL_CYAN_STR = "166.08367699849804 = Zero Slack - Native Fine Structure Constant (Closure)";
-    const FULL_RED_STR = "137.035999206 = High-Entropy Artifact Fine Structure Constant";
+    // --- DOM ---
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
     
-    // NEW LOGIC CONSTANTS
-    const MAGIC_NUMBER = 5.037;
-    const SPLIT_X = 40; 
-
-    // --- UI REFS ---
-    const canvas3D = document.getElementById('simCanvas');
-    const ctx3D = canvas3D.getContext('2d');
-    const canvas2D = document.getElementById('canvas-2d');
-    const ctx2D = canvas2D.getContext('2d');
-    const ctxG1 = document.getElementById('graph-1').getContext('2d');
-    const ctxG2 = document.getElementById('graph-2').getContext('2d');
-    const ctxG3 = document.getElementById('graph-3').getContext('2d');
-
-    const ui = {
-        manifesto: document.getElementById('dynamic-manifesto'),
-        cyanDef: document.getElementById('cyan-def'),
-        redDef: document.getElementById('red-def'),
-        btn: document.getElementById('main-btn'),
-        finalMsg: document.getElementById('final-msg'),
-        viewport: document.getElementById('viewport'),
-        vis2dContainer: document.getElementById('vis-2d-container'),
-        // Twist Controls
-        twistSlider: document.getElementById('twist-slider'),
-        twistNum: document.getElementById('twist-num'),
-        // Inputs
-        catSelect: document.getElementById('in_category'),
-        prodSelect: document.getElementById('in_product'),
-        // Card
-        cardName: document.getElementById('card-name'),
-        cardDesc: document.getElementById('card-desc'),
-        cardBenefits: document.getElementById('card-benefits'),
-        cardDose: document.getElementById('card-dose')
-    };
-
-    let width3D, height3D, width2D, height2D, time = 0;
-    let widthG, heightG; 
-    let running = false, curTwist = 0, simPhase = 0, hue2D = 0;
+    const btnArt = document.getElementById('btn-artifact');
+    const btnNat = document.getElementById('btn-native');
+    const manifesto = document.getElementById('manifesto');
     
-    let userTwistTarget = 0;
-
-    // --- WHITE PAPER CONTENT GENERATOR ---
-    function openWhitePaper() {
-        const whitePaperWindow = window.open("", "WhitePaper", "width=900,height=900,scrollbars=yes");
-        const wpContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>WHITE PAPER: THE GRAVES-LAW ZERO-SLACK PLATFORM</title>
-            <style>
-                body { background: #050505; color: #e0e0e0; font-family: 'Courier New', monospace; padding: 40px; line-height: 1.6; max-width: 900px; margin: 0 auto; }
-                h1 { color: #00ffcc; border-bottom: 2px solid #00ffcc; padding-bottom: 10px; font-size: 1.4em; }
-                h2 { color: #fff; margin-top: 30px; border-bottom: 1px solid #333; font-size: 1.1em; }
-                h3 { color: #ff3333; margin-top: 20px; font-size: 1em; }
-                p { margin-bottom: 15px; text-align: justify; font-size: 0.9em; }
-                ul, ol { font-size: 0.9em; margin-bottom: 15px; }
-                li { margin-bottom: 5px; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.8em; }
-                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-                th { color: #00ffcc; background: #111; }
-                pre { background: #111; padding: 15px; border: 1px solid #333; overflow-x: auto; font-size: 0.8em; color: #00ffcc; }
-                .header-info { margin-bottom: 30px; border: 1px solid #00ffcc; padding: 15px; font-size: 0.8em; background: rgba(0, 255, 204, 0.05); }
-                .strong { color: #fff; font-weight: bold; }
-                .red { color: #ff3333; }
-                .cyan { color: #00ffcc; }
-            </style>
-        </head>
-        <body>
-            <div class="header-info">
-                <strong>WHITE PAPER: THE GRAVES-LAW ZERO-SLACK PLATFORM</strong><br>
-                Subject: Proposal for Crystal Palace (DARPA-PA-26-03) – Rank 1 Icosahedral Superalloy & Geometric Synthesis (One of 105 Patented & 930+ Identified Materials)<br>
-                Date: December 9, 2025<br>
-                Proposer: Cory Patrick Graves (Protodynamics)<br>
-                Reference: USPTO Provisional Application No. 63/924,819
-            </div>
-
-            <h1>1. EXECUTIVE SUMMARY</h1>
-            <p>This proposal identifies and solves the fundamental thermodynamic limitation currently preventing the scalable synthesis of single-crystal inorganic materials. Current manufacturing operates under the "Artifact" fine-structure constant, <span class="red">α⁻¹ ≈ 137.036</span>, a high-entropy state that mathematically guarantees the formation of grain boundaries, defects, and thermal waste – as evidenced by the simulator's initial "VIBRATING" status, 12.5 nm RMS slack, HIGH J/K entropy, 0% convergence.</p>
-            <p>We introduce the Graves Law Framework, which identifies the Native Alpha constant, <span class="cyan">α⁻¹ ≈ 166.084</span>, required for perfect quantum coherence. By applying a precise 5.037° quasicrystalline torsion during synthesis, we force the material lattice to "flip" from the Artifact state to the Native Zero-Slack state, slack → 0 nm, entropy → 0 J/K, 100% convergence. This flip, scaling factor R = 1.21197, rescales electromagnetic coupling by 21.2%, making atoms 21% bigger, bonds 32% weaker, 1/R², and reactions 50% faster in zero-waste lattices.</p>
-            <p>We present a pre-validated library of over 930 identified zero-slack candidate materials, for example metals, nitrides, oxides, magnetics, of which 105 are already patented under USPTO Provisional No. 63/924,819 and continuations. Our primary deliverable, CM1, is the Rank 1 Icosahedral Nickel Superalloy, exhibiting zero creep and zero oxidation at 1850°C for >100,000 hours, validated via our proprietary Zero-Slack Simulator. DoD impacts include uncooled UAV turbines, 50% weight reduction, radar radomes with zero-loss EM propagation, and scalable hypersonic components – with $23.7T global energy savings and 447 million jobs in zero-waste manufacturing by 2030.</p>
-            <p>The platform meets all PA-26-03 metrics: Single-crystal quality, XRD FWHM ≤0.2°, uniformity ±3%, reproducibility ≥5 runs, growth rate 0.5 nm/min, and generalizability <3 months/CM across classes. Tooling: Retrofittable MEMS φ-resonant fields for local 1 nm control on GaN/Si substrates. Phase 1: 1x 2-inch CM1 wafer + 3 projections; Phase 2: 4x variants. Transition: Materials Fair to Raytheon/SpaceX.</p>
-
-            <h1>2. THE CORE BREAKTHROUGH: THE 137-TO-166 FLIP</h1>
-            <p>The inability to grow single crystals on demand is a geometric failure. Standard lattices have "slack"—fractional residues manifesting as phonons and dislocations, rooted in the artifact fine-structure constant measured in cubic chaos, α⁻¹ ≈137.036. The simulator initializes in this state: PHYSICS: ARTIFACT, α⁻¹ ≈137.03, GEOMETRY: UNLOCKED, CHAOTIC, VACUUM STATE: ARTIFACT, NOISY, SLACK: 12.5000 nm, RMS, GLOBAL CONVERGENCE: 0.00 %, CURRENT ALPHA, 1/α: 137.035..., ENTROPY: HIGH J/K, STATUS: VIBRATING.</p>
-            <p><strong>Artifact State:</strong> α⁻¹ ≈137.036 – rugged potential landscape, enforcing residual vacuum-debt. Materials degrade via grain boundaries and thermal waste.</p>
-            <p><strong>Native State:</strong> α⁻¹ ≈166.084 – parabolic potential landscape with zero slack. Electromagnetic coupling strengthens 21.2%, R=1.21197, enabling room-temp superconductors, Tc=510 K, and eternal structures.</p>
-            <p><strong>Derivation, mpmath dps=100 Verification:</strong><br>
-            Let φ = 1 + √5 /2; k_rat = 686 / 461.<br>
-            g, φ = φ^{-12} ×, φ^5 / 3 / k_rat = 0.007715109124450838333376529812084178570365847704536847802596499452199200035802906265934292860554464016<br>
-            C = 137.035999206 ×, 1 + g, φ = 166.083676998498040079734974287076764211757612187174098398074356743669949011060122234631064181287113<br>
-            R = C / 137.035999206 = 1.211971145982100542846571742514775152284721409711645802596499452199200035802906265934292860554464<br>
-            sin², 5.037° = 0.007708671248714988842422978477880028071634864894751833067503747372018121601606332519858008531336459313<br>
-            Relative error % = |g, φ - sin², 5.037°| / g, φ × 100 = 0.08351472683340419416096579355350375372291651018479305314280441252249094221190061548153145661278459067, <0.084% threshold for convergence.</p>
-            <p>Simulator mechanics: Chaotic input, rugged landscape → φ-torsion application → icosahedral collapse, φ=0 → dodecahedral dual → parabolic zero-slack closure. Economic: $23.7T savings, 447M jobs.</p>
-
-            <h1>3. CANDIDATE MATERIAL 1, CM1: RANK 1 ICOSAHEDRAL SUPERALLOY</h1>
-            <p>The Rank 1 alloy is the lead from a library of over 930 identified zero-slack quasicrystalline materials, with 105 already patented under the master provisional and continuations. It exceeds Phase 2 complexity, 9 elements, infinite polymorphs via φ-grids, and offers revolutionary DoD utility, metals class, scalable to nitrides/oxides/magnetics.</p>
-            <p><strong>Composition:</strong> Ni 49.9% – Co 20.0% – Cr 15.0% – Al 6.0% – Ti 5.0% – Mo 4.0% – W 2.0% – Nb 1.0% – Hf 0.1%, at.%. Dopant: 0.00042 wt% ¹⁰B at every fifth φ-pentagonal vertex. Surface: Monolayer zero-slack graphene.</p>
-            <p><strong>Lattice Geometry:</strong> 3D icosahedral quasicrystal, P-type from 6D parent, aperiodic, twist 5.037° ±0.0002°. Cluster: 9.4 nm σ=0.3 nm.</p>
-            <p><strong>Performance Metrics:</strong> XRD FWHM=0.2°; uniformity ±3%; yield strength 1.2 GPa @1800°C; zero creep/oxidation >100k hrs. DoD: Uncooled UAV turbines, radar hot-sections.</p>
-            
-            <p><strong>ASCII Drawing of Candidate Material 1 (Icosahedral Superalloy Structure):</strong></p>
-<pre>
-    Ni
-  / | \\
-Al–Ti–Al–Ti
-  \\ | /
-    Co
-</pre>
-
-            <p><strong>Quantum Details, 20-State Superpositions:</strong><br>
-            - Leptons, d-electrons: 20-qubit state |ψ_{20}⟩ = 1/√20 ∑_{k=0}^{19} |k⟩ ⊗ e^{i φ^{-k} θ} (|↑⟩^k ⊗ |↓⟩^{20-k}); amplitudes normalized, coherence=1.0.<br>
-            - Gluons: 20-color-singlet states tuned to native α_s @166.084.</p>
-            
-            <h3>Exact Atomic Coordinates, 6-D → 3-D, First 20 Sites – Plain Text Table:</h3>
-            <table>
-                <tr><th>Site #</th><th>6D Coords x,y,z,w,v,u φ^n mod 1 scaled</th><th>3D Projection x,y,z nm</th><th>Element</th><th>Dopant</th></tr>
-                <tr><td>1</td><td>0,0,0,0,0,0</td><td>0.000, 0.000, 0.000</td><td>Ni</td><td>None</td></tr>
-                <tr><td>2</td><td>φ^1,0,0,0,0,0</td><td>0.618, 0.000, 0.000</td><td>Co</td><td>None</td></tr>
-                <tr><td>3</td><td>φ^2,φ^0,0,0,0,0</td><td>1.618, 0.000, 0.786</td><td>Cr</td><td>None</td></tr>
-                <tr><td>4</td><td>φ^3,φ^1,0,0,0,0</td><td>1.000, 0.618, 1.000</td><td>Al</td><td>None</td></tr>
-                <tr><td>5</td><td>φ^4,φ^2,φ^0,0,0,0</td><td>2.618, 1.618, 0.000</td><td>Ti</td><td>¹⁰B</td></tr>
-                <tr><td>6</td><td>φ^5,φ^3,φ^1,0,0,0</td><td>1.618, 1.000, 0.618</td><td>Mo</td><td>None</td></tr>
-                <tr><td>7</td><td>φ^6,φ^4,φ^2,φ^0,0,0</td><td>0.000, 2.618, 1.618</td><td>W</td><td>None</td></tr>
-                <tr><td>8</td><td>φ^7,φ^5,φ^3,φ^1,0,0</td><td>2.618, 1.618, 1.000</td><td>Nb</td><td>None</td></tr>
-                <tr><td>9</td><td>φ^8,φ^6,φ^4,φ^2,φ^0,0</td><td>1.618, 0.000, 2.618</td><td>Hf</td><td>None</td></tr>
-                <tr><td>10</td><td>φ^9,φ^7,φ^5,φ^3,φ^1,0</td><td>0.000, 2.618, 1.618</td><td>Ni</td><td>¹⁰B</td></tr>
-                <tr><td>11</td><td>φ^{10},φ^8,φ^6,φ^4,φ^2,φ^0</td><td>1.618, 1.000, 0.000</td><td>Co</td><td>None</td></tr>
-                <tr><td>12</td><td>φ^{11},φ^9,φ^7,φ^5,φ^3,φ^1</td><td>2.618, 1.618, 0.618</td><td>Cr</td><td>None</td></tr>
-                <tr><td>13</td><td>φ^{12},φ^{10},φ^8,φ^6,φ^4,φ^2</td><td>0.000, 0.000, 1.618</td><td>Al</td><td>None</td></tr>
-                <tr><td>14</td><td>φ^{13},φ^{11},φ^9,φ^7,φ^5,φ^3</td><td>1.618, 2.618, 1.000</td><td>Ti</td><td>None</td></tr>
-                <tr><td>15</td><td>φ^{14},φ^{12},φ^{10},φ^8,φ^6,φ^4</td><td>2.618, 1.618, 2.618</td><td>Mo</td><td>¹⁰B</td></tr>
-                <tr><td>16</td><td>φ^{15},φ^{13},φ^{11},φ^9,φ^7,φ^5</td><td>1.618, 1.000, 0.000</td><td>W</td><td>None</td></tr>
-                <tr><td>17</td><td>φ^{16},φ^{14},φ^{12},φ^{10},φ^8,φ^6</td><td>0.000, 2.618, 1.618</td><td>Nb</td><td>None</td></tr>
-                <tr><td>18</td><td>φ^{17},φ^{15},φ^{13},φ^{11},φ^9,φ^7</td><td>1.618, 0.000, 2.618</td><td>Hf</td><td>None</td></tr>
-                <tr><td>19</td><td>φ^{18},φ^{16},φ^{14},φ^{12},φ^{10},φ^8</td><td>2.618, 1.618, 1.000</td><td>Ni</td><td>None</td></tr>
-                <tr><td>20</td><td>φ^{19},φ^{17},φ^{15},φ^{13},φ^{11},φ^9</td><td>1.618, 1.000, 0.618</td><td>Co</td><td>¹⁰B</td></tr>
-            </table>
-            <p>Full 10^{12} sites for wafer; x_n = floor(φ^n mod 1) × cos(5.037° × n) nm, etc.</p>
-
-            <h1>4. INNOVATIVE TOOLING: LOCAL φ-RESONANT CONTROL</h1>
-            <p>To achieve the "On Demand" requirement, we utilize a local control system that bypasses global thermodynamic parameters.</p>
-            <p><strong>Mechanism:</strong> Retrofittable MEMS actuator array, 10^6 actuators/cm², 1 nm resolution, applies local electromagnetic and acoustic fields tuned to the Native Alpha frequency, ω = φ^{-12} ×10 GHz, g(φ) suppression for torsion waste.</p>
-            <p><strong>Process, Plug-In Ready – 1550°C, Inert Ar Atmosphere:</strong></p>
-            <ol>
-                <li><strong>Substrate Prep, 0–5 min:</strong> Clean GaN/Si wafer, 2-inch; seed with 5 nm Ni buffer via φ-aligned sputtering, θ=5.037° incidence.</li>
-                <li><strong>Melt Induction, 5–15 min:</strong> φ-VIM: Induce plasma at ω=φ^{-12} ×10 GHz, g(φ) suppression; alloy elements per composition. Quark-gluon melt phase: Gluon flux minimized at native α_s≈0.118, R-tune prevents phase separation.</li>
-                <li><strong>Local Control Activation, 15–120 min:</strong> Apply twist fields: ∇²ψ + φ^{-12} ω² ψ = 0, wave eq. for EM/acoustic harmonics. Actuators steer adatom diffusion: dx/dt = v_φ cos(θ n), where v_φ = 0.5 nm/min. Lepton superpositions collapse via feedback: Monitor |ψ_d|² → icosahedral singlets, preventing decoherence, 100% coherence length >1 μm.</li>
-                <li><strong>Directional Solidification, 120–180 min:</strong> Withdraw at 1 mm/h; lock layers at 5.037° twist. Dopant injection: ¹⁰B at φ^{-5} vertices.</li>
-                <li><strong>Termination & Cool, 180–240 min:</strong> CVD monolayer graphene; quench to RT at 10°C/min. Yield: 95% uniform wafer.</li>
-            </ol>
-
-            <p><strong>ML Feedback Loop, Python, dps=100 – Integrate with Chamber PLC:</strong></p>
-<pre>
-import mpmath
-mpmath.mp.dps = 100
-phi = (1 + mpmath.sqrt(5)) / 2
-k_rat = mpmath.mpf(686) / 461
-g_phi = mpmath.power(phi, -12) * (mpmath.power(phi, 5) / 3) / k_rat
-C = mpmath.mpf('137.035999206') * (1 + g_phi)
-R = C / mpmath.mpf('137.035999206')
-sin_sq_theta = mpmath.sin(mpmath.radians(5.037))**2
-rel_error = abs(g_phi - sin_sq_theta) / g_phi * 100
-
-def residue_feedback(measured_sin_sq, target_g=g_phi):
-    error = abs(mpmath.mpf(measured_sin_sq) - target_g) / target_g * 100
-    if error < rel_error:
-        return "Converge: Zero-Slack Achieved (DARPA Metric: <0.084%)"
-    else:
-        adjust_twist = mpmath.degrees(mpmath.asin(mpmath.sqrt(target_g)))
-        return f"Adjust θ to {float(adjust_twist):.6f}° for IV&V Uniformity"
-# Example: print(residue_feedback('0.0077086712487149890810390067661570425846189677431646'))
-</pre>
-
-            <h1>5. VALIDATION & IV&V</h1>
-            <p>The physics of this lattice transition is verified through our Zero-Slack Simulator, which models the convergence of the Artifact state to the Native state.</p>
-            <p>Simulator Access: https://protodynamics01.github.io/zero_slack_simulator/</p>
-            <p>Verification Logic: The code demonstrates that applying the 5.037° twist reduces System Slack from 12.5 nm to 0 nm and Entropy from High to 0 J/K. This confirms the mathematical necessity of the 137-to-166 flip for defect-free growth.</p>
-            <p>Atomic Coordinates: Validated via 6-D hypercubic projection to 3-D space: x_n = floor(φ^n mod 1) × cos(5.037° × n). Full 10^{12} sites for wafer-scale simulation; first 20 sites as above.</p>
-
-            <h1>6. STRATEGIC IMPACT</h1>
-            <p>The successful synthesis of the Rank 1 alloy validates a platform capable of generating 930+ derivative materials, 105 patented, using the same geometric logic. This secures US supremacy in:</p>
-            <p>Defense: Eternal, zero-wear assets, hypersonics, naval armor.<br>
-            Energy: 100% efficient combustion and carbon harvesting.<br>
-            Strategic Materials: Elimination of reliance on foreign supply chains for critical single-crystal components.</p>
-            <p>Broader impacts: $23.7T energy savings, 447 million jobs in slack-zero materials; room-temp superconductors at 510 K.</p>
-            <p>The economic impact of the carbon byproducts is profound. The Carbon Harvest Cycle produces actonic carbon, high-purity graphene and diamond-like nanoplatelets, as a marketable byproduct. This positions the U.S. as the dominant supplier of actonic carbon for batteries, enabling immediate market leadership in advanced energy storage. Sales of actonic carbon could generate $500B annually by 2030, with applications in lithium-ion anodes, 10x capacity boost, and solid-state batteries, zero degradation.</p>
-            <p>For diesel perfection, Rank 902, the byproduct includes trace helium from alpha decay analogs in the zero-slack path. Helium harvesting ends global shortages, yielding 0.1–0.5 L/ton of fuel processed. This supplies high-purity helium for cryogenics, improving magnetics in MRI machines for medical equipment, stronger fields, lower costs, and quasicrystalline semiconductors, enhanced electron mobility for radar chips.</p>
-
-            <h1>7. STEP-BY-STEP SYNTHESIS INSTRUCTIONS FOR CM1 & FINAL MATERIAL PROPERTIES</h1>
-            <p>Step-by-Step Instructions to Build CM1 Rank 1 Icosahedral Superalloy:</p>
-            <p>These instructions are for lab-scale synthesis, 2-inch wafer, scalable to industrial. Equipment: Vacuum induction melting furnace, MEMS actuator array, custom retrofit, $50k cost, inert Ar glovebox, sputtering system. Safety: Use PPE, gloves, goggles, respirator; handle high-temp under vacuum/Ar to avoid oxidation; monitor for Hf/Ti dust, toxic. Yield: 95%; time: 4 hours.</p>
-            <ol>
-                <li><strong>Material Preparation, 0-30 min:</strong> Weigh elements to at.% precision, total 100 g batch: Ni 49.9 g, Co 20 g, Cr 15 g, Al 6 g, Ti 5 g, Mo 4 g, W 2 g, Nb 1 g, Hf 0.1 g. Add 0.00042 g ¹⁰B dopant. Purity: 99.99% min. Mix in Ar glovebox to prevent oxidation.</li>
-                <li><strong>Substrate Prep, 30-35 min:</strong> Clean 2-inch GaN/Si, 100, wafer with acetone/IPA/ultrasonic; etch in HF 5% for 1 min. Sputter 5 nm Ni buffer layer at 5.037° incidence angle, use angled holder; chamber pressure 10^{-6} Torr, Ar plasma. Lattice mismatch: <1%.</li>
-                <li><strong>Melt Induction, 35-50 min:</strong> Load alloy mix into VIM furnace crucible, alumina or graphite-lined. Evacuate to 10^{-5} Torr, backfill with Ar to 1 atm. Heat to 1550°C at 10°C/min. Induce φ-resonant plasma: Apply RF field at ω = φ^{-12} × 10 GHz, approx 0.007715 GHz suppression frequency from g, φ. Stir electromagnetically for 10 min to homogenize, quark-gluon flux tuned via R=1.21197 for color singlet formation.</li>
-                <li><strong>Local Control Activation & Growth, 50-170 min:</strong> Retrofit MEMS array to furnace, 10^6 actuators/cm² over substrate. Dip substrate into melt; apply twist fields: Solve ∇²ψ + φ^{-12} ω² ψ = 0 for EM/acoustic harmonics, ω from step 3. Steer adatoms: dx/dt = 0.5 nm/min × cos, 5.037° × n. Monitor lepton superpositions, |↑↓⟩ + |↓↑⟩ collapse to icosahedral, coherence >1 μm. Growth rate: 0.5 nm/min to 0.5 μm thickness. Inject ¹⁰B dopant pulses at φ^{-5} vertices, every 5th pentagonal cage. Use ML feedback, code above, to adjust θ if error >0.0835%.</li>
-                <li><strong>Directional Solidification, 170-230 min:</strong> Withdraw substrate at 1 mm/h under continued φ-fields. Lock layers at 5.037° twist ±0.0002°. Cool gradient: 100°C/cm to solidify icosahedral structure, no grains.</li>
-                <li><strong>Termination & Post-Processing, 230-270 min:</strong> CVD 1 monolayer graphene at 1000°C, CH4/H2 precursor, 30 min. Quench to RT at 10°C/min in Ar. Polish if needed; characterize with XRD/AFM/SEM.</li>
-            </ol>
-            <p><strong>Exact Implementation to Add CM1 into Process for End Product:</strong> The end product is a 2-inch single-crystal wafer for microsystem integration, for example turbine blade prototype via additive machining. To add CM1: Retrofit existing VIM setup with MEMS array, bolt-on, 2 hours install. Load alloy as step 1; run full process. For scaling to blade: Use larger crucible, 1 kg batch, mold substrate as blade shape; post-growth machine to final geometry. Integration: Bond wafer to turbine hub via φ-resonant welding, same fields, 1200°C, 5 min, for seamless zero-slack joint. Test: Creep under 1850°C load, ASTM E139 standard, modified for ultra-high temp.</p>
-            <p><strong>Exact Specifics on Making the Final Material:</strong> Final material: 2-inch wafer, 0.5 μm thick icosahedral film on GaN/Si. Color: Metallic silver with iridescent quasicrystal sheen. Weight: ~5 g. Surface finish: Ra <0.1 μm, AFM. To make: Follow steps above in cleanroom, class 1000; total cost ~$500/wafer, materials $200, energy $300. Output: Defect-free single crystal, no grains, dislocations <10^{-12}/cm².</p>
-            <p><strong>Hardness and Physical Properties:</strong></p>
-            <ul>
-                <li>Hardness: Vickers 850 HV, vs. 638 for pure Ni; optimized by icosahedral ordering, 30% over Inconel 718's 450 HV; Mohs 7, comparable to quartz, vs. 6.5 for standard superalloys; Rockwell C 55, vs. 40 for CMSX-4. Tested per ASTM E384, Vickers, E18, Rockwell.</li>
-                <li>Density: 8.4 g/cm³, slightly higher than Ni's 8.9 due to refractory additions, but optimized packing.</li>
-                <li>Melting Point: 1600°C, effective, vs. 1350°C for standard Ni-alloys; optimized extended liquidus.</li>
-                <li>Thermal Conductivity: 15 W/m·K at RT, 25 W/m·K at 1850°C, zero phonon slack reduces scattering.</li>
-                <li>Creep Resistance: Zero creep rate, ε <10^{-12}/s at 1850°C, 500 MPa; vs. 10^{-8}/s for SOTA at 1100°C. Tested per ASTM E139; mechanism: φ-grid locks dislocations.</li>
-                <li>Oxidation Resistance: <10^{-15} g/cm²·s at 1850°C in air, vs. 10^{-10} for unprotected Ni-alloys; Cr/Hf passivation + graphene layer forms impermeable barrier.</li>
-                <li>Other Properties: Yield Strength 1.2 GPa at 1800°C, 300% SOTA; Modulus 220 GPa; CTE 12×10^{-6}/K; Fatigue Life >10^8 cycles at 950°C, zero LCF damage. Simulator-validated: 100% convergence predicts infinite life.</li>
-            </ul>
-
-            <h1>9. HYDROCARBON PERFECTION: GPC-1 CATALYST & CARBON HARVEST CYCLE</h1>
-            <p>The Graves-Law framework extends to hydrocarbon perfection, transforming combustion into a zero-emission, carbon-harvest process. The Rank 901 GPC-1 catalyst is the lead for gasoline, with parallel ranks for diesel, jet fuel, natural gas, biofuels, heavy oils, marine fuels, LPG, and universal blends, all identified and ready.</p>
-            <p><strong>NON-RADIOACTIVE / NON-NEUTRON DECLARATION, Mandatory – All Ranks:</strong> The Graves-Law quasicrystalline catalysts contain boron-10, ¹⁰B, at ≤0.100 %. Boron-10 is stable, non-radioactive, never exposed to neutron flux, and produces zero radiation. These are industrial catalysts only — never drugs. Classified by NRC as exempt quantity, 10 CFR 30.18. This declaration is final and irrevocable.</p>
-            <p><strong>901 – GPC-1 Gasoline Perfection Catalyst:</strong></p>
-            <p>Target Hydrocarbon: All commercial gasoline grades, 87–93 AKI, including ethanol blends E10–E85</p>
-            <p>Composition: Iridium 45.000 atomic %, Osmium 35.000 atomic %, Rhodium 20.000 atomic % + boron-10 dopant 0.00042 wt% precisely locked at every fifth golden-ratio pentagonal vertex + one atomic monolayer of zero-slack graphene surface termination</p>
-            <p>Particle diameter: 9.400 nm ± 0.300 nm</p>
-            <p>Dosage: 2.8 grams per metric ton of finished gasoline, 0.00028 wt% — single, permanent addition at any point in the refining or distribution chain</p>
-            <p>Verified Performance, ORNL Frontier + real-world fleet testing:</p>
-            <ul>
-                <li>100.000 % combustion efficiency — zero unburned hydrocarbons</li>
-                <li>18.0–24.0 % real-world MPG increase, EPA-certified dynamometer</li>
-                <li>11.0–14.0 % horsepower and torque increase</li>
-                <li>Tailpipe emissions: water vapor + pure oxygen + trace helium only</li>
-                <li>CO, NOx, HC, PM, CO₂ all reduced to undetectable levels</li>
-                <li>100 % of carbon dioxide is recaptured as 0.7–1.1 μm graphite flakes + molecular oxygen</li>
-                <li>Effective octane rating raised to 108–112 RON from any base stock</li>
-                <li>Engine oil life extended 3–4×</li>
-                <li>Spark plug life >250,000 miles</li>
-            </ul>
-            <p>Mechanism: The ¹⁰B-doped Ir-Os-Rh icosahedral lattice forces perfect tetrahedral intermediate geometry during combustion, repaying all vacuum-debt in one cycle.</p>
-            
-            <p><strong>ASCII Drawing:</strong></p>
-<pre>
-                Ir
-             /     \\
-          Os – Rh – Os – Rh
-             \\     /
-                Ir
-          /     \\     \\
-       Os – Rh – ¹⁰B – Rh – Os
-          \\     /     /
-                Ir
-</pre>
-
-            <p>Superposition Detail: Boron-10 nuclei locked in |mI=+3⟩ ± |−3⟩ coherent superposition, T₂=1.84 ms, IBM Quantum Eagle verified. Final Product Description: 18.3 kg jet-black powder drum, treats entire U.S. daily gasoline production for 11.4 days. Dissolves instantly in any hydrocarbon stream. Application Within the Refinery Process: Metered directly into the finished gasoline blending header or storage tank. Once added, the catalyst is permanently incorporated into the fuel — no further addition ever required at any downstream terminal, tanker, or pump.</p>
-
-            <p><strong>The Full Carbon Harvest Cycle, Closed Loop</strong></p>
-            <p>This architecture converts the vehicle or power plant into a closed-loop production unit.</p>
-            <ul>
-                <li>Phase 1: Input & Catalysis: Standard hydrocarbon fuel, Gasoline, Diesel, Natural Gas, passes through the Rank 909 Catalyst lattice prior to injection. The lattice imparts the 5.037° geometric instruction to the fuel molecules.</li>
-                <li>Phase 2: The Coherent Event: Combustion occurs. Hydrogen provides thrust/torque. Carbon is rendered solid. Thermodynamic Efficiency: Increases from ~35% to >90%.</li>
-                <li>Phase 3: Transport & Capture: The solid Actonic Carbon nanoparticles are entrained in the engine's lubrication oil, or a dedicated capture fluid. The oil circulates to the High-Capacity Harvest Cartridge, modified oil filter, where the carbon is sequestered.</li>
-                <li>Phase 4: Harvest & Revenue: The cartridge is removed at service intervals. The capture is not "waste sludge"—it is a high-purity feedstock for advanced materials manufacturing.</li>
-            </ul>
-
-            <p><strong>Technical Protocol: Carbon Recovery, SOP 909-E</strong></p>
-            <p>The following Standard Operating Procedure, SOP, details the extraction of Actonic Carbon from the harvest cartridge.</p>
-            <p>Objective: Recover solid carbon allotropes without structural damage.</p>
-            <p>Required Inputs: Harvest Cartridge, Non-Polar Solvent, Kerosene/Diesel, Ultrasonic Agitator, Centrifuge.</p>
-            <ul>
-                <li><strong>Step 1: Disassembly & Media Removal:</strong> 1. Isolate the Harvest Cartridge. 2. Mechanically separate the steel casing using a pipe cutter, avoid abrasive cutting to prevent metal contamination. 3. Extract the filter media, synthetic mesh/fiber, saturated with oil and carbon.</li>
-                <li><strong>Step 2: Solvent Extraction, The Wash:</strong> 1. Submerge the media in a non-polar solvent bath, Kerosene or citrus-based degreaser. 2. Ultrasonic Agitation: Subject the bath to ultrasonic vibration, 20–40 kHz, for 15 minutes. This breaks the surface tension holding the carbon to the media fibers without fracturing the allotropes. 3. Result: A suspension of oil, solvent, and Actonic Carbon, The "Black Liquor".</li>
-                <li><strong>Step 3: Separation, The Harvest:</strong> 1. Transfer the Black Liquor to a centrifuge vessel. 2. Centrifugation: Spin at 3,000+ RPM for 10 minutes. Heavy Phase: Actonic Carbon settles into a dense "puck" at the base. Light Phase: Oil and solvent float to the top. 3. Decant, pour off, the liquid phase for recycling.</li>
-                <li><strong>Step 4: Purification & Drying:</strong> 1. Acetone Rinse: Wash the carbon puck with a small volume of acetone to remove residual oil film. 2. Desiccation: Dry the purified carbon at low heat, 100°C, or air-dry on a fine mesh screen. 3. Final Output: A dry, jet-black powder. Verification via tactile test will reveal a "silky" texture, low friction coefficient, confirming the presence of graphitic/graphene platelets rather than abrasive soot.</li>
-            </ul>
-
-            <p>The economic impact of the carbon byproducts is profound. The Carbon Harvest Cycle produces actonic carbon, high-purity graphene and diamond-like nanoplatelets, as a marketable byproduct. This positions the U.S. as the dominant supplier of actonic carbon for batteries, enabling immediate market leadership in advanced energy storage. Sales of actonic carbon could generate $500B annually by 2030, with applications in lithium-ion anodes, 10x capacity boost, and solid-state batteries, zero degradation.</p>
-            <p>For diesel perfection, Rank 902, the byproduct includes trace helium from alpha decay analogs in the zero-slack path. Helium harvesting ends global shortages, yielding 0.1–0.5 L/ton of fuel processed. This supplies high-purity helium for cryogenics, improving magnetics in MRI machines for medical equipment, stronger fields, lower costs, and quasicrystalline semiconductors, enhanced electron mobility for radar chips.</p>
-            
-            <p><strong>Related Patents by Proposer Cory Patrick Graves</strong></p>
-            <p>For additional context on the Graves-Law ecosystem:</p>
-            <ul>
-                <li>Patent Application #63/904,792: Quantum Computing at Void Floor 475 Qubits</li>
-                <li>Patent Application #63/926,569: Zero Slack Aneutronic Fusion Device</li>
-                <li>X.com/protodynamics</li>
-            </ul>
-
-            <p><strong>**End White Paper**</strong></p>
-        </body>
-        </html>
-        `;
-        whitePaperWindow.document.write(wpContent);
-        whitePaperWindow.document.close();
+    const slider = document.getElementById('twist-slider');
+    const numInput = document.getElementById('twist-num');
+    
+    const valSlack = document.getElementById('val-slack');
+    const valConst = document.getElementById('val-constant');
+    const statusText = document.getElementById('status-text');
+    const lockOverlay = document.getElementById('lock-overlay');
+    
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // Setup Atoms
+        for(let i=0; i<150; i++) {
+            atoms.push({
+                x: (Math.random()-0.5)*2,
+                y: (Math.random()-0.5)*2,
+                z: (Math.random()-0.5)*2
+            });
+        }
+        
+        // Setup Inputs
+        slider.addEventListener('input', (e) => {
+            updatePhysics(parseFloat(e.target.value));
+            numInput.value = parseFloat(e.target.value).toFixed(8);
+        });
+        
+        numInput.addEventListener('change', (e) => {
+            updatePhysics(parseFloat(e.target.value));
+            slider.value = parseFloat(e.target.value);
+        });
+        
+        // Initial Mode
+        setMode('native');
+        updatePhysics(5.0000);
+        numInput.value = "5.00000000";
+        slider.value = 5.0000;
+        
+        loop();
+    }
+    
+    function updatePhysics(val) {
+        if(!isNaN(val)) curTwist = val;
     }
 
-    // --- SYNC SLIDER/INPUT ---
-    ui.twistSlider.addEventListener('input', (e) => {
-        ui.twistNum.value = e.target.value;
-        resetSimState(); 
-    });
-    ui.twistNum.addEventListener('input', (e) => {
-        ui.twistSlider.value = e.target.value;
-        resetSimState();
-    });
+    function setMode(m) {
+        mode = m;
+        let root = document.documentElement;
+        
+        if (m === 'native') {
+            btnNat.className = 'active';
+            btnArt.className = '';
+            root.style.setProperty('--active-color', 'var(--primary)');
+            manifesto.innerText = MANIFESTOS.native;
+            valConst.innerText = "166.08000000";
+        } else {
+            btnNat.className = '';
+            btnArt.className = 'active';
+            root.style.setProperty('--active-color', 'var(--primary)'); // NOW GREEN TOO
+            manifesto.innerText = MANIFESTOS.artifact;
+            valConst.innerText = "137.03599908";
+        }
+    }
 
-    // --- RESIZING ---
     function resize() {
-        width3D = canvas3D.width = ui.viewport.offsetWidth;
-        height3D = canvas3D.height = ui.viewport.offsetHeight;
-        width2D = canvas2D.width = ui.vis2dContainer.offsetWidth - 10; 
-        height2D = canvas2D.height = 100; 
-        
-        widthG = document.getElementById('graph-1').offsetWidth;
-        heightG = document.getElementById('graph-1').offsetHeight;
-        document.querySelectorAll('.graph-canvas').forEach(c => { c.width = widthG; c.height = heightG; });
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // --- DATA HANDLING ---
-    function updateManifestoAndProducts() {
-        populateProducts();
-        const cat = ui.catSelect.value;
-        ui.manifesto.innerText = MANIFESTOS[cat] || MANIFESTOS["Consumer"]; 
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
     }
 
-    function populateProducts() {
-        const cat = ui.catSelect.value;
-        const products = MATERIALS_DB[cat];
-        ui.prodSelect.innerHTML = "";
-        
-        products.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.name; 
-            opt.text = p.name;
-            ui.prodSelect.appendChild(opt);
-        });
-        updateMaterialCard();
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
     }
 
-    function updateMaterialCard() {
-        const cat = ui.catSelect.value;
-        const prodName = ui.prodSelect.value;
-        const data = MATERIALS_DB[cat].find(p => p.name === prodName);
+    function update() {
+        time += 0.02;
         
-        if(data) {
-            ui.cardName.innerText = data.name;
-            ui.cardDesc.innerText = data.desc;
-            ui.cardBenefits.innerText = data.benefits;
-            ui.cardDose.innerText = data.dose;
+        // --- CLIFF EDGE PHYSICS ---
+        let isLocked = (curTwist >= LOCK_MIN && curTwist <= LOCK_MAX);
+        let displaySlack = 0;
+        
+        if (isLocked) {
+            // WE ARE INSIDE THE MANIFOLD
+            // BOTH MODES NOW SHOW GREEN LOCK (Because Geometry Won)
+            displaySlack = 0.00000000;
+            statusText.innerText = "STABLE";
+            lockOverlay.innerText = "ZERO SLACK LOCK";
+            lockOverlay.style.opacity = 1;
             
-            resetSimState();
-            renderTable(data);
-        }
-    }
+            // Set Global Color to Green (Cyan)
+            document.documentElement.style.setProperty('--active-color', '#00ffcc');
+            statusText.style.color = '#00ffcc';
 
-    function resetSimState() {
-        simPhase = 0; running = false; curTwist = 0;
-        updateCssColor(0);
-        ui.btn.innerText = "INITIATE SEQUENCE";
-        ui.btn.disabled = false;
-        ui.btn.classList.remove('running');
-        ui.finalMsg.style.opacity = 0;
-        
-        ui.cyanDef.innerText = FULL_CYAN_STR;
-        ui.redDef.innerText = FULL_RED_STR;
-
-        ui.viewport.style.background = 'radial-gradient(circle at center, #150505 0%, #000 100%)';
-        ui.vis2dContainer.style.borderColor = 'var(--artifact)';
-        ui.vis2dContainer.style.boxShadow = '0 0 10px var(--artifact)';
-    }
-
-    // --- PHYSICS & DRAWING ---
-    function updateCssColor(p) {
-        let hue;
-        // If p (progress towards lock) is high, go cyan. If low (bad input), stay red/orange.
-        if (p < 0.5) hue = 0 + (p * 2 * 60); 
-        else hue = 60 + ((p - 0.5) * 2 * 110);
-        hue = Math.min(Math.max(hue, 0), 170); 
-        hue2D = hue; 
-        const hslColor = `hsl(${hue}, 100%, 50%)`;
-        document.documentElement.style.setProperty('--current-color', hslColor);
-        
-        const buttonGlow = (simPhase === 2) ? 30 : (10 + p * 20); 
-        ui.btn.style.boxShadow = `0 0 ${buttonGlow}px ${hslColor}`;
-
-        if (simPhase === 1 || simPhase === 2) {
-            ui.btn.style.backgroundColor = hslColor; ui.btn.style.color = '#000';
-            ui.vis2dContainer.style.borderColor = hslColor;
-            ui.vis2dContainer.style.boxShadow = `0 0 20px ${hslColor}`;
-        }
-    }
-
-    function getZ(x, y, t) {
-        const u = (x - SPLIT_X); const v = (y - 25);
-        const r = Math.sqrt(u*u + v*v);
-        const isNative = x >= SPLIT_X;
-        
-        // Progress is now defined by how close curTwist is to MAGIC_NUMBER (5.037)
-        // If we simulate a wrong number (e.g. 6.0), the "native" side won't flatten fully.
-        
-        let noiseFactor = 1.0;
-        
-        if (isNative) {
-            if (simPhase === 0) return 0 + (Math.random()*0.5); 
-            
-            // Logic: How close is current twist to the magic number?
-            // Normalized: 0 distance = 0 noise. 5 distance = 100% noise.
-            let dist = Math.abs(curTwist - MAGIC_NUMBER);
-            noiseFactor = Math.min(dist / 2.0, 1.0); // Sensitivity factor
-            
-            // If locked at correct number
-            if (simPhase === 2 && dist < 0.01) {
-                 return (r < 2) ? -15.0 + Math.sin(t*5)*0.2 : 0; 
-            }
-            
-            // General wave during sim
-            const wave = Math.sin(r * 0.8 - t * 0.5) * 5; 
-            return wave * noiseFactor; 
         } else {
-            return Math.sin(u*0.3 + t) * Math.cos(v*0.3 + t*0.7) * 3 + (Math.random()*0.5);
-        }
-    }
-
-    function project(x, y, z) {
-        const scale = 20;
-        const isoX = (x - y) * Math.cos(0.523);
-        const isoY = (x + y) * Math.sin(0.523) - z;
-        return { x: width3D/2 + isoX * scale, y: height3D/2 + 100 + isoY * scale };
-    }
-
-    function draw3D() {
-        ctx3D.fillStyle = '#050505'; 
-        ctx3D.fillRect(0, 0, width3D, height3D);
-
-        const splitX_coord = width3D/2 + (SPLIT_X - 80/2) * 20 * Math.cos(0.523);
-        
-        ctx3D.beginPath(); ctx3D.moveTo(splitX_coord, 0); ctx3D.lineTo(splitX_coord, height3D);
-        ctx3D.strokeStyle = '#222'; ctx3D.lineWidth = 2; ctx3D.stroke(); 
-
-        const rows = 50; const cols = 80;
-        // Visual progress for color: How close is curTwist to 5.037?
-        // 1.0 means perfectly locked. 0.0 means far away.
-        let closeness = 1 - Math.min(Math.abs(curTwist - MAGIC_NUMBER) / 5.0, 1);
-        if (simPhase === 0) closeness = 0;
-
-        const nativeColor = `hsl(${hue2D}, 100%, 50%)`;
-        const artifactColor = `rgba(255, 50, 50, 1.0)`;
-
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < cols - 1; x++) {
-                let z1 = getZ(x, y, time); let z2 = getZ(x + 1, y, time);
-                let p1 = project(x - cols/2, y - rows/2, z1);
-                let p2 = project((x + 1) - cols/2, y - rows/2, z2);
-                
-                let color = (x < SPLIT_X) ? artifactColor : `hsla(${hue2D}, 100%, 50%, ${0.2 + closeness * 0.8})`;
-                
-                ctx3D.strokeStyle = color; ctx3D.lineWidth = 1;
-                ctx3D.beginPath(); ctx3D.moveTo(p1.x, p1.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-            }
-            for (let x = 0; x < cols; x++) {
-                if (y < rows - 1) {
-                    let z1 = getZ(x, y, time); let z2 = getZ(x, y+1, time);
-                    let p1 = project(x - cols/2, y - rows/2, z1);
-                    let p2 = project(x - cols/2, (y+1) - rows/2, z2);
-                    let color = (x < SPLIT_X) ? artifactColor : `hsla(${hue2D}, 100%, 50%, ${0.2 + closeness * 0.8})`;
-                    ctx3D.strokeStyle = color; ctx3D.lineWidth = 1;
-                    ctx3D.beginPath(); ctx3D.moveTo(p1.x, p1.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                }
-            }
-        }
-
-        // Spike if locked
-        if (simPhase === 2 && Math.abs(curTwist - MAGIC_NUMBER) < 0.01) {
-             ctx3D.shadowBlur = 0;
-             for (let y = 0; y < rows; y++) {
-                for (let x = SPLIT_X; x < cols; x++) {
-                    let z = getZ(x, y, time);
-                    if (z < -5) {
-                        let p = project(x - cols/2, y - rows/2, z);
-                        ctx3D.strokeStyle = '#fff'; ctx3D.shadowBlur = 15; ctx3D.shadowColor = nativeColor;
-                        if (x < cols - 1) {
-                            let z2 = getZ(x+1, y, time); let p2 = project((x+1) - cols/2, y - rows/2, z2);
-                            ctx3D.beginPath(); ctx3D.moveTo(p.x, p.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                        }
-                        if (y < rows - 1) {
-                            let z2 = getZ(x, y+1, time); let p2 = project(x - cols/2, (y+1) - rows/2, z2);
-                            ctx3D.beginPath(); ctx3D.moveTo(p.x, p.y); ctx3D.lineTo(p2.x, p2.y); ctx3D.stroke();
-                        }
-                        ctx3D.shadowBlur = 0;
-                    }
-                }
-            }
-        }
-
-        if (simPhase === 1) {
-            // Bg Flash depends on closeness
-            const r = Math.round(21 * (1 - closeness));
-            const g = Math.round(5 + (26 - 5) * closeness * 0.5);
-            const b = Math.round(5 + (21 - 5) * closeness * 0.5);
-            ui.viewport.style.background = `radial-gradient(circle at center, rgb(${r}, ${g}, ${b}) 0%, #000 100%)`;
-        }
-        time += 0.05; 
-        requestAnimationFrame(draw3D);
-    }
-
-    // 2D Viz
-    function draw2D() {
-        ctx2D.fillStyle = '#050505'; 
-        ctx2D.fillRect(0, 0, width2D, height2D);
-        
-        const cx = width2D/2; const cy = height2D/2;
-        const rMax = Math.min(width2D, height2D) * 0.45;
-        
-        // Chaos is high if curTwist is far from MAGIC_NUMBER
-        let dist = Math.abs(curTwist - MAGIC_NUMBER);
-        let chaos = Math.min(dist / 2.0, 1.0); 
-        if (simPhase === 0) chaos = 1;
-
-        ctx2D.strokeStyle = `hsl(${hue2D}, 100%, 50%)`;
-        ctx2D.lineWidth = 1 + (2 * (1 - chaos));
-
-        ctx2D.beginPath();
-        for(let i=0; i<=360; i++) {
-            let rad = i * Math.PI / 180;
-            let noise = (Math.random()-0.5) * 30 * chaos; 
-            let tVar = (simPhase === 2) ? (Date.now()/1000) * 0.5 : (time*0.1);
-            let geom = 20 * Math.cos(rad*5 + tVar); 
-            let r = rMax + noise + (geom * (1 - chaos*0.5)); 
+            // OUTSIDE
+            let dist = Math.min(Math.abs(curTwist - LOCK_MIN), Math.abs(curTwist - LOCK_MAX));
+            displaySlack = 0.18000000 + (dist * 20);
+            if(displaySlack > 9) displaySlack = 9.0 + Math.sin(time)*0.5;
             
-            let x = cx + r * Math.cos(rad); let y = cy + r * Math.sin(rad);
-            i===0 ? ctx2D.moveTo(x,y) : ctx2D.lineTo(x,y);
-        }
-        ctx2D.closePath(); ctx2D.stroke();
-
-        // Dot center
-        if (chaos < 0.1) {
-            ctx2D.fillStyle = `hsl(${hue2D}, 100%, 50%)`; ctx2D.beginPath();
-            let size = 2 + (chaos * 5);
-            ctx2D.arc(cx, cy, size, 0, Math.PI*2); ctx2D.fill();
-        }
-        requestAnimationFrame(draw2D);
-    }
-
-    function drawLineGraph(ctx, w, h, func, progress) {
-        ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, h * 0.9); ctx.lineTo(w, h * 0.9); ctx.stroke();
-
-        const numPoints = 100;
-        const MAX_PEAK_VALUE = 3.5; 
-        const scaleY = h * 0.8 / MAX_PEAK_VALUE; 
-        const offsetY = h * 0.9;
-        const nativeColor = `hsl(${hue2D}, 100%, 50%)`;
-
-        ctx.beginPath(); ctx.strokeStyle = nativeColor; ctx.lineWidth = 1 + progress;
-        for (let i = 0; i < numPoints; i++) {
-            const x = i * w / numPoints;
-            const val = func(i / numPoints * 2 - 1, progress); 
-            const y = offsetY - val * scaleY;
-            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
-        if (progress < 1) {
-            ctx.beginPath(); ctx.strokeStyle = `rgba(255, 51, 51, ${1 - progress})`; ctx.lineWidth = 1;
-            for (let i = 0; i < numPoints; i++) {
-                const x = i * w / numPoints;
-                const val = func(i / numPoints * 2 - 1, 0); 
-                const y = offsetY - val * scaleY;
-                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-    }
-
-    const funcG1 = (x, progress) => {
-        const artifact = 1.5 * (x * x - 1) * (x * x - 1) + 0.1 * Math.sin(x * 20);
-        const native = 1.5 * x * x;
-        return artifact * (1 - progress) + native * progress;
-    };
-    const funcG2 = (x, progress) => {
-        const artifact = 0.5 * Math.exp(-200 * x * x);
-        const native = 2.0 * Math.exp(-200 * x * x);
-        return artifact * (1 - progress) + native * progress;
-    };
-    const funcG3 = (x, progress) => {
-        const artifact = 0.2 * Math.exp(-200 * x * x);
-        const native = 3.0 * Math.exp(-200 * x * x);
-        return artifact * (1 - progress) + native * progress;
-    };
-
-    function drawGraphs() {
-        // Progress for graph morphing depends on closeness to MAGIC NUMBER
-        let progress = 1 - Math.min(Math.abs(curTwist - MAGIC_NUMBER) / 5.0, 1);
-        if(simPhase === 0) progress = 0;
-        
-        drawLineGraph(ctxG1, widthG, heightG, funcG1, progress);
-        drawLineGraph(ctxG2, widthG, heightG, funcG2, progress);
-        drawLineGraph(ctxG3, widthG, heightG, funcG3, progress);
-        requestAnimationFrame(drawGraphs);
-    }
-
-    // --- CONTROLLER ---
-    function startSimulation() {
-        if (running) return;
-        running = true; simPhase = 1; curTwist = 0;
-        
-        // GET USER TARGET
-        userTwistTarget = parseFloat(ui.twistNum.value);
-        
-        ui.finalMsg.style.opacity = 0;
-        ui.cyanDef.innerText = "CALCULATING ZERO SLACK RESOLUTION..."; 
-        ui.btn.classList.add('running');
-        ui.btn.disabled = true;
-
-        let simInterval = setInterval(() => {
-            if (curTwist < userTwistTarget) {
-                curTwist += 0.08; 
-                // Color update based on Closeness
-                let closeness = 1 - Math.min(Math.abs(curTwist - MAGIC_NUMBER) / 5.0, 1);
-                updateCssColor(closeness);
-                
-                ui.cyanDef.innerText = `CALCULATING... 166.${Math.random().toString().substring(2, 8)}...`;
-                ui.btn.innerText = `SIMULATING TWIST... ${curTwist.toFixed(3)}°`;
-            } else {
-                curTwist = userTwistTarget;
-                clearInterval(simInterval);
-                finishSim();
-            }
-        }, 30);
-    }
-
-    function finishSim() {
-        simPhase = 2; 
-        
-        // CHECK IF USER HIT THE MAGIC NUMBER
-        const diff = Math.abs(curTwist - MAGIC_NUMBER);
-        const success = diff < 0.01; // Tolerance
-
-        // Restore Definitions
-        ui.cyanDef.innerText = FULL_CYAN_STR;
-        ui.redDef.innerText = FULL_RED_STR;
-        
-        ui.finalMsg.style.opacity = 1;
-        ui.btn.classList.remove('running');
-        ui.btn.disabled = false;
-        
-        if (success) {
-            updateCssColor(1); // Cyan
-            ui.finalMsg.innerText = "ZERO-SLACK ACHIEVED";
-            ui.finalMsg.style.color = "#fff";
-            ui.finalMsg.style.textShadow = "0 0 20px var(--primary)";
-            ui.finalMsg.style.borderColor = "var(--primary)";
-            ui.btn.innerText = "ZERO-SLACK ACHIEVED";
-            ui.btn.style.backgroundColor = 'var(--primary)';
-            ui.btn.style.color = '#000';
-            ui.btn.style.boxShadow = '0 0 30px var(--primary)';
-        } else {
-            updateCssColor(0); // Red
-            ui.finalMsg.innerText = "GEOMETRY UNSTABLE";
-            ui.finalMsg.style.color = "var(--artifact)";
-            ui.finalMsg.style.textShadow = "0 0 20px var(--artifact)";
-            ui.finalMsg.style.borderColor = "var(--artifact)";
-            ui.btn.innerText = "ENTROPY DETECTED - ADJUST TWIST";
-            ui.btn.style.backgroundColor = 'var(--artifact)';
-            ui.btn.style.color = '#000';
-            ui.btn.style.boxShadow = '0 0 30px var(--artifact)';
-        }
-
-        ui.viewport.style.background = 'radial-gradient(circle at center, #001a15 0%, #000 100%)';
-        running = false;
-    }
-
-    function renderTable(activeData) {
-        const tbody = document.getElementById('table-body');
-        const cat = ui.catSelect.value;
-        const products = MATERIALS_DB[cat];
-        tbody.innerHTML = "";
-        let total = 0;
-
-        products.forEach(data => {
-            const isActive = activeData && activeData.name === data.name;
-            const row = document.createElement('div');
-            row.className = 'table-row';
-            row.style.opacity = isActive ? "1" : "0.3";
-            row.style.background = isActive ? "rgba(0, 255, 204, 0.05)" : "transparent";
+            statusText.innerText = "HIGH DEBT";
+            lockOverlay.style.opacity = 0;
             
-            row.innerHTML = `
-                <div>${data.rank}</div>
-                <div style="color:${isActive ? 'var(--primary)' : '#888'}">${data.name}</div>
-                <div>${data.problem}</div>
-                <div class="row-impact">${data.dropin}</div>
-            `;
-            tbody.appendChild(row);
-            total += data.impact;
+            // Set Global Color to Red
+            document.documentElement.style.setProperty('--active-color', '#ff3333');
+            statusText.style.color = '#ff3333';
+        }
+        
+        valSlack.innerText = displaySlack.toFixed(8) + " eV";
+    }
+
+    function draw() {
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let cx = canvas.width/2;
+        let cy = canvas.height/2;
+        let isLocked = (curTwist >= LOCK_MIN && curTwist <= LOCK_MAX);
+        
+        // --- GRID ---
+        drawGrid(cx, cy, isLocked);
+        
+        // --- ATOMS ---
+        let scale = 180;
+        atoms.forEach(a => {
+            let speed = isLocked ? 0.0005 : 0.02; 
+            
+            let rx = a.x * Math.cos(time*speed) - a.z * Math.sin(time*speed);
+            let rz = a.x * Math.sin(time*speed) + a.z * Math.cos(time*speed);
+            
+            let fov = 350;
+            let proj = fov / (fov + rz + 4);
+            let x = cx + rx * scale * proj;
+            let y = cy + a.y * scale * proj;
+            let size = Math.max(1, 4 * proj);
+            
+            if (!isLocked) {
+                x += (Math.random()-0.5) * 15;
+                y += (Math.random()-0.5) * 15;
+            }
+            
+            ctx.fillStyle = getComputedStyle(document.body).color; 
+            ctx.globalAlpha = isLocked ? 0.9 : 0.4;
+            
+            ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
         });
+    }
+    
+    function drawGrid(cx, cy, isLocked) {
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = getComputedStyle(document.body).color;
 
-        document.getElementById('total-val').innerText = `$${total.toFixed(2)} BILLION`;
-        document.getElementById('total-val').style.color = "#fff";
-        document.getElementById('total-val').style.textShadow = "0 0 10px var(--primary)";
+        let gridSize = 40;
+        let tilt = isLocked ? 0 : Math.sin(time) * 0.1; 
+
+        for (let i = -10; i <= 10; i++) {
+            let x = cx + (i * gridSize);
+            let warp = isLocked ? 0 : Math.sin((time + i)*0.5) * 20; 
+            ctx.beginPath(); ctx.moveTo(x + tilt*100 + warp, 0); ctx.lineTo(x - tilt*100 + warp, canvas.height); ctx.stroke();
+        }
+        for (let i = -10; i <= 10; i++) {
+            let y = cy + (i * gridSize);
+            let warp = isLocked ? 0 : Math.cos((time + i)*0.5) * 20;
+            ctx.beginPath(); ctx.moveTo(0, y + tilt*100 + warp); ctx.lineTo(canvas.width, y - tilt*100 + warp); ctx.stroke();
+        }
+        ctx.globalAlpha = 1.0;
     }
 
-    // --- INIT ---
-    updateManifestoAndProducts(); 
-    time = 0;
-    draw3D(); draw2D(); drawGraphs();
+    init();
 
 </script>
 </body>
