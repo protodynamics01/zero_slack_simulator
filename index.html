@@ -1,929 +1,999 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v24.0 | FINAL MASTER BUILD</title>
-    <style>
-        :root {
-            --cyan: #00ffcc;       
-            --diamond: #ffffff;    
-            --red: #ff3333;        
-            --orange: #ffaa00;
-            --bg: #050505;
-            
-            --glass-bg: rgba(8, 8, 8, 0.9);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.12);
-            --font-main: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-            
-            --active-color: var(--red);
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAVES CONSOLE v28.1 | FINAL WORKING BUILD</title>
+    <style>
+        :root {
+            --cyan: #00ffcc;       
+            --diamond: #ffffff;    
+            --red: #ff3333;        
+            --orange: #ffaa00;
+            --bg: #050505;
+            
+            --glass-bg: rgba(8, 8, 8, 0.9);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+            --font-main: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            
+            --active-color: var(--red);
+        }
 
-        * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; user-select: none; }
 
-        body {
-            margin: 0; background-color: var(--bg); color: #e0e0e0;
-            font-family: var(--font-main); height: 100vh; width: 100vw;
-            display: flex; flex-direction: column; overflow: hidden;
-            transition: box-shadow 0.3s;
-        }
+        body {
+            margin: 0; background-color: var(--bg); color: #e0e0e0;
+            font-family: var(--font-main); height: 100vh; width: 100vw;
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
 
-        /* DYNAMIC BORDERS */
-        body.mode-red { box-shadow: inset 0 0 50px rgba(255, 51, 51, 0.2); }
-        body.mode-orange { box-shadow: inset 0 0 80px rgba(255, 170, 0, 0.3); }
-        body.mode-cyan { box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.2); }
-        body.mode-diamond { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4); }
+        /* DYNAMIC BORDERS */
+        body.mode-red { box-shadow: inset 0 0 50px rgba(255, 51, 51, 0.2); }
+        body.mode-orange { box-shadow: inset 0 0 80px rgba(255, 170, 0, 0.3); }
+        body.mode-cyan { box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.2); }
+        body.mode-diamond { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4); }
 
-        /* HEADER */
-        #global-header {
-            background: #000; border-bottom: var(--glass-border); height: 45px;
-            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; font-size: 0.8em; font-weight: 700; letter-spacing: 2px; z-index: 20;
-        }
-        
-        .sys-red { color: var(--red); display: block; animation: flashRed 1s infinite; }
-        
-        @keyframes flashRed { 0% { opacity:1; } 50% { opacity:0.6; } 100% { opacity:1; } }
+        /* HEADER */
+        #global-header {
+            background: #000; border-bottom: var(--glass-border); height: 45px;
+            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 0.8em; font-weight: 700; letter-spacing: 2px; z-index: 20;
+        }
+        
+        .sys-red { color: var(--red); display: block; animation: flashRed 1s infinite; }
+        
+        @keyframes flashRed { 0% { opacity:1; } 50% { opacity:0.6; } 100% { opacity:1; } }
 
-        /* LAYOUT */
-        #main-container { display: flex; flex: 1; overflow: hidden; background: radial-gradient(circle at center, #111 0%, #000 100%); }
+        /* LAYOUT */
+        #main-container { display: flex; flex: 1; overflow: hidden; background: radial-gradient(circle at center, #111 0%, #000 100%); }
 
-        /* SIDEBAR */
-        #sidebar {
-            width: 360px; min-width: 320px; background: var(--glass-bg);
-            border-right: var(--glass-border); padding: 15px;
-            display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
-            flex-shrink: 0; z-index: 10;
-        }
+        /* SIDEBAR (Structural Fix Applied here) */
+        #sidebar {
+            width: 360px; min-width: 320px; background: var(--glass-bg);
+            border-right: var(--glass-border); padding: 15px;
+            flex-shrink: 0; z-index: 10;
+            display: flex; 
+            flex-direction: column; /* Main container for scrolling content and fixed footer */
+        }
 
-        .panel-box { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
-        .label-sm { font-size: 0.7em; color: #888; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+        /* New scrollable area */
+        #sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto; /* Allows content overflow */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 15px; 
+        }
 
-        /* CONSTANT BAR */
-        .proj-bar-container { 
-            display: flex; height: 10px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 5px; border: 1px solid #333;
-        }
-        .proj-fill { 
-            height: 100%; width: 0%; background: var(--active-color); 
-            box-shadow: 0 0 15px var(--active-color); transition: width 0.1s linear, background 0.2s; 
-        }
+        /* Fixed button/console footer */
+        #sidebar-footer {
+            flex-shrink: 0;
+            padding-top: 10px;
+            border-top: var(--glass-border);
+        }
+        
+        .panel-box { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
+        .label-sm { 
+            font-size: 0.7em; color: #888; 
+            font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; 
+            transition: color 0.3s; /* Smooth color transition for headers */
+        }
 
-        /* ENV PRESETS */
-        .env-selector { display: flex; gap: 5px; margin-bottom: 5px; }
-        .env-btn {
-            flex: 1; padding: 8px 5px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); color: #666;
-            font-size: 0.7em; font-weight: bold; cursor: pointer; text-align: center;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-        .env-btn:hover { background: rgba(255,255,255,0.1); }
-        .env-btn.active {
-            background: rgba(0, 255, 204, 0.1); border-color: var(--cyan); color: var(--cyan);
-        }
+        /* CONSTANT BAR */
+        .proj-bar-container { 
+            display: flex; height: 10px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 5px; border: 1px solid #333;
+        }
+        .proj-fill { 
+            height: 100%; width: 0%; background: var(--active-color); 
+            box-shadow: 0 0 15px var(--active-color); transition: width 0.1s linear, background 0.2s; 
+        }
 
-        /* INPUTS */
-        .input-wrapper {
-            display: flex; align-items: baseline; justify-content: space-between;
-            background: rgba(255,255,255,0.05); border-radius: 4px; padding: 8px 12px;
-            border: 1px solid transparent; transition: border 0.3s;
-        }
-        .input-wrapper:focus-within { border-color: var(--active-color); }
-        
-        /* LOCKED/DISABLED STYLES */
-        .locked-input { 
-            opacity: 0.4; 
-            pointer-events: none; 
-            filter: grayscale(100%); 
-            border-color: #333 !important; 
-        }
+        /* ENV PRESETS */
+        .env-selector { display: flex; gap: 5px; margin-bottom: 5px; }
+        .env-btn {
+            flex: 1; padding: 8px 5px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); color: #666;
+            font-size: 0.7em; font-weight: bold; cursor: pointer; text-align: center;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .env-btn:hover { background: rgba(255,255,255,0.1); }
+        .env-btn.active {
+            background: rgba(0, 255, 204, 0.1); border-color: var(--cyan); color: var(--cyan);
+        }
 
-        /* THERMAL CONTROL STYLES FOR STATE 2/3 */
-        .thermal-label-white { color: var(--diamond) !important; }
+        /* INPUTS */
+        .input-wrapper {
+            display: flex; align-items: baseline; justify-content: space-between;
+            background: rgba(255,255,255,0.05); border-radius: 4px; padding: 8px 12px;
+            border: 1px solid transparent; transition: border 0.3s;
+        }
+        .input-wrapper:focus-within { border-color: var(--active-color); }
+        
+        /* LOCKED/DISABLED STYLES */
+        .locked-input { 
+            opacity: 0.4; 
+            pointer-events: none; 
+            filter: grayscale(100%); 
+            border-color: #333 !important; 
+        }
 
-        input.val-input {
-            background: transparent; border: none; color: #fff;
-            font-family: var(--font-main); font-size: 1.3em; font-weight: 300;
-            text-align: right; width: 100%; outline: none;
-        }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        /* THERMAL CONTROL STYLES FOR STATE 2/3 */
+        .thermal-label-white { color: var(--diamond) !important; }
 
-        .unit-label { color: #666; font-size: 0.9em; font-weight: 600; margin-left: 5px; }
+        input.val-input {
+            background: transparent; border: none; color: #fff;
+            font-family: var(--font-main); font-size: 1.3em; font-weight: 300;
+            text-align: right; width: 100%; outline: none;
+        }
+        
+        /* Torsion Input Arrows FIX */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+             -webkit-appearance: initial; 
+             opacity: 1;
+             cursor: pointer;
+             height: 30px; 
+        }
 
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0; cursor: pointer; }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: #fff; margin-top: -6px; box-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; border-radius: 2px; }
+        .unit-label { color: #666; font-size: 0.9em; font-weight: 600; margin-left: 5px; }
 
-        /* BUTTONS */
-        button.main-btn {
-            width: 100%; padding: 18px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); color: #555;
-            font-family: var(--font-main); font-size: 0.9em; font-weight: 700; letter-spacing: 2px;
-            cursor: not-allowed; transition: all 0.2s ease; margin-top: auto; text-transform: uppercase;
-        }
-        button.main-btn.can-lock {
-            background: rgba(0, 255, 204, 0.15); color: var(--cyan); border-color: var(--cyan);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); cursor: pointer;
-        }
-        button.main-btn.ready-fab {
-            background: #fff; color: #000; border-color: #fff;
-            box-shadow: 0 0 30px #fff; cursor: pointer;
-            animation: pulseWhite 1s infinite;
-        }
-        button.main-btn.complete {
-            background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #fff;
-            cursor: default; animation: none;
-        }
-        button.main-btn.reset-mode {
-            background: rgba(255, 50, 50, 0.2); color: #ff3333; border-color: #ff3333;
-            cursor: pointer; animation: none;
-        }
-        @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #fff; margin-top: -6px; box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; border-radius: 2px; }
 
-        /* CONSOLE */
-        #console-log {
-            margin-top: 10px; border-top: var(--glass-border); padding-top: 10px;
-            font-family: 'Courier New', monospace; font-size: 0.6em; color: #888;
-            height: 90px; overflow-y: hidden; line-height: 1.5;
-        }
-        .log-hl { color: var(--active-color); }
+        /* BUTTONS */
+        button.main-btn {
+            width: 100%; padding: 18px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); color: #555;
+            font-family: var(--font-main); font-size: 0.9em; font-weight: 700; letter-spacing: 2px;
+            cursor: not-allowed; transition: all 0.2s ease; margin-top: 0; text-transform: uppercase;
+        }
+        button.main-btn.can-lock {
+            background: rgba(0, 255, 204, 0.15); color: var(--cyan); border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); cursor: pointer;
+        }
+        button.main-btn.ready-fab {
+            background: #fff; color: #000; border-color: #fff;
+            box-shadow: 0 0 30px #fff; cursor: pointer;
+            animation: pulseWhite 1s infinite;
+        }
+        button.main-btn.complete {
+            background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #fff;
+            cursor: default; animation: none;
+        }
+        button.main-btn.reset-mode {
+            background: rgba(255, 50, 50, 0.2); color: var(--red); border-color: var(--red);
+            cursor: pointer; animation: none;
+        }
+        button.main-btn.thermal-warning {
+             background: rgba(255, 170, 0, 0.2); color: var(--orange); border-color: var(--orange);
+             cursor: not-allowed; animation: none;
+        }
 
-        /* STAGE */
-        #main-stage { flex: 1; display: flex; flex-direction: column; position: relative; }
-        #view-container { flex: 1; position: relative; overflow: hidden; background: radial-gradient(circle at center, #111 0%, #000 100%); }
-        
-        canvas#bgCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
-        canvas#mainCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5; }
+        @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        /* WARNING BOX */
-        #warning-box {
-            position: absolute; top: 20px; right: 200px;
-            padding: 10px 20px; font-size: 1.1em; font-weight: 800; letter-spacing: 2px;
-            z-index: 20; display: none; pointer-events: none;
-            backdrop-filter: blur(10px); text-align: right;
-            border-right: 4px solid;
-        }
-        .warn-red { border-color: var(--red); background: rgba(50, 0, 0, 0.4); color: var(--red); text-shadow: 0 0 10px var(--red); }
-        .warn-orange { border-color: var(--orange); background: rgba(50, 30, 0, 0.4); color: var(--orange); text-shadow: 0 0 10px var(--orange); }
+        /* CONSOLE */
+        #console-log {
+            margin-top: 10px; border-top: var(--glass-border); padding-top: 10px;
+            font-family: 'Courier New', monospace; font-size: 0.6em; color: #888;
+            height: 90px; overflow-y: auto; line-height: 1.5;
+            flex-shrink: 0;
+        }
+        .log-hl { color: var(--active-color); }
 
-        /* FAIL MODAL */
-        #fail-modal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 50;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(15px);
-        }
-        .fail-content {
-            border: 2px solid var(--red); padding: 40px; background: rgba(20,0,0,0.8);
-            text-align: center; box-shadow: 0 0 50px var(--red);
-        }
-        .fail-title { font-size: 2em; color: var(--red); font-weight: 900; letter-spacing: 3px; margin-bottom: 10px; }
-        .fail-sub { color: #fff; margin-bottom: 20px; font-family: 'Courier New', monospace; line-height: 1.5; }
-        button.main-btn.fail-btn {
-            background: rgba(255, 50, 50, 0.2); border-color: var(--red); color: var(--red);
-            cursor: pointer; animation: none;
-        }
+        /* STAGE */
+        #main-stage { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            min-height: 0;
+        }
+        
+        #view-container { 
+            flex: 1 1 auto;
+            position: relative; 
+            overflow: hidden; 
+            background: radial-gradient(circle at center, #111 0%, #000 100%); 
+        }
+        
+        canvas#bgCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
+        canvas#mainCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5; }
 
-        /* HUD */
-        .hud-label {
-            position: absolute; top: 20px; left: 20px; z-index: 10;
-            font-size: 0.7em; font-weight: 700; color: rgba(255,255,255,0.4); 
-            letter-spacing: 1px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 10px;
-            text-transform: uppercase;
-        }
+        /* WARNING BOX */
+        #warning-box {
+            position: absolute; top: 20px; right: 200px;
+            padding: 10px 20px; font-size: 1.1em; font-weight: 800; letter-spacing: 2px;
+            z-index: 20; opacity: 0; 
+            pointer-events: none;
+            backdrop-filter: blur(10px); text-align: right;
+            border-right: 4px solid;
+            transition: opacity 0.3s;
+        }
+        .warn-red { border-color: var(--red); background: rgba(50, 0, 0, 0.4); color: var(--red); text-shadow: 0 0 10px var(--red); }
+        .warn-orange { border-color: var(--orange); background: rgba(50, 30, 0, 0.4); color: var(--orange); text-shadow: 0 0 10px var(--orange); }
 
-        /* RIGHT STACK */
-        #insets-container {
-            position: absolute; top: 20px; right: 20px; z-index: 15;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .inset-box {
-            width: 150px; height: 85px;
-            background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.2);
-            position: relative; display: flex; flex-direction: column;
-        }
-        .inset-label {
-            position: absolute; top: 5px; left: 5px; font-size: 9px; 
-            color: #888; font-weight: bold; letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        canvas.inset-canvas { width: 100%; height: 100%; }
+        /* FAIL MODAL */
+        #fail-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 50;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            backdrop-filter: blur(15px);
+        }
+        .fail-content {
+            border: 2px solid var(--red); padding: 40px; background: rgba(20,0,0,0.8);
+            text-align: center; box-shadow: 0 0 50px var(--red);
+        }
+        .fail-title { font-size: 2em; font-weight: 900; letter-spacing: 3px; margin-bottom: 10px; }
+        .fail-sub { color: #fff; margin-bottom: 20px; font-family: 'Courier New', monospace; line-height: 1.5; }
+        button.main-btn.fail-btn {
+            background: rgba(255, 50, 50, 0.2); color: var(--red); border-color: var(--red);
+            cursor: pointer; animation: none;
+        }
 
-        /* MONITORS */
-        #monitor-panel { height: 140px; flex-shrink: 0; display: flex; background: rgba(0,0,0,0.5); border-top: var(--glass-border); backdrop-filter: blur(10px); }
-        /* FIX/IMPROVEMENT: Ensure monitor boxes share space equally */
-        .monitor-box { flex: 1; position: relative; display: flex; flex-direction: column; padding: 10px; }
-        .monitor-box:first-child { border-right: var(--glass-border); } 
-        
-        .monitor-header { display: flex; justify-content: space-between; font-size: 0.65em; font-weight: 700; letter-spacing: 1px; color: #666; margin-bottom: 5px; text-transform: uppercase; }
-        
-        /* FINAL WHITE COLOR FOR STRESS TEST MONITORS */
-        .white-header-text { color: var(--diamond) !important; }
-        
-        .mon-val { font-family: 'Courier New', monospace; font-weight: bold; }
-        .col-red { color: var(--red); }
-        .col-cyan { color: var(--cyan); }
-        
-        canvas.waveform { width: 100%; height: 100%; display: block; }
+        /* HUD */
+        .hud-label {
+            position: absolute; top: 20px; left: 20px; z-index: 10;
+            font-size: 0.7em; font-weight: 700; color: rgba(255,255,255,0.4); 
+            letter-spacing: 1px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 10px;
+        }
 
-        .flash-white { animation: flashWhite 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
-        @keyframes flashWhite { 0% { background-color: #fff; } 100% { background-color: var(--bg); } }
+        /* MONITORS */
+        #monitor-panel { 
+            height: 140px; 
+            flex-shrink: 0; 
+            display: flex; 
+            background: rgba(0,0,0,0.5); 
+            border-top: var(--glass-border); 
+            backdrop-filter: blur(10px); 
+        }
+        .monitor-box { flex: 1; position: relative; display: flex; flex-direction: column; padding: 10px; }
+        .monitor-box:first-child { border-right: var(--glass-border); } 
+        
+        .monitor-header { display: flex; justify-content: space-between; font-size: 0.65em; font-weight: 700; letter-spacing: 1px; color: #666; margin-bottom: 5px; }
+        
+        .white-header-text { color: var(--diamond) !important; }
 
-        /* Add basic responsiveness (as seen in v25.0) for robustness */
-        @media (max-width: 768px) {
-            #main-container { flex-direction: column; }
-            #sidebar { width: 100%; min-width: auto; border-right: none; border-bottom: var(--glass-border); }
-            #monitor-panel { flex-direction: column; height: 280px; }
-            .monitor-box { flex-shrink: 0; height: 50%; }
-            .monitor-box:first-child { border-right: none; border-bottom: var(--glass-border); }
-        }
+        .mon-val { font-family: 'Courier New', monospace; font-weight: bold; }
+        .col-red { color: var(--red); }
+        .col-cyan { color: var(--cyan); text-shadow: 0 0 0 var(--cyan); }
+        
+        canvas.waveform { width: 100%; height: 100%; display: block; }
 
-    </style>
+        .flash-white { animation: flashWhite 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes flashWhite { 0% { background-color: #fff; } 100% { background-color: var(--bg); } }
+    </style>
 </head>
 <body class="mode-red">
 
-    <div id="global-header">
-        <div>GRAVES CONSOLE v24.0</div>
-        <div class="hw-ref">LINK: SYMMETRICOM 8040C <span style="color:#0f0; margin-left:5px;">●</span></div>
-    </div>
+    <div id="global-header">
+        <div>GRAVES CONSOLE v28.1</div>
+        <div class="hw-ref">LINK: SYMMETRICOM 8040C <span style="color:#0f0; margin-left:5px;">●</span></div>
+    </div>
 
-    <div id="main-container">
-        <div id="sidebar">
-            <div class="panel-box">
-                <div class="label-sm">PHYSICS CONSTANT (TUNER)</div>
-                <div class="proj-bar-container">
-                    <div id="proj-bar" class="proj-fill"></div>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.65em; color:#666; margin-top:4px;">
-                    <span id="label-val-left">137.03 (ARTIFACT)</span>
-                    <span id="label-val-current" style="color:var(--active-color); font-weight:bold;">UNDER TORQUE (ARTIFACT)</span>
-                </div>
-            </div>
+    <div id="main-container">
+        <div id="sidebar">
+            <div id="sidebar-content">
+                <div class="panel-box">
+                    <div class="label-sm">PHYSICS CONSTANT (TUNER)</div>
+                    <div class="proj-bar-container">
+                        <div id="proj-bar" class="proj-fill"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.65em; color:#666; margin-top:4px;">
+                        <span id="label-val-left">137.03 (ARTIFACT)</span>
+                        <span id="label-val-current" style="color:var(--active-color); font-weight:bold;">UNDER TORQUE (ARTIFACT)</span>
+                    </div>
+                </div>
 
-            <div class="panel-box">
-                <div class="label-sm">FABRICATION ENVIRONMENT</div>
-                <div class="env-selector" id="env-selector">
-                    <div class="env-btn" id="btn-cryo" onclick="setEnv('CRYO')">CRYO (4K)</div>
-                    <div class="env-btn active" id="btn-room" onclick="setEnv('ROOM')">ROOM (300K)</div>
-                </div>
-            </div>
+                <div class="panel-box">
+                    <div class="label-sm">FABRICATION ENVIRONMENT</div>
+                    <div class="env-selector" id="env-selector">
+                        <div class="env-btn" id="btn-cryo" onclick="setEnv('CRYO')">CRYO (4K)</div>
+                        <div class="env-btn active" id="btn-room" onclick="setEnv('ROOM')">ROOM (300K)</div>
+                    </div>
+                </div>
 
-            <div class="panel-box">
-                <div class="label-sm">TORSION CONTROL (0° - 10°)</div>
-                <div class="input-wrapper" id="torsion-wrap" title="Target 5.0372° to achieve Zero Slack Manifold">
-                    <input type="number" id="torsion-text" class="val-input" step="0.0001" placeholder="0.0000">
-                    <span class="unit-label">°</span>
-                </div>
-                <input type="range" id="torsion-slider" min="0.0000" max="10.0000" step="0.0001" value="0.0000">
-            </div>
+                <div class="panel-box">
+                    <div class="label-sm">TORSION CONTROL (0° - 10°)</div>
+                    <div class="input-wrapper" id="torsion-wrap" title="Target 5.0372° to achieve Zero Slack Manifold">
+                        <input type="number" id="torsion-text" class="val-input" step="0.0001" placeholder="0.0000">
+                        <span class="unit-label">°</span>
+                    </div>
+                    <input type="range" id="torsion-slider" min="0.0000" max="10.0000" step="0.0001" value="0.0000">
+                </div>
 
-            <div class="panel-box">
-                <div class="label-sm thermal-label-white" id="thermal-label">THERMAL CONTROL (0K - 100,000K)</div>
-                <div class="input-wrapper locked-input" id="thermal-wrap">
-                    <input type="number" id="temp-text" class="val-input" value="300" step="10" readonly>
-                    <span class="unit-label thermal-label-white" id="temp-unit">K</span>
-                </div>
-                <input type="range" id="temp-slider" min="0" max="100" step="0.1" value="7.5" class="locked-input">
-            </div>
+                <div class="panel-box">
+                    <div class="label-sm" id="thermal-label">THERMAL CONTROL (0K - 100,000K)</div>
+                    <div class="input-wrapper locked-input" id="thermal-wrap">
+                        <input type="number" id="temp-text" class="val-input" value="300" step="10">
+                        <span class="unit-label" id="temp-unit">K</span>
+                    </div>
+                    <input type="range" id="temp-slider" min="0" max="100" step="0.1" value="7.5" class="locked-input">
+                </div>
 
-            <div class="panel-box">
-                <div class="label-sm">METRICS</div>
-                <div style="font-size:0.75em; line-height:1.8; color:#aaa; font-family:'Courier New', monospace;">
-                    SLACK: <span id="val-slack" style="color:var(--red); font-weight:bold;">HIGH</span><br>
-                    TOPOLOGY: <span id="val-topo">OPEN</span>
-                </div>
-            </div>
+                <div class="panel-box">
+                    <div class="label-sm">METRICS</div>
+                    <div style="font-size:0.75em; line-height:1.8; color:#aaa; font-family:'Courier New', monospace;">
+                        SLACK: <span id="val-slack" style="color:var(--red); font-weight:bold;">HIGH</span><br>
+                        TOPOLOGY: <span id="val-topo">OPEN</span>
+                    </div>
+                </div>
+            </div><div id="sidebar-footer">
+                <button class="main-btn" id="main-btn" onclick="handleBtnClick()">TEST LOCK PARAMETERS</button>
 
-            <button class="main-btn" id="main-btn" onclick="handleBtnClick()">TEST LOCK PARAMETERS</button>
+                <div id="console-log">
+                    <div class="log-entry">> SYSTEM BOOT... OK</div>
+                    <div class="log-entry">> PHYSICS ENGINE... IDLE</div>
+                    <div class="log-entry">> AWAITING MANUAL TORSION INPUT...</div>
+                </div>
+            </div></div>
 
-            <div id="console-log">
-                <div class="log-entry">> SYSTEM BOOT... OK</div>
-                <div class="log-entry">> PHYSICS ENGINE... IDLE</div>
-                <div class="log-entry">> AWAITING MANUAL TORSION INPUT...</div>
-            </div>
-        </div>
+        <div id="main-stage">
+            <div id="view-container">
+                <div class="hud-label">
+                    VISUAL: ATOMIC LATTICE (Ni-Co-Cr)<br>
+                    <span style="opacity:0.6; font-size:0.9em;">STATUS: <span id="sys-status-text" style="color:var(--red)">UNSTABLE</span></span>
+                </div>
+                
+                <div id="warning-box" class="warn-red">GEOMETRY UNSTABLE<br><span style="font-size:0.5em; letter-spacing:1px;">UNDER TORQUE</span></div>
+                
+                <div id="fail-modal">
+                    <div class="fail-content">
+                        <div class="fail-title">GEOMETRY COLLAPSE</div>
+                        <div class="fail-sub">THERMAL LOAD > 800 K<br>LOCK REJECTED</div>
+                        <button class="main-btn fail-btn" onclick="resetSystem()">RESET SYSTEM</button>
+                    </div>
+                </div>
 
-        <div id="main-stage">
-            <div id="view-container">
-                <div class="hud-label">
-                    VISUAL: ATOMIC LATTICE (Ni-Co-Cr)<br>
-                    <span style="opacity:0.6; font-size:0.9em;">STATUS: <span id="sys-status-text" style="color:var(--red)">UNSTABLE</span></span>
-                </div>
-                
-                <div id="warning-box" class="warn-red">GEOMETRY UNSTABLE<br><span style="font-size:0.5em; letter-spacing:1px;">UNDER TORQUE</span></div>
-                
-                <div id="fail-modal">
-                    <div class="fail-content">
-                        <div class="fail-title">GEOMETRY COLLAPSE</div>
-                        <div class="fail-sub">THERMAL LOAD > 800 K<br>LOCK REJECTED</div>
-                        <button class="main-btn fail-btn" onclick="resetSystem()">RESET SYSTEM</button>
-                    </div>
-                </div>
+                <div id="insets-container">
+                    <div class="inset-box">
+                        <div class="inset-label">POTENTIAL (2D)</div>
+                        <canvas id="inset1" class="inset-canvas"></canvas>
+                    </div>
+                    <div class="inset-box">
+                        <div class="inset-label">PHASE SPACE</div>
+                        <canvas id="inset2" class="inset-canvas"></canvas>
+                    </div>
+                    <div class="inset-box">
+                        <div class="inset-label">VACUUM FLUX</div>
+                        <canvas id="inset3" class="inset-canvas"></canvas>
+                    </div>
+                </div>
 
-                <div id="insets-container">
-                    <div class="inset-box">
-                        <div class="inset-label">POTENTIAL (2D)</div>
-                        <canvas id="inset1" class="inset-canvas"></canvas>
-                    </div>
-                    <div class="inset-box">
-                        <div class="inset-label">PHASE SPACE</div>
-                        <canvas id="inset2" class="inset-canvas"></canvas>
-                    </div>
-                    <div class="inset-box">
-                        <div class="inset-label">VACUUM FLUX</div>
-                        <canvas id="inset3" class="inset-canvas"></canvas>
-                    </div>
-                </div>
+                <canvas id="bgCanvas"></canvas>
+                <canvas id="mainCanvas"></canvas>
+            </div>
 
-                <canvas id="bgCanvas"></canvas>
-                <canvas id="mainCanvas"></canvas>
-            </div>
-
-            <div id="monitor-panel">
-                <div class="monitor-box">
-                    <div class="monitor-header">
-                        <span id="entropy-label">PHONON ENTROPY (137)</span>
-                        <span id="slack-status" class="mon-val col-red">CRITICAL</span>
-                    </div>
-                    <canvas id="thermCanvas" class="waveform"></canvas>
-                </div>
-                
-                <div class="monitor-box">
-                    <div class="monitor-header">
-                        <span id="dephasing-label" style="color:var(--cyan)">NATIVE DEPHASING (166)</span>
-                        <span id="graves-status" class="mon-val col-cyan">ALWAYS ONLINE</span>
-                    </div>
-                    <canvas id="gravesCanvas" class="waveform"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div id="monitor-panel">
+                <div class="monitor-box">
+                    <div class="monitor-header">
+                        <span id="entropy-label">PHONON ENTROPY (137)</span>
+                        <span id="slack-status" class="mon-val col-red">CRITICAL</span>
+                    </div>
+                    <canvas id="thermCanvas" class="waveform"></canvas>
+                </div>
+                
+                <div class="monitor-box" style="border-right:none;">
+                    <div class="monitor-header">
+                        <span id="dephasing-label" style="color:var(--cyan)">NATIVE DEPHASING (166)</span>
+                        <span id="graves-status" class="mon-val col-cyan">ALWAYS ONLINE</span>
+                    </div>
+                    <canvas id="gravesCanvas" class="waveform"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
-    // --- CONSTANTS ---
-    const LOCK_MIN = 5.0370;
-    const LOCK_MAX = 5.0375;
-    const LOCK_CENTER = 5.0372;
-    const VAL_START = 137.035;
-    
-    // --- STATE ---
-    let torsion = 0.0;
-    let tempRaw = 7.5; 
-    let tempK = 300;
-    // STEPS: 0=Hunt, 1=Locked(Cyan), 2=Fabricated(Diamond), 3=Stress Test
-    let step = 0; 
-    let time = 0;
+    // --- CONSTANTS ---
+    const LOCK_MIN = 5.0370;
+    const LOCK_MAX = 5.0375;
+    const LOCK_CENTER = 5.0372;
+    const VAL_START = 137.035;
+    
+    // --- STATE ---
+    let torsion = 0.0;
+    let tempRaw = 7.5; 
+    let tempK = 300;
+    // STEPS: 0=Hunt, 1=Locked(Cyan), 2=Fabricated(Diamond), 3=Stress Test
+    let step = 0; 
+    let time = 0;
 
-    // --- DOM ---
-    const ui = {
-        body: document.body,
-        sliderT: document.getElementById('torsion-slider'),
-        inputT: document.getElementById('torsion-text'),
-        wrapT: document.getElementById('torsion-wrap'),
-        sliderK: document.getElementById('temp-slider'),
-        inputK: document.getElementById('temp-text'),
-        wrapK: document.getElementById('thermal-wrap'),
-        bar: document.getElementById('proj-bar'),
-        lblCurrent: document.getElementById('label-val-current'),
-        slack: document.getElementById('val-slack'),
-        topo: document.getElementById('val-topo'),
-        statText: document.getElementById('sys-status-text'),
-        btn: document.getElementById('main-btn'),
-        console: document.getElementById('console-log'),
-        warn: document.getElementById('warning-box'),
-        slackStat: document.getElementById('slack-status'),
-        gravesStat: document.getElementById('graves-status'),
-        failModal: document.getElementById('fail-modal'),
-        entropyLabel: document.getElementById('entropy-label'),
-        dephasingLabel: document.getElementById('dephasing-label'),
-        btnCryo: document.getElementById('btn-cryo'),
-        btnRoom: document.getElementById('btn-room'),
-        envSelector: document.getElementById('env-selector'),
-        thermalLabel: document.getElementById('thermal-label'),
-        tempUnit: document.getElementById('temp-unit')
-    };
+    // --- DOM ---
+    const ui = {
+        body: document.body,
+        sliderT: document.getElementById('torsion-slider'),
+        inputT: document.getElementById('torsion-text'),
+        wrapT: document.getElementById('torsion-wrap'),
+        sliderK: document.getElementById('temp-slider'),
+        inputK: document.getElementById('temp-text'),
+        wrapK: document.getElementById('thermal-wrap'),
+        bar: document.getElementById('proj-bar'),
+        lblCurrent: document.getElementById('label-val-current'),
+        slack: document.getElementById('val-slack'),
+        topo: document.getElementById('val-topo'),
+        statText: document.getElementById('sys-status-text'),
+        btn: document.getElementById('main-btn'),
+        console: document.getElementById('console-log'),
+        warn: document.getElementById('warning-box'),
+        slackStat: document.getElementById('slack-status'),
+        gravesStat: document.getElementById('graves-status'),
+        failModal: document.getElementById('fail-modal'),
+        entropyLabel: document.getElementById('entropy-label'),
+        dephasingLabel: document.getElementById('dephasing-label'),
+        btnCryo: document.getElementById('btn-cryo'),
+        btnRoom: document.getElementById('btn-room'),
+        envSelector: document.getElementById('env-selector'),
+        thermalLabel: document.getElementById('thermal-label'),
+        tempUnit: document.getElementById('temp-unit')
+    };
 
-    const ctxM = document.getElementById('mainCanvas').getContext('2d');
-    const ctxB = document.getElementById('bgCanvas').getContext('2d');
-    const ctxT = document.getElementById('thermCanvas').getContext('2d');
-    const ctxG = document.getElementById('gravesCanvas').getContext('2d');
-    const ctxI1 = document.getElementById('inset1').getContext('2d');
-    const ctxI2 = document.getElementById('inset2').getContext('2d');
-    const ctxI3 = document.getElementById('inset3').getContext('2d');
+    const ctxM = document.getElementById('mainCanvas').getContext('2d');
+    const ctxB = document.getElementById('bgCanvas').getContext('2d');
+    const ctxT = document.getElementById('thermCanvas').getContext('2d');
+    const ctxG = document.getElementById('gravesCanvas').getContext('2d');
+    const ctxI1 = document.getElementById('inset1').getContext('2d');
+    const ctxI2 = document.getElementById('inset2').getContext('2d');
+    const ctxI3 = document.getElementById('inset3').getContext('2d');
 
-    function resize() {
-        const v = document.getElementById('view-container');
-        const m = document.querySelector('.monitor-box');
-        ctxM.canvas.width = v.offsetWidth; ctxM.canvas.height = v.offsetHeight;
-        ctxB.canvas.width = v.offsetWidth; ctxB.canvas.height = v.offsetHeight;
-        // Check if 'm' exists before accessing offsetWidth/offsetHeight (for safety)
-        if (m) {
-            ctxT.canvas.width = m.offsetWidth; 
-            ctxT.canvas.height = m.offsetHeight - 25;
-            ctxG.canvas.width = m.offsetWidth; 
-            ctxG.canvas.height = m.offsetHeight - 25;
-        }
-        [ctxI1, ctxI2, ctxI3].forEach(c => {
-            c.canvas.width = 150; c.canvas.height = 85;
-        });
-    }
-    window.addEventListener('resize', resize);
+    function resize() {
+        const v = document.getElementById('view-container');
+        const m = document.querySelector('.monitor-box');
+        ctxM.canvas.width = v.offsetWidth; ctxM.canvas.height = v.offsetHeight;
+        ctxB.canvas.width = v.offsetWidth; ctxB.canvas.height = v.offsetHeight;
+        if (m) {
+            ctxT.canvas.width = m.offsetWidth; 
+            ctxT.canvas.height = m.offsetHeight - 25;
+            ctxG.canvas.width = m.offsetWidth; 
+            ctxG.canvas.height = m.offsetHeight - 25;
+        }
+        [ctxI1, ctxI2, ctxI3].forEach(c => {
+            c.canvas.width = 150; c.canvas.height = 85;
+        });
+        // Call draw after resize
+        if (typeof draw === 'function') draw(); 
+    }
 
-    // ATOMS
-    let atoms = [];
-    const TYPES = [
-        {id:'Ni', c:'#cccccc', r:4}, {id:'Co', c:'#3366ff', r:4},
-        {id:'Cr', c:'#ff33cc', r:4}, {id:'Al', c:'#ffff33', r:3},
-        {id:'Ti', c:'#999999', r:5}
-    ];
-    function initAtoms() {
-        const phi = 1.618;
-        const verts = [[0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],[1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],[phi,0,1],[-phi,0,1],[phi,0,-1],[-phi,0,-1]];
-        verts.forEach(v=>{ atoms.push({x:v[0]*40, y:v[1]*40, z:v[2]*40, type:TYPES[1]}); });
-        verts.forEach(v=>{ atoms.push({x:v[0]*70, y:v[1]*70, z:v[2]*70, type:TYPES[2]}); });
-        const duals = [[1,1,1],[1,1,-1],[1,-1,1],[-1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
-        duals.forEach((v,i)=>{ atoms.push({x:v[0]*110, y:v[1]*110, z:v[2]*110, type:i%2==0?TYPES[3]:TYPES[4]}); });
-    }
-    initAtoms();
+    window.addEventListener('resize', resize);
 
-    // LOGIC
-    function calcTemp(raw) {
-        if(raw<=25) return (raw/25)*1000;
-        // Prevent runaway calculations by capping raw input conversion
-        let k = 1000 + (Math.pow((raw-25)/75, 2) * 99000);
-        return Math.min(k, 100000);
-    }
-    function calcRaw(k) {
-        // Ensure K doesn't exceed the max for the inverse calculation (prevents NaN)
-        if (k > 100000) k = 100000;
-        if (k <= 1000) return (k/1000) * 25;
-        return 25 + 75 * Math.sqrt((k - 1000)/99000);
-    }
+    // ATOMS
+    let atoms = [];
+    const TYPES = [
+        {id:'Ni', c:'#cccccc', r:4}, {id:'Co', c:'#3366ff', r:4},
+        {id:'Cr', c:'#ff33cc', r:4}, {id:'Al', c:'#ffff33', r:3},
+        {id:'Ti', c:'#999999', r:5}
+    ];
+    function initAtoms() {
+        const phi = 1.618;
+        const verts = [[0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],[1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],[phi,0,1],[-phi,0,1],[phi,0,-1],[-phi,0,-1]];
+        verts.forEach(v=>{ atoms.push({x:v[0]*40, y:v[1]*40, z:v[2]*40, type:TYPES[1]}); });
+        verts.forEach(v=>{ atoms.push({x:v[0]*70, y:v[1]*70, z:v[2]*70, type:TYPES[2]}); });
+        const duals = [[1,1,1],[1,1,-1],[1,-1,1],[-1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
+        duals.forEach((v,i)=>{ atoms.push({x:v[0]*110, y:v[1]*110, z:v[2]*110, type:i%2==0?TYPES[3]:TYPES[4]}); });
+    }
+    initAtoms();
 
-    function setEnv(type) {
-        if (step > 1) return; 
+    // LOGIC
+    function calcTemp(raw) {
+        if(raw<=25) return (raw/25)*1000;
+        let k = 1000 + (Math.pow((raw-25)/75, 2) * 99000);
+        return Math.min(k, 100000);
+    }
+    function calcRaw(k) {
+        if (k > 100000) k = 100000;
+        if (k <= 1000) return (k/1000) * 25;
+        return 25 + 75 * Math.sqrt((k - 1000)/99000);
+    }
 
-        ui.btnCryo.classList.remove('active');
-        ui.btnRoom.classList.remove('active');
-        
-        if (type === 'CRYO') {
-            ui.btnCryo.classList.add('active');
-            tempK = 4;
-            log(">>> ENVIRONMENT: CRYO (4K)");
-        } else {
-            ui.btnRoom.classList.add('active');
-            tempK = 300;
-            log(">>> ENVIRONMENT: ROOM (300K)");
-        }
-        // Sync inputs
-        tempRaw = calcRaw(tempK);
-        ui.sliderK.value = tempRaw;
-        ui.inputK.value = Math.floor(tempK);
-        updateState();
-    }
+    function setEnv(type) {
+        if (step > 1) return; 
 
-    function handleBtnClick() {
-        if (step === 0) {
-            if (inWindow()) {
-                if (tempK > 800) { ui.failModal.style.display = 'flex'; return; }
-                
-                // --- AUTO QUENCH AND LOCK TORSION/ENV ---
-                step = 1;
-                ui.sliderT.classList.add('locked-input');
-                ui.inputT.disabled = true;
-                ui.wrapT.classList.add('locked-input');
-                ui.envSelector.classList.add('locked-input');
-                
-                if (tempK > 4) {
-                    tempK = 4;
-                    tempRaw = calcRaw(4);
-                    ui.sliderK.value = tempRaw;
-                    ui.inputK.value = 4;
-                    log("> CRITICAL QUENCH PERFORMED. FABRICATING AT 4 K.");
-                }
+        ui.btnCryo.classList.remove('active');
+        ui.btnRoom.classList.remove('active');
+        
+        if (type === 'CRYO') {
+            ui.btnCryo.classList.add('active');
+            tempK = 4;
+            log(">>> ENVIRONMENT: CRYO (4K)");
+        } else {
+            ui.btnRoom.classList.add('active');
+            tempK = 300;
+            log(">>> ENVIRONMENT: ROOM (300K)");
+        }
+        // Sync inputs
+        tempRaw = calcRaw(tempK);
+        ui.sliderK.value = tempRaw;
+        ui.inputK.value = Math.floor(tempK);
+        updateState();
+    }
 
-                // LOCK THERMAL CONTROLS
-                ui.sliderK.classList.add('locked-input');
-                ui.inputK.classList.add('locked-input');
-                ui.wrapK.classList.add('locked-input');
-                
-                ui.btn.className = "main-btn ready-fab";
-                ui.btn.innerText = "INITIATE FABRICATION";
-                log(">>> GEOMETRY LOCKED.");
-            } else {
-                updateState(true);
-            }
-        } else if (step === 1) {
-            // FABRICATE -> UNLOCK THERMAL CONTROL FOR STRESS TEST
-            step = 2;
-            document.documentElement.style.setProperty('--active-color', '#ffffff');
-            document.body.classList.add('flash-white');
-            setTimeout(()=>document.body.classList.remove('flash-white'), 800);
-            
-            // UNLOCK THERMAL CONTROL FOR STRESS TESTING
-            ui.sliderK.classList.remove('locked-input');
-            ui.inputK.classList.remove('locked-input');
-            ui.wrapK.classList.remove('locked-input');
+    function handleBtnClick() {
+        if (step === 0) {
+            if (inWindow()) {
+                if (tempK > 800) { ui.failModal.style.display = 'flex'; return; }
+                
+                // SMART THERMAL GATE: Cannot lock if temp > 400K
+                if (tempK > 400) { 
+                    updateState(true); 
+                    return; 
+                }
+                
+                // --- AUTO QUENCH AND LOCK TORSION/ENV ---
+                step = 1;
+                ui.sliderT.classList.add('locked-input');
+                ui.inputT.disabled = true;
+                ui.wrapT.classList.add('locked-input');
+                ui.envSelector.classList.add('locked-input');
+                
+                if (tempK > 4) {
+                    tempK = 4;
+                    tempRaw = calcRaw(4);
+                    ui.sliderK.value = tempRaw;
+                    ui.inputK.value = 4;
+                    log("> CRITICAL QUENCH PERFORMED. FABRICATING AT 4 K.");
+                }
+                
+                // LOCK THERMAL CONTROLS
+                ui.sliderK.classList.add('locked-input');
+                ui.inputK.classList.add('locked-input');
+                ui.wrapK.classList.add('locked-input');
 
-            ui.btn.className = "main-btn complete";
-            ui.btn.innerText = "TEST THERMAL LIMITS";
-            ui.topo.innerText = "CLOSED (PROTECTED)"; ui.topo.style.color="#fff";
-            ui.statText.innerText = "ZERO SLACK (FLAT)";
-            log(">>> FABRICATION COMPLETE.");
-        } else if (step === 2) {
-            // TEST THERMAL LIMITS -> ENGAGE STRESS TEST
-            step = 3;
-            ui.btn.className = "main-btn reset-mode";
-            ui.btn.innerText = "SYSTEM RESET";
-            log(">>> STRESS TEST ENGAGED.");
-        } else if (step === 3) {
-            // SYSTEM RESET
-            resetSystem();
-        }
-    }
+                ui.btn.className = "main-btn ready-fab";
+                ui.btn.innerText = "INITIATE FABRICATION";
+                log(">>> GEOMETRY LOCKED.");
+                
+                updateState(); 
 
-    function resetSystem() {
-        step = 0;
-        ui.failModal.style.display = 'none';
-        document.documentElement.style.setProperty('--active-color', '#ff3333');
-        
-        // UNLOCK ALL CONTROLS
-        ui.sliderT.classList.remove('locked-input');
-        ui.inputT.disabled = false;
-        ui.wrapT.classList.remove('locked-input');
-        ui.sliderK.classList.add('locked-input'); // Thermal starts locked in tuning mode
-        ui.inputK.classList.add('locked-input');
-        ui.wrapK.classList.add('locked-input');
-        ui.envSelector.classList.remove('locked-input');
-        
-        setEnv('ROOM');
-        ui.inputT.value = "0.0000"; ui.sliderT.value = 0; torsion = 0;
-        updateState();
-        log(">>> SYSTEM RESET.");
-    }
+            } else {
+                updateState(true);
+            }
+        } else if (step === 1) {
+            // FABRICATE -> UNLOCK STRESS TEST CONTROLS
+            step = 2;
+            document.documentElement.style.setProperty('--active-color', '#ffffff');
+            document.body.classList.add('flash-white');
+            setTimeout(()=>document.body.classList.remove('flash-white'), 800);
+            
+            // UNLOCK THERMAL CONTROL FOR STRESS TESTING
+            ui.sliderK.classList.remove('locked-input');
+            ui.inputK.classList.remove('locked-input');
+            ui.wrapK.classList.remove('locked-input');
 
-    function inWindow() { return (torsion >= LOCK_MIN && torsion <= LOCK_MAX); }
+            ui.btn.className = "main-btn complete";
+            ui.btn.innerText = "TEST THERMAL LIMITS";
+            ui.topo.innerText = "CLOSED (PROTECTED)"; ui.topo.style.color="#fff";
+            ui.statText.innerText = "ZERO SLACK (FLAT)";
+            log(">>> FABRICATION COMPLETE.");
+        } else if (step === 2) {
+            // TEST THERMAL LIMITS -> ENGAGE STRESS TEST
+            step = 3;
+            ui.btn.className = "main-btn reset-mode";
+            ui.btn.innerText = "SYSTEM RESET";
+            log(">>> STRESS TEST ENGAGED.");
+        } else if (step === 3) {
+            // SYSTEM RESET
+            resetSystem();
+        }
+    }
 
-    function updateState(forcedWarn = false) {
-        if (step === 1) return; 
-        
-        // Read K directly from input and sync slider
-        tempK = parseFloat(ui.inputK.value); 
-        if (isNaN(tempK)) tempK = 300; 
-        ui.sliderK.value = calcRaw(tempK);
-        
-        // Console Log Cleanup: Keeps the console from filling infinitely
-        if (ui.console.children.length > 20) {
-            ui.console.removeChild(ui.console.firstChild);
-        }
-        
-        let fillPct = (torsion / 10) * 100; 
-        ui.bar.style.width = fillPct + "%";
+    function resetSystem() {
+        step = 0;
+        ui.failModal.style.display = 'none';
+        document.documentElement.style.setProperty('--active-color', '#ff3333');
+        
+        // UNLOCK ALL CONTROLS
+        ui.sliderT.classList.remove('locked-input');
+        ui.inputT.disabled = false;
+        ui.wrapT.classList.remove('locked-input');
+        ui.envSelector.classList.remove('locked-input');
+        
+        // LOCK THERMAL SLIDER/INPUT (Default state)
+        ui.sliderK.classList.add('locked-input');
+        ui.inputK.classList.add('locked-input');
+        ui.wrapK.classList.add('locked-input');
+        
+        setEnv('ROOM');
+        ui.inputT.value = "0.0000"; ui.sliderT.value = 0; torsion = 0;
+        
+        // Reset thermal color visual
+        ui.thermalLabel.classList.remove('thermal-label-white');
+        ui.inputK.style.color = 'var(--diamond)';
+        ui.tempUnit.classList.remove('thermal-label-white');
+        ui.entropyLabel.classList.remove('white-header-text');
+        ui.dephasingLabel.classList.remove('white-header-text');
 
-        // TUNER LABEL LOGIC (ARTIFACT vs. NATIVE)
-        if (inWindow()) {
-            ui.lblCurrent.innerText = "166.083 (NATIVE)";
-            ui.lblCurrent.style.color = "var(--cyan)";
-        } else {
-            if (torsion > LOCK_MAX) {
-                ui.lblCurrent.innerText = "OVER TORQUE (ARTIFACT)";
-                ui.lblCurrent.style.color = "var(--orange)";
-            } else {
-                ui.lblCurrent.innerText = "UNDER TORQUE (ARTIFACT)";
-                ui.lblCurrent.style.color = "var(--red)";
-            }
-        }
-        
-        // --- VISUAL CUES: STRESS TEST MODE (STEP 2/3) ---
-        if (step === 2 || step === 3) {
-            ui.warn.style.display = "none"; 
-            ui.slack.innerText = "0.000000 eV"; 
-            setTheme('diamond');
-            
-            // FINAL WHITE COLOR SWITCH FOR MONITORS 
-            ui.thermalLabel.classList.add('thermal-label-white');
-            ui.inputK.style.color = 'var(--diamond)';
-            ui.tempUnit.classList.add('thermal-label-white');
-            ui.entropyLabel.classList.add('white-header-text');
-            ui.dephasingLabel.classList.add('white-header-text');
-            
-            return;
-        } else {
-            // Revert back if not in stress test mode
-            ui.thermalLabel.classList.remove('thermal-label-white');
-            ui.inputK.style.color = 'var(--diamond)'; 
-            ui.tempUnit.classList.remove('thermal-label-white');
-            ui.entropyLabel.classList.remove('white-header-text');
-            ui.dephasingLabel.classList.remove('white-header-text');
-        }
+        updateState();
+        log(">>> SYSTEM RESET.");
+    }
 
-        // --- GLOBAL WARNINGS (BEFORE LOCK) ---
-        if (tempK > 800) {
-            ui.warn.style.display = "block";
-            ui.warn.className = "warn-red";
-            ui.warn.innerHTML = "THERMAL DECAY<br><span style='font-size:0.5em'>LIMIT 800 K</span>";
-            setTheme('red');
-            return;
-        }
+    function inWindow() { return (torsion >= LOCK_MIN && torsion <= LOCK_MAX); }
 
-        // --- TUNING MODE (STEP 0) ---
-        if (inWindow()) {
-            setTheme('cyan');
-            ui.warn.style.display = "none";
-            ui.btn.className = "main-btn can-lock";
-            ui.btn.innerText = "READY TO LOCK GEOMETRY";
-            ui.slack.innerText = "0.000000 eV";
-            ui.statText.innerText = "WINDOW MATCHED"; ui.statText.style.color="var(--cyan)";
-            ui.slackStat.innerText = "SHUNTED"; ui.slackStat.style.color = "var(--cyan)";
-            ui.gravesStat.innerText = "HARMONIC LOCK"; ui.gravesStat.style.color = "var(--cyan)";
-            logOnce(">>> WINDOW MATCHED. READY.");
-        } else {
-            ui.btn.className = "main-btn";
-            ui.btn.innerText = "TEST LOCK PARAMETERS";
-            
-            if (forcedWarn || (torsion > 0.1 && Math.abs(torsion - LOCK_CENTER) > 0.05)) ui.warn.style.display = "block";
-            else ui.warn.style.display = "none";
+    function updateState(forcedWarn = false) {
+        
+        // Read K directly from input and sync slider
+        tempK = parseFloat(ui.inputK.value); 
+        if (isNaN(tempK)) tempK = 300; 
+        ui.sliderK.value = calcRaw(tempK);
+        
+        // Console Log Cleanup: Keeps the console from filling infinitely
+        while (ui.console.children.length > 20) {
+            ui.console.removeChild(ui.console.firstChild);
+        }
 
-            if (torsion > LOCK_MAX) {
-                setTheme('orange');
-                ui.statText.innerText = "OVER TORQUE";
-                ui.warn.className = "warn-orange";
-                ui.warn.innerHTML = "GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>OVER TORQUE</span>";
-            } else {
-                setTheme('red');
-                ui.statText.innerText = "UNDER TORQUE";
-                ui.warn.className = "warn-red";
-                ui.warn.innerHTML = torsion < 4.8 ? "GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>UNDER TORQUE</span>" : "APPROACHING LOCK...<br><span style='font-size:0.5em'>UNDER TORQUE</span>";
-            }
-            
-            let tFactor = Math.max(1, tempK/300);
-            let dist = Math.abs(torsion - LOCK_CENTER);
-            let val = (0.18 * tFactor) + (dist*10);
-            ui.slack.innerText = val.toFixed(6) + " eV";
-            ui.slackStat.innerText = "CRITICAL"; ui.slackStat.style.color = "var(--active-color)";
-            ui.gravesStat.innerText = "OFFLINE"; ui.gravesStat.style.color = "#555";
-        }
-    }
+        let fillPct = (torsion / 10) * 100; 
+        ui.bar.style.width = fillPct + "%";
 
-    function setTheme(colorName) {
-        ui.body.className = "mode-" + colorName;
-        let hex = "#00ffcc";
-        if (colorName === 'red') hex = "#ff3333";
-        if (colorName === 'orange') hex = "#ffaa00";
-        if (colorName === 'diamond') hex = "#ffffff";
-        document.documentElement.style.setProperty('--active-color', hex);
-    }
+        // TUNER LABEL LOGIC (ARTIFACT vs. NATIVE)
+        if (inWindow()) {
+            ui.lblCurrent.innerText = "166.083 (NATIVE)";
+            ui.lblCurrent.style.color = "var(--cyan)";
+        } else {
+            if (torsion > LOCK_MAX) {
+                ui.lblCurrent.innerText = "OVER TORQUE (ARTIFACT)";
+                ui.lblCurrent.style.color = "var(--orange)";
+            } else {
+                ui.lblCurrent.innerText = "UNDER TORQUE (ARTIFACT)";
+                ui.lblCurrent.style.color = "var(--red)";
+            }
+        }
+        
+        // --- VISUAL CUES: LOCKED & STRESS TEST MODES (STEP 1, 2, 3) ---
+        if (step >= 1) {
+            let monitorColor = (step === 2 || step === 3) ? 'var(--diamond)' : 'var(--cyan)';
+            
+            // FIX 3/4: Final White/Diamond color switch on Step 1
+            ui.thermalLabel.classList.add('thermal-label-white');
+            ui.inputK.style.color = 'var(--diamond)';
+            ui.tempUnit.classList.add('thermal-label-white');
+            ui.entropyLabel.classList.add('white-header-text');
+            ui.dephasingLabel.classList.add('white-header-text');
+            
+            ui.lblCurrent.style.color = monitorColor;
+            ui.slack.innerText = "0.000000 eV";
+            ui.slackStat.innerText = "ALIGNED"; 
+            ui.slackStat.style.color = monitorColor;
+            ui.gravesStat.style.color = monitorColor;
+            
+            if (step === 2 || step === 3) setTheme('diamond'); 
+            else setTheme('cyan');
+            
+            return;
+        } else {
+            // Revert back if not in stress test mode
+            ui.thermalLabel.classList.remove('thermal-label-white');
+            ui.inputK.style.color = 'var(--diamond)';
+            ui.tempUnit.classList.remove('thermal-label-white');
+            ui.entropyLabel.classList.remove('white-header-text');
+            ui.dephasingLabel.classList.remove('white-header-text');
+        }
 
-    let lastLog = "";
-    function log(msg) { 
-        // Keep console clean
-        while (ui.console.children.length > 20) {
-            ui.console.removeChild(ui.console.firstChild);
-        }
-        ui.console.innerHTML += `<div><span class="log-hl">>></span> ${msg}</div>`; 
-        ui.console.scrollTop = ui.console.scrollHeight; 
-    }
-    function logOnce(msg) { if(lastLog !== msg) { log(msg); lastLog = msg; } }
+        // --- GLOBAL WARNINGS (BEFORE LOCK) ---
+        if (tempK > 800) {
+            ui.warn.style.opacity = 1;
+            ui.warn.className = "warn-red";
+            ui.warn.innerHTML = "THERMAL DECAY<br><span style='font-size:0.5em'>LOCK BLOCKED: TEMP > 800 K</span>";
+            setTheme('red');
+            ui.btn.className = "main-btn thermal-warning";
+            ui.btn.innerText = "UNABLE TO LOCK";
+            return;
+        }
 
-    function draw() {
-        time++;
-        ctxM.clearRect(0,0,ctxM.canvas.width, ctxM.canvas.height);
-        ctxB.clearRect(0,0,ctxB.canvas.width, ctxB.canvas.height);
+        if (inWindow()) {
+            if (tempK > 400) { // Smart Thermal Gate Warning
+                 setTheme('orange');
+                 ui.btn.className = "main-btn thermal-warning";
+                 ui.btn.innerText = "HIGH THERMAL NOISE - COOL TO OPTIMIZE";
+                 ui.warn.style.opacity = 1;
+                 ui.warn.className = "warn-orange";
+                 ui.warn.innerHTML = "THERMAL RISK<br><span style='font-size:0.5em'>COOL BELOW 400 K TO LOCK</span>";
+                 return;
+            }
 
-        // BACKGROUND
-        const w=ctxB.canvas.width, h=ctxB.canvas.height;
-        ctxB.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-        ctxB.lineWidth = 1; ctxB.globalAlpha = 0.3; ctxB.beginPath();
+            // SUCCESSFUL TUNE
+            setTheme('cyan');
+            ui.warn.style.opacity = 0;
+            ui.btn.className = "main-btn can-lock";
+            ui.btn.innerText = "READY TO LOCK GEOMETRY";
+            ui.slack.innerText = "0.000000 eV";
+            ui.statText.innerText = "WINDOW MATCHED"; ui.statText.style.color="var(--cyan)";
+            ui.slackStat.innerText = "SHUNTED"; ui.slackStat.style.color = "var(--cyan)";
+            ui.gravesStat.innerText = "HARMONIC LOCK"; ui.gravesStat.style.color = "var(--cyan)";
+        } else {
+            // TORSION ERROR
+            ui.btn.className = "main-btn";
+            ui.btn.innerText = "TEST LOCK PARAMETERS";
+            
+            if (forcedWarn || (torsion > 0.1 && Math.abs(torsion - LOCK_CENTER) > 0.05)) ui.warn.style.opacity = 1;
+            else ui.warn.style.opacity = 0;
 
-        let hatAmp = 0;
-        if (step !== 2 && step !== 3 && !inWindow()) {
-            hatAmp = (tempK/300) * 15; 
-            hatAmp += Math.abs(torsion - LOCK_CENTER)*10; 
-            if (hatAmp > 120) hatAmp = 120;
-        }
+            if (torsion > LOCK_MAX) {
+                setTheme('orange');
+                ui.statText.innerText = "OVER TORQUE";
+                ui.warn.className = "warn-orange";
+                ui.warn.innerHTML = "GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>OVER TORQUE</span>";
+            } else {
+                setTheme('red');
+                ui.statText.innerText = "UNDER TORQUE";
+                ui.warn.className = "warn-red";
+                ui.warn.innerHTML = torsion < 4.8 ? "GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>UNDER TORQUE</span>" : "APPROACHING LOCK...<br><span style='font-size:0.5em'>UNDER TORQUE</span>";
+            }
+            
+            let tFactor = Math.max(1, tempK/300);
+            let dist = Math.abs(torsion - LOCK_CENTER);
+            let val = (0.18 * tFactor) + (dist*10);
+            ui.slack.innerText = val.toFixed(6) + " eV";
+            ui.slackStat.innerText = "CRITICAL"; ui.slackStat.style.color = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+            ui.gravesStat.innerText = "OFFLINE"; ui.gravesStat.style.color = "#555";
+        }
+    }
 
-        for (let r=0; r<Math.max(w,h); r+=25) {
-            ctxB.moveTo(w/2 + r, h/2);
-            for(let a=0; a<=Math.PI*2; a+=0.1) {
-                let dist = r * 0.05;
-                let z = (step > 0 || inWindow()) ? 0 : Math.sin(dist - time*0.05) * hatAmp;
-                let x = w/2 + (r + z*0.5) * Math.cos(a);
-                let y = h/2 + (r + z*0.5) * Math.sin(a) * 0.6; 
-                ctxB.lineTo(x, y);
-            }
-        }
-        ctxB.stroke(); ctxB.globalAlpha = 1.0;
+    function setTheme(colorName) {
+        ui.body.className = "mode-" + colorName;
+        let hex = "#00ffcc";
+        if (colorName === 'red') hex = "#ff3333";
+        if (colorName === 'orange') hex = "#ffaa00";
+        if (colorName === 'diamond') hex = "#ffffff";
+        document.documentElement.style.setProperty('--active-color', hex);
+    }
 
-        // ATOMS
-        let cx = w/2, cy = h/2;
-        let rot = time * ((step === 2 || step === 3) ? 0.001 : 0.005);
-        let jitter = 0;
-        if (step !== 2 && step !== 3 && !inWindow()) {
-            jitter = 20 + (tempK/500); 
-            if (jitter > 80) jitter = 80;
-        }
+    let lastLog = "";
+    function log(msg) { 
+        // Keep console clean
+        while (ui.console.children.length > 20) {
+            ui.console.removeChild(ui.console.firstChild);
+        }
+        ui.console.innerHTML += `<div><span class="log-hl">>></span> ${msg}</div>`; 
+        ui.console.scrollTop = ui.console.scrollHeight; 
+    }
+    function logOnce(msg) { if(lastLog !== msg) { log(msg); lastLog = msg; } }
 
-        let projected = [];
-        atoms.forEach(atom => {
-            let jx=(Math.random()-0.5)*jitter, jy=(Math.random()-0.5)*jitter, jz=(Math.random()-0.5)*jitter;
-            let x1 = (atom.x+jx)*Math.cos(rot) - (atom.z+jz)*Math.sin(rot);
-            let z1 = (atom.x+jx)*Math.sin(rot) + (atom.z+jz)*Math.cos(rot);
-            let y1 = (atom.y+jy)*Math.cos(0.3) - z1*Math.sin(0.3);
-            let z2 = (atom.y+jy)*Math.sin(0.3) + z1*Math.cos(0.3);
-            let s = 600/(600+z2+200);
-            projected.push({x:cx+x1*s, y:cy+y1*s, s:s, z:z2, type:atom.type});
-        });
-        projected.sort((a,b)=>b.z-a.z);
+    function draw() {
+        time++;
+        ctxM.clearRect(0,0,ctxM.canvas.width, ctxM.canvas.height);
+        ctxB.clearRect(0,0,ctxB.canvas.width, ctxB.canvas.height);
 
-        ctxM.lineWidth = (step === 2 || step === 3) ? 1 : 0.5;
-        ctxM.strokeStyle = (step === 2 || step === 3) ? 'rgba(255,255,255,0.4)' : getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-        ctxM.beginPath();
-        for(let i=0; i<projected.length; i++){
-            for(let j=i+1; j<projected.length; j++){
-                let d = Math.hypot(projected[i].x-projected[j].x, projected[i].y-projected[j].y);
-                if(d < 100*projected[i].s) {
-                    ctxM.moveTo(projected[i].x, projected[i].y);
-                    ctxM.lineTo(projected[j].x, projected[j].y);
-                }
-            }
-        }
-        ctxM.stroke();
+        // BACKGROUND
+        const w=ctxB.canvas.width, h=ctxB.canvas.height;
+        ctxB.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+        ctxB.lineWidth = 1; ctxB.globalAlpha = 0.3; ctxB.beginPath();
 
-        ctxM.font = "10px sans-serif"; ctxM.textAlign = "center";
-        projected.forEach(p => {
-            let col = (step === 2 || step === 3) ? '#fff' : p.type.c;
-            if(step !== 2 && step !== 3 && jitter > 10) col = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-            ctxM.fillStyle = col; 
-            
-            if(p.type.id === 'Ni') return; 
-            
-            ctxM.beginPath(); ctxM.arc(p.x, p.y, p.type.r*p.s, 0, Math.PI*2); ctxM.fill();
-            if (p.s > 0.8 && jitter < 5) { ctxM.fillStyle = "#fff"; ctxM.fillText(p.type.id, p.x+8, p.y-5); }
-        });
+        let hatAmp = 0;
+        if (step !== 2 && step !== 3 && !inWindow()) {
+            hatAmp = (tempK/300) * 15; 
+            hatAmp += Math.abs(torsion - LOCK_CENTER)*10; 
+            if (hatAmp > 120) hatAmp = 120;
+        }
 
-        drawMonitors();
-        drawInsets();
-        requestAnimationFrame(draw);
-    }
+        for (let r=0; r<Math.max(w,h); r+=25) {
+            ctxB.moveTo(w/2 + r, h/2);
+            for(let a=0; a<=Math.PI*2; a+=0.1) {
+                let dist = r * 0.05;
+                let z = (step > 0 || inWindow()) ? 0 : Math.sin(dist - time*0.05) * hatAmp;
+                let x = w/2 + (r + z*0.5) * Math.cos(a);
+                let y = h/2 + (r + z*0.5) * Math.sin(a) * 0.6; 
+                ctxB.lineTo(x, y);
+            }
+        }
+        ctxB.stroke(); ctxB.globalAlpha = 1.0;
 
-    function drawInsets() {
-        let col = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-        let lockedState = (step > 0 || inWindow());
+        // ATOMS
+        let cx = w/2, cy = h/2;
+        let rot = time * ((step === 2 || step === 3) ? 0.001 : 0.005);
+        let jitter = 0;
+        if (step !== 2 && step !== 3 && !inWindow()) {
+            jitter = 20 + (tempK/500); 
+            if (jitter > 80) jitter = 80;
+        }
 
-        ctxI1.clearRect(0,0,150,85); ctxI1.strokeStyle = col; ctxI1.lineWidth = 2; ctxI1.beginPath();
-        for(let x=0; x<150; x++) {
-            let nx = (x-75)/35;
-            let y = lockedState ? (nx*nx) : (Math.pow(nx, 4) - Math.pow(nx, 2));
-            let py = 60 - (y * 25);
-            if(x==0) ctxI1.moveTo(x,py); else ctxI1.lineTo(x,py);
-        }
-        ctxI1.stroke();
+        let projected = [];
+        atoms.forEach(atom => {
+            let jx=(Math.random()-0.5)*jitter, jy=(Math.random()-0.5)*jitter, jz=(Math.random()-0.5)*jitter;
+            let x1 = (atom.x+jx)*Math.cos(rot) - (atom.z+jz)*Math.sin(rot);
+            let z1 = (atom.x+jx)*Math.sin(rot) + (atom.z+jz)*Math.cos(rot);
+            let y1 = (atom.y+jy)*Math.cos(0.3) - z1*Math.sin(0.3);
+            let z2 = (atom.y+jy)*Math.sin(0.3) + z1*Math.cos(0.3);
+            let s = 600/(600+z2+200);
+            projected.push({x:cx+x1*s, y:cy+y1*s, s:s, z:z2, type:atom.type});
+        });
+        projected.sort((a,b)=>b.z-a.z);
 
-        ctxI2.clearRect(0,0,150,85); ctxI2.strokeStyle = col; ctxI2.lineWidth = 1; ctxI2.beginPath();
-        let noise = lockedState ? 0 : 20;
-        ctxI2.arc(75, 42, 25 + (Math.random()-0.5)*noise, 0, Math.PI*2); ctxI2.stroke();
+        ctxM.lineWidth = (step === 2 || step === 3) ? 1 : 0.5;
+        ctxM.strokeStyle = (step === 2 || step === 3) ? 'rgba(255,255,255,0.4)' : getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+        ctxM.beginPath();
+        for(let i=0; i<projected.length; i++){
+            for(let j=i+1; j<projected.length; j++){
+                let d = Math.hypot(projected[i].x-projected[j].x, projected[i].y-projected[j].y);
+                if(d < 100*projected[i].s) {
+                    ctxM.moveTo(projected[i].x, projected[i].y);
+                    ctxM.lineTo(projected[j].x, projected[j].y);
+                }
+            }
+        }
+        ctxM.stroke();
 
-        ctxI3.clearRect(0,0,150,85); ctxI3.strokeStyle = col; ctxI3.beginPath();
-        for(let x=0; x<150; x+=2) {
-            let amp = lockedState ? 0 : 20;
-            let y = 42 + (Math.random()-0.5)*amp;
-            ctxI3.lineTo(x, y);
-        }
-        ctxI3.stroke();
-    }
+        ctxM.font = "10px sans-serif"; ctxM.textAlign = "center";
+        projected.forEach(p => {
+            let col = (step === 2 || step === 3) ? '#fff' : p.type.c;
+            if(step !== 2 && step !== 3 && jitter > 10) col = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+            ctxM.fillStyle = col; 
+            
+            if(p.type.id === 'Ni') return; 
+            
+            ctxM.beginPath(); ctxM.arc(p.x, p.y, p.type.r*p.s, 0, Math.PI*2); ctxM.fill();
+            if (p.s > 0.8 && jitter < 5) { ctxM.fillStyle = "#fff"; ctxM.fillText(p.type.id, p.x+8, p.y-5); }
+        });
 
-    let waveS=[], waveG=[];
-    function drawMonitors() {
-        const w=ctxT.canvas.width, h=ctxT.canvas.height;
-        ctxT.clearRect(0,0,w,h);
-        
-        let isAligned = (step > 0 || inWindow());
-        
-        // LEFT MONITOR: ENTROPY/ALIGNMENT
-        if (isAligned) {
-            ui.entropyLabel.innerText = "PHONON ALIGNMENT (166)";
-            // Color based on step
-            let monitorColor = (step === 2 || step === 3) ? 'var(--diamond)' : 'var(--cyan)';
-            ui.entropyLabel.style.color = monitorColor;
-            ui.slackStat.style.color = monitorColor;
-            ui.slackStat.innerText = "ALIGNED"; ui.slackStat.className = "mon-val col-cyan";
-            
-            ctxT.strokeStyle = monitorColor; 
-            ctxT.lineWidth = 1 + (tempK/20000); 
-            
-            // NOTE: Shadow is needed for the 'glow' effect
-            ctxT.shadowColor = monitorColor; 
-            ctxT.shadowBlur = (tempK > 1000) ? 5 + (tempK/5000) : 0; 
-            
-            ctxT.beginPath(); ctxT.moveTo(0, h/2); ctxT.lineTo(w, h/2); ctxT.stroke();
-            ctxT.shadowBlur = 0;
-        } else {
-            ui.entropyLabel.innerText = "PHONON ENTROPY (137)";
-            ui.entropyLabel.style.color = "#666";
-            
-            // ACCURATE ENTROPY SCALING (V22.1 FIX: IMMEDIATE CHAOS)
-            let amp = (tempK > 300) ? (tempK/100) * 10 : (tempK/300) * 10;
-            if(amp>h/2) amp=h/2;
-            waveS.push((Math.random()-0.5)*amp*2); if(waveS.length>w/2) waveS.shift();
-            
-            ctxT.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-            ctxT.lineWidth = 1;
-            ctxT.beginPath(); for(let i=0;i<waveS.length;i++) ctxT.lineTo(i*2, h/2+waveS[i]); ctxT.stroke();
+        drawMonitors();
+        drawInsets();
+        requestAnimationFrame(draw);
+    }
 
-            // Status Update for Extreme Entropy
-            if (tempK > 400 && tempK <= 800) ui.slackStat.innerText = "DANGER";
-            else if (tempK > 800) ui.slackStat.innerText = "MELTING";
-            else ui.slackStat.innerText = "CRITICAL";
-            ui.slackStat.style.color = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
-        }
+    function drawInsets() {
+        let col = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+        let lockedState = (step > 0 || inWindow());
 
-        // RIGHT MONITOR: NATIVE DEPHASING (Stress Test Visuals)
-        const wg=ctxG.canvas.width;
-        ctxG.clearRect(0,0,wg,h);
-        
-        let gVal = Math.sin(time*0.1)*(h*0.3);
-        
-        // VISUAL LOAD AMPLIFICATION
-        let jitterAmp = 0;
-        if (tempK > 400) jitterAmp = (tempK/10000);
-        gVal += (Math.random()-0.5) * jitterAmp;
-        
-        waveG.push(gVal); if(waveG.length>wg/2) waveG.shift();
-        
-        // GLOW & COLOR
-        let monitorColor = (step === 2 || step === 3) ? 'var(--diamond)' : '#00ffcc';
-        
-        let glow = 0;
-        if (tempK > 400) glow = 10 + (tempK/2000); 
+        ctxI1.clearRect(0,0,150,85); ctxI1.strokeStyle = col; ctxI1.lineWidth = 2; ctxI1.beginPath();
+        for(let x=0; x<150; x++) {
+            let nx = (x-75)/35;
+            let y = lockedState ? (nx*nx) : (Math.pow(nx, 4) - Math.pow(nx, 2));
+            let py = 60 - (y * 25);
+            if(x==0) ctxI1.moveTo(x,py); else ctxI1.lineTo(x,py);
+        }
+        ctxI1.stroke();
 
-        ctxG.strokeStyle = monitorColor; 
-        ctxG.lineWidth = 3; 
-        ctxG.shadowColor = monitorColor; 
-        ctxG.shadowBlur = glow;
-        
-        ctxG.beginPath(); for(let i=0;i<waveG.length;i++) ctxG.lineTo(i*2, h/2+waveG[i]); ctxG.stroke();
-        ctxG.shadowBlur = 0;
+        ctxI2.clearRect(0,0,150,85); ctxI2.strokeStyle = col; ctxI2.lineWidth = 1; ctxI2.beginPath();
+        let noise = lockedState ? 0 : 20;
+        ctxI2.arc(75, 42, 25 + (Math.random()-0.5)*noise, 0, Math.PI*2); ctxI2.stroke();
 
-        // STATIC PARTICLES (NOISE INSIDE WAVE)
-        if (tempK > 400) {
-            let density = Math.floor(tempK/500); 
-            if(density>200) density=200;
-            ctxG.fillStyle = "rgba(255, 255, 255, 0.8)";
-            for(let i=0; i<density; i++) {
-                let rx = Math.random() * wg;
-                let waveY = h/2 + Math.sin((time*0.1) - (rx/2)*0.1)*(h*0.3);
-                let ry = waveY + (Math.random()-0.5) * (tempK/2000); 
-                ctxG.fillRect(rx, ry, 1.5, 1.5);
-            }
-        }
-        
-        // Monitor text color for Stress Test
-        if (step === 2 || step === 3) {
-            ui.dephasingLabel.style.color = 'var(--diamond)';
-            ui.gravesStat.style.color = 'var(--diamond)';
-        } else {
-            ui.dephasingLabel.style.color = 'var(--cyan)';
-            ui.gravesStat.style.color = 'var(--cyan)';
-        }
-    }
+        ctxI3.clearRect(0,0,150,85); ctxI3.strokeStyle = col; ctxI3.beginPath();
+        for(let x=0; x<150; x+=2) {
+            let amp = lockedState ? 0 : 20;
+            let y = 42 + (Math.random()-0.5)*amp;
+            ctxI3.lineTo(x, y);
+        }
+        ctxI3.stroke();
+    }
 
-    // EVENT LISTENERS
-    ui.sliderT.addEventListener('input', (e)=>{ torsion=parseFloat(e.target.value); ui.inputT.value=torsion.toFixed(4); updateState(); });
-    ui.inputT.addEventListener('input', (e)=>{ torsion=parseFloat(e.target.value); if(!isNaN(torsion)){ui.sliderT.value=torsion; updateState();} });
-    
-    // THERMAL INPUT HANDLERS
-    ui.sliderK.addEventListener('input', (e)=>{ 
-        if(step < 2) return; // Locked until fabricated
-        let tempRaw = parseFloat(e.target.value); 
-        ui.inputK.value = Math.floor(calcTemp(tempRaw));
-        updateState(); 
-    });
-    ui.inputK.addEventListener('input', (e)=>{
-        if(step < 2) return; // Locked until fabricated
-        let k = parseFloat(e.target.value);
-        if(!isNaN(k)) { 
-            tempK = k; tempRaw = calcRaw(k); 
-            ui.sliderK.value = tempRaw; 
-            updateState(); 
-        }
-    });
+    let waveS=[], waveG=[];
+    function drawMonitors() {
+        const w=ctxT.canvas.width, h=ctxT.canvas.height;
+        ctxT.clearRect(0,0,w,h);
+        
+        let isAligned = (step > 0 || inWindow());
+        
+        // LEFT MONITOR: ENTROPY/ALIGNMENT
+        if (isAligned) {
+            ui.entropyLabel.innerText = "PHONON ALIGNMENT (166)";
+            let monitorColor = (step === 2 || step === 3) ? 'var(--diamond)' : 'var(--cyan)';
+            ui.entropyLabel.style.color = monitorColor;
+            ui.slackStat.style.color = monitorColor;
+            ui.slackStat.innerText = "ALIGNED"; 
+            
+            ctxT.strokeStyle = monitorColor; 
+            ctxT.lineWidth = 1 + (tempK/20000); 
+            ctxT.shadowColor = monitorColor; 
+            ctxT.shadowBlur = (tempK > 1000) ? 5 + (tempK/5000) : 0; 
+            
+            ctxT.beginPath(); ctxT.moveTo(0, h/2); ctxT.lineTo(w, h/2); ctxT.stroke();
+            ctxT.shadowBlur = 0;
+        } else {
+            ui.entropyLabel.innerText = "PHONON ENTROPY (137)";
+            ui.entropyLabel.style.color = "#666";
+            
+            // ACCURATE ENTROPY SCALING (IMMEDIATE CHAOS)
+            let amp = (tempK > 300) ? (tempK/100) * 10 : (tempK/300) * 10;
+            if(amp>h/2) amp=h/2;
+            waveS.push((Math.random()-0.5)*amp*2); if(waveS.length>w/2) waveS.shift();
+            
+            ctxT.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+            ctxT.lineWidth = 1;
+            ctxT.beginPath(); for(let i=0;i<waveS.length;i++) ctxT.lineTo(i*2, h/2+waveS[i]); ctxT.stroke();
 
-    ui.btnCryo.addEventListener('click', () => setEnv('CRYO'));
-    ui.btnRoom.addEventListener('click', () => setEnv('ROOM'));
+            // Status Update for Extreme Entropy
+            if (tempK > 400 && tempK <= 800) ui.slackStat.innerText = "DANGER";
+            else if (tempK > 800) ui.slackStat.innerText = "MELTING";
+            else ui.slackStat.innerText = "CRITICAL";
+            ui.slackStat.style.color = getComputedStyle(document.documentElement).getPropertyValue('--active-color');
+        }
 
-    // Init
-    resize(); 
-    setEnv('ROOM');
-    // Ensure thermal control starts locked (default state for step 0)
-    ui.sliderK.classList.add('locked-input');
-    ui.inputK.classList.add('locked-input');
-    ui.wrapK.classList.add('locked-input');
-    draw(); 
-    ui.inputT.value = "0.0000";
+        // RIGHT MONITOR: NATIVE DEPHASING
+        const wg=ctxG.canvas.width;
+        ctxG.clearRect(0,0,wg,h);
+        
+        let gVal = Math.sin(time*0.1)*(h*0.3);
+        
+        // ADD JITTER
+        let jitterAmp = 0;
+        if (tempK > 400) jitterAmp = (tempK/10000);
+        gVal += (Math.random()-0.5) * jitterAmp;
+        
+        waveG.push(gVal); if(waveG.length>wg/2) waveG.shift();
+        
+        // GLOW & COLOR
+        let monitorColor = (step === 2 || step === 3) ? 'var(--diamond)' : '#00ffcc';
+        
+        let glow = 0;
+        if (tempK > 400) glow = 10 + (tempK/2000); 
+
+        ctxG.strokeStyle = monitorColor; 
+        ctxG.lineWidth = 3; 
+        ctxG.shadowColor = monitorColor; 
+        ctxG.shadowBlur = glow;
+        
+        ctxG.beginPath(); for(let i=0;i<waveG.length;i++) ctxG.lineTo(i*2, h/2+waveG[i]); ctxG.stroke();
+        ctxG.shadowBlur = 0;
+
+        // STATIC PARTICLES (NOISE INSIDE WAVE)
+        if (tempK > 400) {
+            let density = Math.floor(tempK/500); 
+            if(density>200) density=200;
+            ctxG.fillStyle = "rgba(255, 255, 255, 0.8)";
+            for(let i=0; i<density; i++) {
+                let rx = Math.random() * wg;
+                let waveY = h/2 + Math.sin((time*0.1) - (rx/2)*0.1)*(h*0.3);
+                let ry = waveY + (Math.random()-0.5) * (tempK/2000); 
+                ctxG.fillRect(rx, ry, 1.5, 1.5);
+            }
+        }
+        
+        // Monitor text color for Stress Test
+        if (step === 2 || step === 3) {
+            ui.dephasingLabel.style.color = 'var(--diamond)';
+            ui.gravesStat.style.color = 'var(--diamond)';
+        } else {
+            ui.dephasingLabel.style.color = 'var(--cyan)';
+            ui.gravesStat.style.color = 'var(--cyan)';
+        }
+    }
+
+    // EVENT LISTENERS
+    ui.sliderT.addEventListener('input', (e)=>{ torsion=parseFloat(e.target.value); ui.inputT.value=torsion.toFixed(4); updateState(); });
+    // Torsion input changes slider value
+    ui.inputT.addEventListener('input', (e)=>{ 
+        let t = parseFloat(e.target.value);
+        if(!isNaN(t)) {
+            t = Math.min(Math.max(t, 0), 10);
+            torsion = t; 
+            ui.sliderT.value = t; 
+            updateState();
+        } 
+    });
+    
+    // THERMAL INPUT HANDLERS
+    ui.sliderK.addEventListener('input', (e)=>{ 
+        if(step < 2) return; 
+        let tempRaw = parseFloat(e.target.value); 
+        ui.inputK.value = Math.floor(calcTemp(tempRaw));
+        updateState(); 
+    });
+    ui.inputK.addEventListener('input', (e)=>{
+        if(step < 2) return; 
+        let k = parseFloat(e.target.value);
+        if(!isNaN(k)) { 
+            tempK = k; tempRaw = calcRaw(k); 
+            ui.sliderK.value = tempRaw; 
+            updateState(); 
+        }
+    });
+
+    ui.btnCryo.addEventListener('click', () => setEnv('CRYO'));
+    ui.btnRoom.addEventListener('click', () => setEnv('ROOM'));
+
+    // Init
+    resize(); 
+    setEnv('ROOM');
+    // Ensure thermal control starts locked (default state for step 0)
+    ui.sliderK.classList.add('locked-input');
+    ui.inputK.classList.add('locked-input');
+    ui.wrapK.classList.add('locked-input');
+    draw(); 
+    ui.inputT.value = "0.0000";
 
 </script>
 </body>
