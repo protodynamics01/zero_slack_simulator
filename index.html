@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES-LAW MASTER SIMULATOR | DEFINITIVE</title>
+    <title>GRAVES-LAW MASTER SIMULATOR | MANUAL TRIGGER</title>
     <style>
         :root {
             --primary: #00ffcc;       /* Zero Slack Cyan */
@@ -73,6 +73,21 @@
             border-color: var(--active-color);
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
+        
+        /* ENGAGE BUTTON SPECIFIC */
+        #btn-engage {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        #btn-engage:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
 
         /* INPUTS (Extended Decimals) */
         input[type=number] {
@@ -137,7 +152,7 @@
 <body>
 
 <div id="sidebar">
-    <div class="header">GRAVES PROTO-KERNEL v12</div>
+    <div class="header">GRAVES PROTO-KERNEL v13</div>
 
     <div class="control-group">
         <label>Projection Mode (α⁻¹)</label>
@@ -154,6 +169,7 @@
     <div class="control-group">
         <label>Torsion Angle (deg)</label>
         <input type="number" id="twist-num" step="0.00000001" placeholder="5.03700000">
+        <button id="btn-engage">ENGAGE LOCK</button>
         <input type="range" id="twist-slider" min="4.5" max="5.5" step="0.00001">
     </div>
 
@@ -195,9 +211,9 @@
     const LOCK_MIN = 5.0370;
     const LOCK_MAX = 5.0375;
     
-    // EXACT CONSTANTS - UPDATED TO 20-DIGIT PRECISION
+    // EXACT CONSTANTS
     const VAL_CODATA = "137.0359992064";
-    const VAL_GRAVES = "166.0836769985"; // Display truncated for UI space
+    const VAL_GRAVES = "166.0836769985"; 
     const VAL_GRAVES_FULL = "166.083676998498043210"; 
     const VAL_BRIDGE = "497.3454688700"; 
 
@@ -220,6 +236,7 @@
     
     const btnArt = document.getElementById('btn-artifact');
     const btnNat = document.getElementById('btn-native');
+    const btnEngage = document.getElementById('btn-engage');
     const manifesto = document.getElementById('manifesto');
     
     const slider = document.getElementById('twist-slider');
@@ -243,28 +260,38 @@
             });
         }
         
-        // Setup Inputs
+        // --- INPUT HANDLERS ---
+        // 1. Slider updates immediately (Preview)
         slider.addEventListener('input', (e) => {
-            updatePhysics(parseFloat(e.target.value));
-            numInput.value = parseFloat(e.target.value).toFixed(8);
+            let val = parseFloat(e.target.value);
+            curTwist = val;
+            numInput.value = val.toFixed(8);
         });
         
-        numInput.addEventListener('change', (e) => {
-            updatePhysics(parseFloat(e.target.value));
-            slider.value = parseFloat(e.target.value);
+        // 2. Typing does NOT update physics immediately
+        // 3. Button Click ENGAGES the lock
+        btnEngage.addEventListener('click', () => {
+            let val = parseFloat(numInput.value);
+            if(!isNaN(val)) {
+                curTwist = val;
+                slider.value = val;
+            }
+        });
+        
+        // 4. Enter key also ENGAGES
+        numInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                btnEngage.click();
+            }
         });
         
         // Initial Mode
         setMode('native');
-        updatePhysics(5.0000);
+        curTwist = 5.0000;
         numInput.value = "5.00000000";
         slider.value = 5.0000;
         
         loop();
-    }
-    
-    function updatePhysics(val) {
-        if(!isNaN(val)) curTwist = val;
     }
 
     function setMode(m) {
