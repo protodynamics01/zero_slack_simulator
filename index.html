@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES-LAW MASTER SIMULATOR | FINAL</title>
+    <title>GRAVES-LAW MASTER SIMULATOR | DEFINITIVE</title>
     <style>
         :root {
             --primary: #00ffcc;       /* Zero Slack Cyan */
@@ -21,7 +21,7 @@
             height: 100vh; 
             overflow: hidden;
             display: grid; 
-            grid-template-columns: 400px 1fr; 
+            grid-template-columns: 420px 1fr; 
         }
         
         /* SIDEBAR */
@@ -137,13 +137,13 @@
 <body>
 
 <div id="sidebar">
-    <div class="header">GRAVES PROTO-KERNEL v10</div>
+    <div class="header">GRAVES PROTO-KERNEL v12</div>
 
     <div class="control-group">
         <label>Projection Mode (α⁻¹)</label>
         <div class="btn-group">
-            <button id="btn-artifact" onclick="setMode('artifact')">CODATA (137.036)</button>
-            <button id="btn-native" class="active" onclick="setMode('native')">GRAVES (166.080)</button>
+            <button id="btn-artifact" onclick="setMode('artifact')">CODATA (137)</button>
+            <button id="btn-native" class="active" onclick="setMode('native')">GRAVES (166)</button>
         </div>
     </div>
 
@@ -169,8 +169,8 @@
             <span class="metric-val">3.10000000 Å</span>
         </div>
         <div class="metric-row">
-            <span>Active Constant (α⁻¹)</span>
-            <span id="val-constant" class="metric-val">166.08000000</span>
+            <span>Active Constant</span>
+            <span id="val-constant" class="metric-val">166.08367699</span>
         </div>
     </div>
 
@@ -195,10 +195,17 @@
     const LOCK_MIN = 5.0370;
     const LOCK_MAX = 5.0375;
     
+    // EXACT CONSTANTS - UPDATED TO 20-DIGIT PRECISION
+    const VAL_CODATA = "137.0359992064";
+    const VAL_GRAVES = "166.0836769985"; // Display truncated for UI space
+    const VAL_GRAVES_FULL = "166.083676998498043210"; 
+    const VAL_BRIDGE = "497.3454688700"; 
+
     // TEXT DATA
     const MANIFESTOS = {
-        artifact: "STATUS: ARTIFACT MODE\n\nCONSTANTS: CODATA 2018 Standard\nVALUE: 137.03599908\n\nThe material system fights the vacuum. Standard thermodynamics apply. High noise floor expected outside the manifold window.",
-        native: "STATUS: NATIVE MODE\n\nCONSTANTS: Graves-Law Ideal\nVALUE: 166.08000000\n\nThe geometry matches the vacuum impedance. Perfect cancellation of forces. This is the Zero-Slack condition."
+        artifact: "STATUS: ARTIFACT MODE\n\nCONSTANTS: CODATA 2018\nVALUE: " + VAL_CODATA + "\n\nStandard physics imposes thermodynamic debt (Slack > 8 eV). The geometry must fight the vacuum constants to achieve stability.",
+        native: "STATUS: NATIVE MODE\n\nCONSTANTS: Graves Native\nVALUE: " + VAL_GRAVES_FULL + "\n\nTheoretical ideal. The geometry matches the vacuum impedance. Perfect cancellation of forces expected.",
+        locked: "STATUS: BRIDGE ESTABLISHED\n\nCONSTANTS: Effective Bridged State\nVALUE: " + VAL_BRIDGE + "\n\nThe 137 and 166 manifolds are bridged. The local vacuum constant has shifted. Slack is eliminated."
     };
 
     // --- STATE ---
@@ -269,13 +276,13 @@
             btnArt.className = '';
             root.style.setProperty('--active-color', 'var(--primary)');
             manifesto.innerText = MANIFESTOS.native;
-            valConst.innerText = "166.08000000";
+            valConst.innerText = VAL_GRAVES;
         } else {
             btnNat.className = '';
             btnArt.className = 'active';
-            root.style.setProperty('--active-color', 'var(--primary)'); // NOW GREEN TOO
+            root.style.setProperty('--active-color', 'var(--primary)'); 
             manifesto.innerText = MANIFESTOS.artifact;
-            valConst.innerText = "137.03599908";
+            valConst.innerText = VAL_CODATA;
         }
     }
 
@@ -298,12 +305,20 @@
         let displaySlack = 0;
         
         if (isLocked) {
-            // WE ARE INSIDE THE MANIFOLD
-            // BOTH MODES NOW SHOW GREEN LOCK (Because Geometry Won)
+            // WE ARE INSIDE THE MANIFOLD (BRIDGE STATE)
             displaySlack = 0.00000000;
-            statusText.innerText = "STABLE";
-            lockOverlay.innerText = "ZERO SLACK LOCK";
+            statusText.innerText = "BRIDGE LOCK";
+            lockOverlay.innerText = "ZERO SLACK";
             lockOverlay.style.opacity = 1;
+            
+            // TRANSMUTE THE CONSTANT TO THE EFFECTIVE VALUE
+            valConst.innerText = VAL_BRIDGE;
+            valConst.style.color = "#00ffcc";
+            valConst.style.textShadow = "0 0 10px #00ffcc";
+            
+            // Update Manifesto to explain the Bridge
+            manifesto.innerText = MANIFESTOS.locked;
+            manifesto.style.borderLeftColor = "#00ffcc";
             
             // Set Global Color to Green (Cyan)
             document.documentElement.style.setProperty('--active-color', '#00ffcc');
@@ -317,6 +332,17 @@
             
             statusText.innerText = "HIGH DEBT";
             lockOverlay.style.opacity = 0;
+            
+            // Reset Constant to Base Mode Value
+            if (mode === 'native') {
+                valConst.innerText = VAL_GRAVES;
+                manifesto.innerText = MANIFESTOS.native;
+            } else {
+                valConst.innerText = VAL_CODATA;
+                manifesto.innerText = MANIFESTOS.artifact;
+            }
+            valConst.style.color = "var(--active-color)";
+            valConst.style.textShadow = "none";
             
             // Set Global Color to Red
             document.documentElement.style.setProperty('--active-color', '#ff3333');
