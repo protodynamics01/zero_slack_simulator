@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v36.7 | ZERO-SLACK BLUEPRINT</title>
+    <title>GRAVES CONSOLE v36.10 | LIVE DEPHASING</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -179,6 +179,25 @@
         .col-cyan { color: var(--cyan); text-shadow: 0 0 0 var(--cyan); }
         .col-grey { color: #888; }
         
+        .hud-label {
+            position: absolute; top: 20px; left: 20px; z-index: 10;
+            font-family: 'Courier New'; font-weight: bold; color: #666; font-size: 12px;
+            max-width: 650px; pointer-events: none;
+        }
+        .target-id {
+            font-size: 14px; color: #888; margin-bottom: 4px; display: block;
+            text-shadow: 0 0 2px rgba(0,0,0,0.8);
+        }
+        .target-comp {
+            font-size: 11px; color: #555; margin-bottom: 8px; display: block;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;
+        }
+        .blueprint-info {
+            font-size: 11px; margin-top: 8px; color: var(--cyan);
+            line-height: 1.4; display: none; white-space: pre-wrap;
+            text-shadow: 0 0 5px rgba(0,255,204,0.3);
+        }
+        
         canvas.waveform { width: 100%; height: 100%; display: block; }
     </style>
 </head>
@@ -187,7 +206,7 @@
     <div id="pulse-overlay"></div>
 
     <div id="global-header">
-        <div>GRAVES CONSOLE v36.7 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
+        <div>GRAVES CONSOLE v36.10 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
         <div class="header-controls">
             <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
             <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
@@ -252,7 +271,12 @@
 
         <div id="main-stage">
             <div id="view-container">
-                <div class="hud-label" style="position:absolute; top:20px; left:20px; z-index:10; font-family:'Courier New'; font-weight:bold; color:#666; font-size:12px;">VISUAL: <span id="visual-name">LATTICE CONFIGURATION</span><br><span style="opacity:0.6; font-size:0.9em;">STATUS: <span id="sys-status-text" style="color:var(--red)">UNSTABLE</span></span></div>
+                <div class="hud-label">
+                    <span id="target-id" class="target-id">LOADING TARGET...</span>
+                    <span id="target-comp" class="target-comp"></span>
+                    <div id="blueprint-data" class="blueprint-info"></div>
+                    <br><span style="opacity:0.6; font-size:0.9em; margin-top:5px; display:block;">STATUS: <span id="sys-status-text" style="color:var(--red)">UNSTABLE</span></span>
+                </div>
                 <div id="warning-box" class="warn-red">GEOMETRY UNSTABLE<br><span style="font-size:0.5em; letter-spacing:1px;">UNDER TORQUE</span></div>
                 <div id="insets-container">
                     <div class="inset-box"><div class="inset-label">POTENTIAL (2D)</div><canvas id="inset1" class="inset-canvas"></canvas></div>
@@ -284,6 +308,14 @@
     </div>
 
 <script>
+    // --- BLUEPRINT DATA (EDIT THIS BLOCK FOR NEW RANKS) ---
+    const BLUEPRINT_DATA = {
+        rank: "0001",
+        name: "Zero-Slack Turbine Blade",
+        composition: "Ni–20Co–15Cr–6Al–5Ti–4Mo–2W–1Nb–0.1Hf",
+        specs: "Applications: (1) Jet engine hot section; (2) 1 blade → 1850 °C capability, 100,000 h life; (3) Ni–Al icosahedral γ′ lattice.\nProduction yield: 99.999% efficiency in sims; cost: $0.05/g via vapor deposition.\nEnables all downstream ranks (2–900)."
+    };
+
     // --- TIER 0 AXIOMATIC CONSTANTS ---
     const ALPHA_NATIVE = 166.08367698920713463; 
     const PHI = 1.618033988749895;
@@ -296,21 +328,7 @@
     const TORSION_STEP_COARSE = 0.1; const TORSION_STEP_FINE = 0.0001;
 
     // --- STATE ---
-    // STEP 0: HUNT, STEP 1: LOCKED(THERMAL OPEN), STEP 2: CONFIRM, STEP 3: FLASH/BLUEPRINT, STEP 4: RESET
     let torsion = 0.0; let tempK = 300; let step = 0; let time = 0; let audioCtx = null;
-
-    // --- ATOM DEFINITIONS ---
-    const TYPES = {
-        Ni: {c:'#e0e0e0', s:'Ni', r:6}, // Center (Silver)
-        Co: {c:'#3366ff', s:'Co', r:5}, // Vertices (Blue)
-        Cr: {c:'#9933cc', s:'Cr', r:5}, // Vertices (Purple)
-        Al: {c:'#ffff33', s:'Al', r:4},
-        Ti: {c:'#aaaaaa', s:'Ti', r:4},
-        Mo: {c:'#00ff00', s:'Mo', r:5}, // Faces (Green)
-        W:  {c:'#ffaa00', s:'W',  r:5}, // Faces (Orange)
-        Nb: {c:'#00ffff', s:'Nb', r:4}, // Edges (Cyan)
-        Hf: {c:'#ff0000', s:'Hf', r:3}  // Stabilizer (Red)
-    };
 
     // --- DOM REFERENCES ---
     const ui = {
@@ -339,7 +357,9 @@
         pulseOverlay: document.getElementById('pulse-overlay'),
         clkJit: document.getElementById('clk-jit'),
         clkCoh: document.getElementById('clk-coh'),
-        visualName: document.getElementById('visual-name')
+        targetId: document.getElementById('target-id'),
+        targetComp: document.getElementById('target-comp'),
+        blueprintDiv: document.getElementById('blueprint-data')
     };
 
     const ctxM = document.getElementById('mainCanvas').getContext('2d');
@@ -350,6 +370,12 @@
     const ctxI2 = document.getElementById('inset2').getContext('2d');
     const ctxI3 = document.getElementById('inset3').getContext('2d');
     const ctxI4 = document.getElementById('inset4').getContext('2d');
+
+    // --- INITIALIZATION ---
+    function initConsole() {
+        ui.targetId.innerText = `TARGET: RANK ${BLUEPRINT_DATA.rank} // ${BLUEPRINT_DATA.name.toUpperCase()}`;
+        ui.targetComp.innerText = `COMPOSITION: ${BLUEPRINT_DATA.composition}`;
+    }
 
     // --- PRECISION CONTROL ---
     function setTorsion(val) {
@@ -496,11 +522,21 @@
             ui.warn.style.display="none"; ui.slack.innerText="0.000000 eV"; setTheme('diamond'); 
             ui.thermalLabel.classList.add('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.add('thermal-label-white'); 
             ui.entropyLabel.classList.add('white-header-text'); ui.dephasingLabel.classList.add('white-header-text'); 
-            ui.visualName.innerText = "ZERO-SLACK QUASICRYSTAL"; ui.visualName.style.color = "var(--diamond)";
+            
+            ui.targetId.style.color = "var(--cyan)";
+            ui.targetComp.style.color = "var(--cyan)";
+            
+            ui.blueprintDiv.style.display = "block";
+            ui.blueprintDiv.innerText = BLUEPRINT_DATA.specs;
             return; 
         }
         
         ui.thermalLabel.classList.remove('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.remove('thermal-label-white'); ui.entropyLabel.classList.remove('white-header-text'); ui.dephasingLabel.classList.remove('white-header-text');
+        
+        // Reset colors
+        ui.targetId.style.color = "#888";
+        ui.targetComp.style.color = "#555";
+        ui.blueprintDiv.style.display = "none";
         
         if(step < 3) {
             ui.sliderK.classList.remove('locked-input'); ui.inputK.classList.remove('locked-input'); ui.wrapK.classList.remove('locked-input');
@@ -515,10 +551,9 @@
                 ui.btn.className="main-btn can-lock"; ui.btn.innerText="READY TO LOCK GEOMETRY"; 
             }
             ui.slack.innerText="0.000000 eV"; ui.statText.innerText="WINDOW MATCHED"; ui.statText.style.color="var(--cyan)"; ui.slackStat.innerText="SHUNTED"; ui.slackStat.style.color="var(--cyan)"; ui.gravesStat.innerText="LOCKED"; ui.gravesStat.style.color="var(--cyan)"; ui.lblCurrent.innerText="166.083 (NATIVE)"; ui.lblCurrent.style.color="var(--cyan)"; 
-            ui.visualName.innerText = "ZERO-SLACK QUASICRYSTAL"; ui.visualName.style.color = "var(--cyan)";
+            ui.targetId.style.color = "var(--cyan)";
             logOnce(">>> WINDOW MATCHED. READY.");
         } else {
-            ui.visualName.innerText = "LATTICE CONFIGURATION"; ui.visualName.style.color = "inherit";
             if(step===0) {
                 ui.btn.className="main-btn"; ui.btn.innerText="TEST LOCK PARAMETERS"; 
                 ui.warn.style.display=(forcedWarn||(torsion>0.1&&!isLocked()))?"block":"none"; 
@@ -542,45 +577,40 @@
                     ui.lblCurrent.innerText="UNDER TORQUE (ARTIFACT)"; ui.lblCurrent.style.color="var(--red)"; 
                 }
             }
-            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
+            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
         }
     }
     function setTheme(c) { ui.body.className="mode-"+c; document.documentElement.style.setProperty('--active-color', c==='red'?'#ff3333':(c==='orange'?'#ffaa00':(c==='diamond'?'#ffffff':'#00ffcc'))); }
     let lastLog=""; function log(msg) { ui.console.innerHTML+=`<div><span class="log-hl">>></span> ${msg}</div>`; ui.console.scrollTop=ui.console.scrollHeight; }
     function logOnce(msg) { if(lastLog!==msg){ log(msg); lastLog=msg; } }
 
-    // --- EXACT TURBINE BLADE LATTICE (Graves-Law Quasicrystalline Ni-Superalloy) ---
+    // --- ANIMATION KERNEL ---
+    const TYPES = {
+        Ni: {c:'#e0e0e0', s:'Ni', r:6},
+        Co: {c:'#3366ff', s:'Co', r:5},
+        Cr: {c:'#9933cc', s:'Cr', r:5},
+        Mo: {c:'#00ff00', s:'Mo', r:5},
+        W:  {c:'#ffaa00', s:'W',  r:5},
+        Nb: {c:'#00ffff', s:'Nb', r:4},
+        Hf: {c:'#ff0000', s:'Hf', r:3}
+    };
+
     let atoms=[];
     function initAtoms() {
         atoms = [];
-        // Center: Ni (0,0,0)
-        atoms.push({x:0, y:0, z:0, type:TYPES.Ni});
-
-        // 12 Vertices (6 Co + 6 Cr)
         const v = [[0,1,PHI],[0,-1,PHI],[0,1,-PHI],[0,-1,-PHI],[1,PHI,0],[-1,PHI,0],[1,-PHI,0],[-1,-PHI,0],[PHI,0,1],[-PHI,0,1],[PHI,0,-1],[-PHI,0,-1]];
+        atoms.push({x:0, y:0, z:0, type:TYPES.Ni});
         v.forEach((p, i) => {
             let t = (i%2===0) ? TYPES.Co : TYPES.Cr;
             atoms.push({x:p[0]*40, y:p[1]*40, z:p[2]*40, type:t});
         });
-
-        // Shell 1: 20 Faces (Mo/W at centroids)
-        // Approximate centroids by averaging 3 vertices (scaled)
-        // Simplified representation: Dual Icosahedron points
-        const duals = [[1,1,1],[1,1,-1],[1,-1,1],[-1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]]; // subset of 20
+        const duals = [[1,1,1],[1,1,-1],[1,-1,1],[-1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
         duals.forEach((p, i) => {
             let t = (i%2===0) ? TYPES.Mo : TYPES.W;
             atoms.push({x:p[0]*70, y:p[1]*70, z:p[2]*70, type:t});
         });
-
-        // Shell 2: Edges (Nb)
-        v.forEach((p) => {
-            atoms.push({x:p[0]*90, y:p[1]*90, z:p[2]*90, type:TYPES.Nb}); 
-        });
-
-        // Stabilization (Hf)
-        v.forEach((p) => {
-            atoms.push({x:p[0]*110, y:p[1]*110, z:p[2]*110, type:TYPES.Hf});
-        });
+        v.forEach((p) => { atoms.push({x:p[0]*90, y:p[1]*90, z:p[2]*90, type:TYPES.Nb}); });
+        v.forEach((p) => { atoms.push({x:p[0]*110, y:p[1]*110, z:p[2]*110, type:TYPES.Hf}); });
     }
     initAtoms();
 
@@ -598,17 +628,14 @@
         ctxM.lineWidth=(step>=3)?1:0.5; ctxM.strokeStyle=(step>=3)?'rgba(255,255,255,0.4)':ctxB.strokeStyle; ctxM.beginPath();
         for(let i=0;i<proj.length;i++) for(let j=i+1;j<proj.length;j++) if(Math.hypot(proj[i].x-proj[j].x,proj[i].y-proj[j].y)<100*proj[i].s) { ctxM.moveTo(proj[i].x,proj[i].y); ctxM.lineTo(proj[j].x,proj[j].y); } ctxM.stroke();
         
-        // DRAW ATOMS OR TEXT
         proj.forEach(p=>{ 
             if(step>=3) {
-                // BLUEPRINT MODE: TEXT
                 ctxM.fillStyle = p.type.c;
                 ctxM.font = "bold 10px Courier New";
                 ctxM.textAlign = "center";
                 ctxM.textBaseline = "middle";
                 ctxM.fillText(p.type.s, p.x, p.y);
             } else {
-                // STANDARD MODE: CIRCLES
                 ctxM.fillStyle=(step>=3)?'#fff':((step<1&&jitter>10)?ctxB.strokeStyle:p.type.c); 
                 ctxM.beginPath(); ctxM.arc(p.x,p.y,p.type.r*p.s,0,Math.PI*2); ctxM.fill(); 
             }
@@ -621,7 +648,6 @@
         if(locked) { ctxI3.lineWidth=1.5; for(let t=0;t<Math.PI*2;t+=0.1) { let x=75+30*Math.sin(t*3+time*0.1), y=42+30*Math.sin(t*2); if(t===0)ctxI3.moveTo(x,y); else ctxI3.lineTo(x,y); } }
         else { ctxI3.lineWidth=1; for(let x=0;x<150;x+=5) ctxI3.lineTo(x,42+(Math.random()-0.5)*(tempK/5)); } ctxI3.stroke();
 
-        // 4TH INSET: GAUGE
         ctxI4.clearRect(0,0,150,85);
         let grad = ctxI4.createLinearGradient(0,0,150,0);
         grad.addColorStop(0, "#ff3333"); grad.addColorStop(0.5, "#ffaa00"); grad.addColorStop(1, "#ff3333");
@@ -642,7 +668,18 @@
         } else {
             let amp=Math.min(ht/2,(tempK/300)*10); waveS.push((Math.random()-0.5)*amp*2); if(waveS.length>wt/2) waveS.shift();
             ctxT.strokeStyle=col; ctxT.lineWidth=1; ctxT.beginPath(); for(let i=0;i<waveS.length;i++) ctxT.lineTo(i*2,ht/2+waveS[i]); ctxT.stroke();
-            let gVal=Math.sin(time*0.1)*(ht*0.3); let jAmp=(tempK>400)?(tempK/10000):0; gVal+=(Math.random()-0.5)*jAmp*50; waveG.push(gVal); if(waveG.length>wt/2) waveG.shift();
+            
+            // LIVE DEPHASING LOGIC
+            let torsionDist = Math.abs(torsion - LOCK_CENTER);
+            let gFreq = 0.1 + (torsionDist * 0.2); // Freq increases with error
+            let gAmp = Math.min(ht/2, 10 + (torsionDist * 20)); // Amp increases with error
+            
+            // Thermal Noise
+            let noise = (tempK > 300) ? (Math.random()-0.5) * (tempK/1000) : 0;
+            
+            let gVal = Math.sin(time*gFreq)*gAmp + noise;
+            waveG.push(gVal); if(waveG.length>wt/2) waveG.shift();
+            
             ctxG.strokeStyle=(step<2&&!locked&&torsion>LOCK_MAX)?'#ffaa00':col; ctxG.lineWidth=2; ctxG.beginPath(); for(let i=0;i<waveG.length;i++) ctxG.lineTo(i*2,ht/2+waveG[i]); ctxG.stroke();
         }
         if(locked) {
@@ -650,7 +687,7 @@
             ui.gravesStat.innerText="LOCKED"; ui.gravesStat.style.color=(step>=3)?'var(--diamond)':'var(--cyan)';
         } else {
             ui.entropyLabel.innerText="PHONON ENTROPY (137)"; ui.slackStat.innerText=tempK>800?"MELTING":"CRITICAL"; ui.slackStat.style.color=col;
-            ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
+            ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
         }
         if(step>=3) { ui.dephasingLabel.style.color='var(--diamond)'; ui.gravesStat.style.color='var(--diamond)'; } else ui.dephasingLabel.style.color='var(--cyan)';
         requestAnimationFrame(draw);
@@ -661,7 +698,7 @@
     ui.inputK.addEventListener('input',(e)=>{ if(step<3){ let k=parseFloat(e.target.value); if(!isNaN(k)){ tempK=k; ui.sliderK.value=calcRaw(k); updateState(); } } });
 
     // START
-    resize(); setEnv('ROOM'); setTorsion(0);
+    resize(); setEnv('ROOM'); setTorsion(0); initConsole();
     draw(); 
 </script>
 </body>
