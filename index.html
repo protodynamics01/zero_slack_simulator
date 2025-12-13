@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v36.10 | LIVE DEPHASING</title>
+    <title>GRAVES CONSOLE v36.11 | THERMAL LOCKOUT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -129,6 +129,7 @@
         button.main-btn.confirm-mode { background: rgba(255, 170, 0, 0.2); color: var(--orange); border-color: var(--orange); box-shadow: 0 0 30px rgba(255,170,0,0.3); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.global-pulse { background: #fff; color: #000; border: 2px solid #fff; box-shadow: 0 0 50px rgba(255,255,255,0.5); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.reset-mode { background: rgba(255, 50, 50, 0.2); color: #ff3333; border-color: #ff3333; cursor: pointer; animation: none; }
+        button.main-btn.thermal-lock { background: rgba(100, 0, 0, 0.3); color: #ff5555; border-color: #ff3333; cursor: not-allowed; animation: none; box-shadow: none; opacity: 0.7; }
         
         @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         @keyframes pulseFast { 0% { box-shadow: 0 0 20px rgba(255,255,255,0.2); } 100% { box-shadow: 0 0 60px rgba(255,255,255,0.6); } }
@@ -206,7 +207,7 @@
     <div id="pulse-overlay"></div>
 
     <div id="global-header">
-        <div>GRAVES CONSOLE v36.10 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
+        <div>GRAVES CONSOLE v36.11 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
         <div class="header-controls">
             <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
             <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
@@ -455,10 +456,16 @@
 
     function handleBtnClick() {
         initAudio();
+        // THERMAL LOCKOUT CHECK
+        if(tempK > 790) {
+            log("!! ABORT: THERMAL LOCKOUT (>790K) !!");
+            playTone(150, 'sawtooth', 0.3);
+            return; 
+        }
+
         // STEP 0 -> 1: LOCK TORSION, KEEP THERMAL OPEN
         if(step===0) {
             if(isLocked()) {
-                if(tempK>50000) { log("!! ABORT: THERMAL OVERLOAD !!"); return; }
                 step=1; 
                 playLockSound();
                 ui.sliderT.classList.add('locked-input'); ui.inputT.disabled=true; ui.wrapT.classList.add('locked-input');
@@ -542,6 +549,22 @@
             ui.sliderK.classList.remove('locked-input'); ui.inputK.classList.remove('locked-input'); ui.wrapK.classList.remove('locked-input');
         }
 
+        // --- THERMAL LOCKOUT LOGIC ---
+        if(tempK > 790 && step < 2) {
+             ui.warn.style.display="block"; 
+             ui.warn.className="warn-red"; 
+             ui.warn.innerHTML="THERMAL LOCKOUT<br><span style='font-size:0.5em'>LIMIT 790 K</span>"; 
+             setTheme('red'); 
+             
+             // Disable button if over limit
+             if(isLocked()) {
+                 ui.btn.className="main-btn thermal-lock"; 
+                 ui.btn.innerText="THERMAL LOCKOUT (>790K)";
+             }
+             return; 
+        }
+
+        // Standard Thermal Warnings
         if(tempK>800&&tempK<49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="THERMAL DECAY<br><span style='font-size:0.5em'>LIMIT 800 K</span>"; setTheme('red'); return; }
         if(tempK>=49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="STRESS TEST<br><span style='font-size:0.5em'>LEDGER LIMIT</span>"; setTheme('red'); return; }
         
@@ -671,8 +694,8 @@
             
             // LIVE DEPHASING LOGIC
             let torsionDist = Math.abs(torsion - LOCK_CENTER);
-            let gFreq = 0.1 + (torsionDist * 0.2); // Freq increases with error
-            let gAmp = Math.min(ht/2, 10 + (torsionDist * 20)); // Amp increases with error
+            let gFreq = 0.1 + (torsionDist * 0.2); 
+            let gAmp = Math.min(ht/2, 10 + (torsionDist * 20)); 
             
             // Thermal Noise
             let noise = (tempK > 300) ? (Math.random()-0.5) * (tempK/1000) : 0;
