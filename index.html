@@ -3,520 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v37.0 | TARGET IDENTIFICATION</title>
+    <title>AEP 5.1 | FABRICATION UNIT (FINAL)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --cyan: #00ffcc;       
-            --diamond: #ffffff;    
-            --red: #ff3333;        
-            --orange: #ffaa00;
-            --bg: #050505;
-            
-            --glass-bg: rgba(8, 8, 8, 0.95);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
-            --font-main: "Inter", system-ui, -apple-system, sans-serif;
-            --font-mono: 'Courier New', monospace;
-            
-            --active-color: var(--red);
-        }
-
+        :root { --cyan: #00ffcc; --diamond: #ffffff; --red: #ff3333; --orange: #ffaa00; --bg: #050505; --glass-bg: rgba(10, 15, 20, 0.95); --glass-border: 1px solid rgba(0, 255, 204, 0.2); --font-main: "Inter", sans-serif; --font-mono: 'Courier New', monospace; }
         * { box-sizing: border-box; user-select: none; }
-
-        body {
-            margin: 0; background-color: var(--bg); color: #e0e0e0;
-            font-family: var(--font-main); height: 100vh; width: 100vw;
-            display: flex; flex-direction: column; overflow: hidden;
-            transition: box-shadow 0.3s;
-        }
-
-        body.mode-red { box-shadow: inset 0 0 50px rgba(255, 51, 51, 0.2); }
-        body.mode-orange { box-shadow: inset 0 0 80px rgba(255, 170, 0, 0.3); }
-        body.mode-cyan { box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.2); }
-        body.mode-diamond { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4); }
-        
-        /* FLASH ANIMATION FOR TRANSITION */
-        body.flash-white { animation: flashWhiteAnim 1.5s forwards; }
-        @keyframes flashWhiteAnim { 0% { background-color: #fff; } 100% { background-color: var(--bg); } }
-
-        /* HEADER */
-        #global-header {
-            background: #000; border-bottom: var(--glass-border); height: 45px;
-            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; font-size: 0.8em; font-weight: 700; letter-spacing: 2px; z-index: 50;
-        }
-        
-        .header-controls { display: flex; gap: 15px; align-items: center; }
-        .icon-btn { cursor: pointer; opacity: 0.6; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
-        .icon-btn:hover { opacity: 1; color: var(--cyan); }
-        
-        /* LAYOUT */
-        #main-container { 
-            display: flex; flex: 1; overflow: hidden; 
-            background: radial-gradient(circle at center, #111 0%, #000 100%); 
-        }
-
-        #sidebar {
-            width: 360px; min-width: 320px; background: var(--glass-bg);
-            border-right: var(--glass-border); padding: 15px;
-            display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
-            flex-shrink: 0; z-index: 40;
-        }
-
-        #main-stage { 
-            flex: 1; display: flex; flex-direction: column; position: relative; 
-            overflow: hidden; min-width: 0; 
-        }
-        #view-container { 
-            flex: 1; position: relative; overflow: hidden; background: #000; min-height: 0; 
-        }
-
-        /* MONITOR PANEL */
-        #monitor-panel { 
-            height: 150px; flex-shrink: 0; display: flex; 
-            background: rgba(0,0,0,0.6); border-top: var(--glass-border); 
-            backdrop-filter: blur(10px); min-width: 0;
-        }
-        .monitor-box { 
-            flex: 1; position: relative; display: flex; flex-direction: column; 
-            padding: 12px; border-right: 1px solid rgba(255,255,255,0.2);
-            min-width: 0; overflow: hidden;
-        }
-        .monitor-box:last-child { border-right: none; }
-
-        .monitor-header { 
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.65em; font-weight: 700; letter-spacing: 1px; color: #666; 
-            margin-bottom: 8px; height: 16px; flex-shrink: 0;
-            white-space: nowrap; overflow: hidden; 
-        }
-        
-        /* UI ELEMENTS */
-        .panel-box { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
-        .label-sm { font-size: 0.7em; color: #888; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
-
-        .proj-bar-container { display: flex; height: 10px; background: #222; border-radius: 2px; overflow: hidden; margin-top: 5px; border: 1px solid #333; }
-        .proj-fill { height: 100%; width: 0%; background: var(--active-color); box-shadow: 0 0 15px var(--active-color); transition: width 0.1s linear, background 0.2s; }
-
-        .env-selector { display: flex; gap: 5px; margin-bottom: 5px; }
-        .env-btn {
-            flex: 1; padding: 8px 5px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); color: #666;
-            font-size: 0.65em; font-weight: bold; cursor: pointer; text-align: center;
-            transition: all 0.2s;
-        }
-        .env-btn:hover { background: rgba(255,255,255,0.1); }
-        .env-btn.active { background: rgba(0, 255, 204, 0.1); border-color: var(--cyan); color: var(--cyan); }
-        .env-btn.active-stress { background: rgba(255, 50, 50, 0.2); border-color: var(--red); color: var(--red); animation: flashRed 1s infinite; }
-
-        .input-wrapper {
-            display: flex; align-items: baseline; justify-content: space-between;
-            background: rgba(255,255,255,0.05); border-radius: 4px; padding: 8px 12px;
-            border: 1px solid transparent; transition: border 0.3s;
-        }
-        .locked-input { opacity: 0.4; pointer-events: none; filter: grayscale(100%); border-color: #333 !important; }
-        .thermal-label-white { color: var(--diamond) !important; }
-        
-        input.val-input { background: transparent; border: none; color: #fff; font-family: var(--font-main); font-size: 1.3em; font-weight: 300; text-align: right; width: 100%; outline: none; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0; cursor: pointer; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #fff; margin-top: -6px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; border-radius: 2px; }
-
-        button.main-btn {
-            width: 100%; padding: 18px; background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1); color: #555;
-            font-family: var(--font-main); font-size: 0.9em; font-weight: 700; letter-spacing: 2px;
-            cursor: not-allowed; transition: all 0.2s ease; margin-top: auto; text-transform: uppercase;
-        }
-        button.main-btn.can-lock { background: rgba(0, 255, 204, 0.15); color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); cursor: pointer; }
-        button.main-btn.ready-fab { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 30px #fff; cursor: pointer; animation: pulseWhite 1s infinite; }
-        button.main-btn.confirm-mode { background: rgba(255, 170, 0, 0.2); color: var(--orange); border-color: var(--orange); box-shadow: 0 0 30px rgba(255,170,0,0.3); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
-        button.main-btn.global-pulse { background: #fff; color: #000; border: 2px solid #fff; box-shadow: 0 0 50px rgba(255,255,255,0.5); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
-        button.main-btn.reset-mode { background: rgba(255, 50, 50, 0.2); color: #ff3333; border-color: #ff3333; cursor: pointer; animation: none; }
-        button.main-btn.thermal-lock { background: rgba(100, 0, 0, 0.3); color: #ff5555; border-color: #ff3333; cursor: not-allowed; animation: none; box-shadow: none; opacity: 0.7; }
-        
-        @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-        @keyframes pulseFast { 0% { box-shadow: 0 0 20px rgba(255,255,255,0.2); } 100% { box-shadow: 0 0 60px rgba(255,255,255,0.6); } }
-        @keyframes flashRed { 0% { opacity:1; } 50% { opacity:0.6; } 100% { opacity:1; } }
-
-        #console-log {
-            margin-top: 10px; border-top: var(--glass-border); padding-top: 10px;
-            font-family: var(--font-mono); font-size: 0.6em; color: #888;
-            height: 90px; overflow-y: hidden; line-height: 1.5;
-        }
-        .log-hl { color: var(--active-color); }
-
-        canvas#bgCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 1; }
-        canvas#mainCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5; }
-        
-        #pulse-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 100;
-            background: #fff; opacity: 0; transition: opacity 0.1s;
-        }
-
-        #warning-box {
-            position: absolute; top: 20px; right: 200px;
-            padding: 10px 20px; font-size: 1.1em; font-weight: 800; letter-spacing: 2px;
-            z-index: 20; display: none; pointer-events: none;
-            backdrop-filter: blur(10px); text-align: right; border-right: 4px solid;
-        }
-        .warn-red { border-color: var(--red); background: rgba(50, 0, 0, 0.4); color: var(--red); text-shadow: 0 0 10px var(--red); }
-        .warn-orange { border-color: var(--orange); background: rgba(50, 30, 0, 0.4); color: var(--orange); text-shadow: 0 0 10px var(--orange); }
-
-        #insets-container {
-            position: absolute; top: 20px; right: 20px; z-index: 15;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .inset-box {
-            width: 150px; height: 85px;
-            background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.2);
-            position: relative; display: flex; flex-direction: column;
-        }
-        .inset-label {
-            position: absolute; top: 5px; left: 5px; font-size: 9px; 
-            color: #888; font-weight: bold; letter-spacing: 1px;
-        }
-
-        .white-header-text { color: var(--diamond) !important; }
-        
-        .mon-val { font-family: var(--font-mono); font-weight: bold; }
-        .col-red { color: var(--red); }
-        .col-cyan { color: var(--cyan); text-shadow: 0 0 0 var(--cyan); }
-        .col-grey { color: #888; }
-        
-        .hud-label {
-            position: absolute; top: 20px; left: 20px; z-index: 10;
-            font-family: 'Courier New'; font-weight: bold; color: #666; font-size: 12px;
-            max-width: 650px; pointer-events: none;
-        }
-        .target-id {
-            font-size: 14px; color: #888; margin-bottom: 4px; display: block;
-            text-shadow: 0 0 2px rgba(0,0,0,0.8);
-        }
-        .target-comp {
-            font-size: 11px; color: #555; margin-bottom: 8px; display: block;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;
-        }
-        .blueprint-info {
-            font-size: 11px; margin-top: 8px; color: var(--cyan);
-            line-height: 1.4; display: none; white-space: pre-wrap;
-            text-shadow: 0 0 5px rgba(0,255,204,0.3);
-        }
-        
-        canvas.waveform { width: 100%; height: 100%; display: block; }
+        body { margin: 0; background-color: var(--bg); color: #e0e0e0; font-family: var(--font-main); height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden; background: radial-gradient(circle at center, #080808 0%, #000 100%); }
+        #global-header { background: rgba(0,0,0,0.9); border-bottom: var(--glass-border); height: 50px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px; z-index: 50; backdrop-filter: blur(5px); }
+        #main-container { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 380px; background: var(--glass-bg); border-right: var(--glass-border); padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; z-index: 40; overflow-y: auto; }
+        #view-container { flex: 1; position: relative; overflow: hidden; background: #000; }
+        .panel-box { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .label-sm { font-size: 0.65em; color: #666; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
+        .data-val { font-family: var(--font-mono); font-size: 1.1em; color: var(--diamond); display: flex; justify-content: space-between; align-items: baseline; }
+        .data-val.cyan { color: var(--cyan); text-shadow: 0 0 15px rgba(0,255,204,0.3); }
+        .data-val.hot { color: var(--red); text-shadow: 0 0 15px var(--red); }
+        .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .inset-box { width: 100%; height: 85px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .inset-label { position: absolute; top: 4px; left: 6px; font-size: 8px; color: #666; font-weight: bold; font-family: var(--font-mono); }
+        .inset-canvas { width: 100%; height: 100%; display: block; }
+        #mini-view { width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; margin-top: 5px; }
+        #miniCanvas { width: 100%; height: 100%; }
+        .action-btn { width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.1); border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main); font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all 0.1s; text-transform: uppercase; box-shadow: 0 0 15px rgba(0, 255, 204, 0.1); margin-top: 10px; }
+        .action-btn:hover { background: rgba(0, 255, 204, 0.2); }
+        .action-btn:disabled { cursor: not-allowed; opacity: 0.8; pointer-events: none; }
+        .btn-cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.1); }
+        .btn-orange-flash { border-color: var(--orange); color: var(--orange); background: rgba(255,170,0,0.1); animation: pulseFast 0.5s infinite alternate; box-shadow: 0 0 15px rgba(255,170,0,0.2); }
+        .btn-white-pulse { border-color: #fff; color: #fff; background: rgba(255,255,255,0.1); animation: pulseWhite 1s infinite alternate; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .btn-restart { border-color: var(--red); color: var(--red); background: rgba(255,50,50,0.1); box-shadow: 0 0 20px rgba(255,50,50,0.2); }
+        @keyframes pulseFast { 0% { opacity: 0.7; } 100% { opacity: 1.0; text-shadow: 0 0 10px var(--orange); } }
+        @keyframes pulseWhite { 0% { box-shadow: 0 0 10px rgba(255,255,255,0.1); } 100% { box-shadow: 0 0 30px rgba(255,255,255,0.4); } }
+        .print-progress-container { height: 4px; background: #222; width: 100%; position: relative; overflow: hidden; border-radius: 2px; }
+        .print-progress-fill { height: 100%; width: 0%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width 0.1s linear; }
+        #temp-gauge-wrap { height: 4px; width: 100%; background: linear-gradient(90deg, #00ccff, #ffffff, #ff3333); margin-top: 5px; position: relative; border-radius: 2px; }
+        #temp-marker { width: 4px; height: 12px; background: #fff; position: absolute; top: -4px; left: 0%; box-shadow: 0 0 5px #fff; transition: left 0.1s linear; }
+        canvas#mainCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #print-status-overlay { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 20; pointer-events: none; }
+        .status-text { font-family: var(--font-main); font-weight: 800; letter-spacing: 3px; color: var(--cyan); font-size: 1em; margin-bottom: 5px; text-shadow: 0 0 20px var(--cyan); }
+        .sub-status { font-family: var(--font-mono); font-size: 0.65em; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent 0%, rgba(0, 255, 204, 0.05) 50%, transparent 100%); background-size: 100% 80px; pointer-events: none; z-index: 5; animation: scanScroll 4s linear infinite; }
+        @keyframes scanScroll { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
     </style>
 </head>
-<body class="mode-red" id="app-body">
-
-    <div id="pulse-overlay"></div>
-
+<body>
     <div id="global-header">
-        <div>GRAVES CONSOLE v37.0 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
-        <div class="header-controls">
-            <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
-            <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
-            <div class="icon-btn" onclick="exportLog()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><span style="font-size:0.7em;">LOG</span></div>
+        <div>AEP 5.1 // FABRICATION SUITE <span style="color:#666;">// RANK 0001</span></div>
+        <div style="display:flex; gap:20px; font-family:'Courier New'; font-size:0.9em;">
+            <span style="color:#444">VACUUM: <span style="color:#888">10⁻⁹ Torr</span></span>
+            <span style="color:#444">TEMP: <span style="color:var(--cyan)" id="header-temp">300.0 K</span></span>
         </div>
     </div>
-
     <div id="main-container">
         <div id="sidebar">
             <div class="panel-box">
-                <div class="label-sm">PHYSICS KERNEL (166)</div>
-                <div class="proj-bar-container"><div id="proj-bar" class="proj-fill"></div></div>
-                <div style="display:flex; justify-content:space-between; font-size:0.65em; color:#666; margin-top:4px;">
-                    <span id="label-val-left">137.03 (ARTIFACT)</span>
-                    <span id="label-val-current" style="color:var(--active-color); font-weight:bold;">UNDER TORQUE</span>
+                <div class="label-sm">FABRICATION PHASE</div>
+                <div class="data-val cyan" id="phase-display">STANDBY</div>
+                <div class="print-progress-container" style="margin-top:5px;">
+                    <div class="print-progress-fill" id="progress-fill"></div>
                 </div>
             </div>
-
             <div class="panel-box">
-                <div class="label-sm">FABRICATION ENVIRONMENT</div>
-                <div class="env-selector" id="env-selector">
-                    <div class="env-btn active" id="btn-room" onclick="setEnv('ROOM', true)">ROOM (300K)</div>
-                    <div class="env-btn" id="btn-cryo" onclick="setEnv('CRYO', true)">CRYO (4K)</div>
-                    <div class="env-btn" id="btn-stress" onclick="setEnv('STRESS', true)">STRESS (50k)</div>
-                </div>
+                <div class="label-sm">THERMAL MONITOR</div>
+                <div class="data-val" id="temp-display">300.0 K</div>
+                <div id="temp-gauge-wrap"><div id="temp-marker"></div></div>
             </div>
-
             <div class="panel-box">
-                <div class="label-sm">TORSION CONTROL (0° - 10°)</div>
-                <div class="input-wrapper" id="torsion-wrap">
-                    <input type="number" id="torsion-text" class="val-input" step="0.0001" placeholder="0.0000">
-                    <span class="unit-label">°</span>
-                </div>
-                <input type="range" id="torsion-slider" min="0.0000" max="10.0000" step="0.0001" value="0.0000">
-            </div>
-
-            <div class="panel-box">
-                <div class="label-sm thermal-label-white" id="thermal-label">THERMAL CONTROL</div>
-                <div class="input-wrapper locked-input" id="thermal-wrap">
-                    <input type="number" id="temp-text" class="val-input" value="300" step="10" readonly>
-                    <span class="unit-label thermal-label-white" id="temp-unit">K</span>
-                </div>
-                <input type="range" id="temp-slider" min="0" max="100" step="0.1" value="7.5" class="locked-input">
-            </div>
-
-            <div class="panel-box">
-                <div class="label-sm">METRICS</div>
-                <div style="font-size:0.75em; line-height:1.8; color:#aaa; font-family:'Courier New';">
-                    SLACK: <span id="val-slack" style="color:var(--red); font-weight:bold;">HIGH</span><br>
-                    TOPOLOGY: <span id="val-topo">OPEN</span>
-                </div>
-            </div>
-
-            <button class="main-btn" id="main-btn" onclick="handleBtnClick()">TEST LOCK PARAMETERS</button>
-
-            <div id="console-log">
-                <div class="log-entry">> BOOT SEQUENCE... OK</div>
-                <div class="log-entry">> KERNEL: 166.083676989207</div>
-                <div class="log-entry">> DEUTERIUM CLOCK... ONLINE</div>
-            </div>
-        </div>
-
-        <div id="main-stage">
-            <div id="view-container">
-                <div class="hud-label">
-                    <span id="target-id" class="target-id">LOADING TARGET...</span>
-                    <span id="target-comp" class="target-comp"></span>
-                    <div id="blueprint-data" class="blueprint-info"></div>
-                    <br><span style="opacity:0.6; font-size:0.9em; margin-top:5px; display:block;">STATUS: <span id="sys-status-text" style="color:var(--red)">UNSTABLE</span></span>
-                </div>
-                <div id="warning-box" class="warn-red">GEOMETRY UNSTABLE<br><span style="font-size:0.5em; letter-spacing:1px;">UNDER TORQUE</span></div>
-                <div id="insets-container">
+                <div class="label-sm" style="color:var(--cyan);">REAL-TIME DIAGNOSTICS</div>
+                <div class="diag-grid">
                     <div class="inset-box"><div class="inset-label">POTENTIAL (2D)</div><canvas id="inset1" class="inset-canvas"></canvas></div>
                     <div class="inset-box"><div class="inset-label">PHASE SPACE</div><canvas id="inset2" class="inset-canvas"></canvas></div>
                     <div class="inset-box"><div class="inset-label">VACUUM FLUX</div><canvas id="inset3" class="inset-canvas"></canvas></div>
                     <div class="inset-box">
                         <div class="inset-label">DEUTERIUM CLOCK</div>
                         <canvas id="inset4" class="inset-canvas"></canvas>
-                        <div style="position:absolute; bottom:5px; left:5px; right:5px; display:flex; justify-content:space-between; font-size:8px; font-family:'Courier New'; color:#666; font-weight:bold;">
-                            <span>JIT:<span id="clk-jit" style="color:var(--red)">HIGH</span></span>
-                            <span>COH:<span id="clk-coh">0.00</span></span>
+                        <div style="position:absolute; bottom:2px; left:4px; font-size:7px; font-family:'Courier New'; color:#666;">
+                            COH: <span style="color:#fff">1.000</span>
                         </div>
                     </div>
                 </div>
-                <canvas id="bgCanvas"></canvas><canvas id="mainCanvas"></canvas>
             </div>
-
-            <div id="monitor-panel">
-                <div class="monitor-box">
-                    <div class="monitor-header"><span id="entropy-label">PHONON ENTROPY (137)</span><span id="slack-status" class="mon-val col-red">CRITICAL</span></div>
-                    <canvas id="thermCanvas" class="waveform"></canvas>
-                </div>
-                <div class="monitor-box" style="border-right:none;">
-                    <div class="monitor-header"><span id="dephasing-label" style="color:var(--cyan)">THERMAL DEPHASING (166)</span><span id="graves-status" class="mon-val col-cyan">SYNC LOST</span></div>
-                    <canvas id="gravesCanvas" class="waveform"></canvas>
-                </div>
+            <div class="panel-box">
+                <div class="label-sm" style="color:var(--diamond)">LATTICE STRUCTURE (ZERO-SLACK)</div>
+                <div id="mini-view"><canvas id="miniCanvas"></canvas></div>
+            </div>
+            <div class="panel-box" style="border:none; margin-top:auto;">
+                <button id="main-action-btn" class="action-btn btn-cyan" onclick="handleMainAction()">GENERATE MICRO-LATTICE</button>
+            </div>
+        </div>
+        <div id="view-container">
+            <div class="scan-line"></div>
+            <canvas id="mainCanvas"></canvas>
+            <div id="print-status-overlay">
+                <div class="status-text" id="main-status">SYSTEM READY</div>
+                <div class="sub-status" id="sub-status">AWAITING INPUT</div>
             </div>
         </div>
     </div>
-
 <script>
-    const BLUEPRINT_DATA = {
-        rank: "0001",
-        name: "Zero-Slack Turbine Blade",
-        composition: "Ni–20Co–15Cr–6Al–5Ti–4Mo–2W–1Nb–0.1Hf",
-        specs: "Applications: (1) Jet engine hot section; (2) 1 blade → 1850 °C capability, 100,000 h life; (3) Ni–Al icosahedral γ′ lattice.\nProduction yield: 99.999% efficiency in sims; cost: $0.05/g via vapor deposition.\nEnables all downstream ranks (2–900)."
-    };
-    const LOCK_MIN = 5.0370, LOCK_MAX = 5.0375, LOCK_CENTER = 5.0372;
-    const TORSION_STEP_COARSE = 0.1, TORSION_STEP_FINE = 0.0001, PHI = 1.618033988749895;
-    let torsion = 0.0, tempK = 300, step = 0, time = 0, audioCtx = null, osc = null, gain = null;
+    const canvas = document.getElementById('mainCanvas'), ctx = canvas.getContext('2d');
+    const ctxI1 = document.getElementById('inset1').getContext('2d'), ctxI2 = document.getElementById('inset2').getContext('2d');
+    const ctxI3 = document.getElementById('inset3').getContext('2d'), ctxI4 = document.getElementById('inset4').getContext('2d');
+    const miniCanvas = document.getElementById('miniCanvas'), miniCtx = miniCanvas.getContext('2d');
+    const ui = { phase: document.getElementById('phase-display'), fill: document.getElementById('progress-fill'), status: document.getElementById('main-status'), subStatus: document.getElementById('sub-status'), temp: document.getElementById('temp-display'), headerTemp: document.getElementById('header-temp'), marker: document.getElementById('temp-marker'), mainBtn: document.getElementById('main-action-btn') };
 
-    const ui = {
-        body: document.body, sliderT: document.getElementById('torsion-slider'), inputT: document.getElementById('torsion-text'), wrapT: document.getElementById('torsion-wrap'),
-        sliderK: document.getElementById('temp-slider'), inputK: document.getElementById('temp-text'), wrapK: document.getElementById('thermal-wrap'),
-        bar: document.getElementById('proj-bar'), lblCurrent: document.getElementById('label-val-current'), slack: document.getElementById('val-slack'),
-        topo: document.getElementById('val-topo'), statText: document.getElementById('sys-status-text'), btn: document.getElementById('main-btn'),
-        console: document.getElementById('console-log'), warn: document.getElementById('warning-box'), slackStat: document.getElementById('slack-status'),
-        gravesStat: document.getElementById('graves-status'), entropyLabel: document.getElementById('entropy-label'), dephasingLabel: document.getElementById('dephasing-label'),
-        btnCryo: document.getElementById('btn-cryo'), btnRoom: document.getElementById('btn-room'), btnStress: document.getElementById('btn-stress'),
-        envSelector: document.getElementById('env-selector'), thermalLabel: document.getElementById('thermal-label'), tempUnit: document.getElementById('temp-unit'),
-        pulseOverlay: document.getElementById('pulse-overlay'), clkJit: document.getElementById('clk-jit'), clkCoh: document.getElementById('clk-coh'),
-        targetId: document.getElementById('target-id'), targetComp: document.getElementById('target-comp'), blueprintDiv: document.getElementById('blueprint-data')
-    };
+    let width, height;
+    function resize() { width = canvas.width = window.innerWidth - 380; height = canvas.height = window.innerHeight - 50; [ctxI1, ctxI2, ctxI3, ctxI4].forEach(c => { c.canvas.width = 180; c.canvas.height = 85; }); miniCanvas.width = 330; miniCanvas.height = 150; }
+    window.addEventListener('resize', resize); setTimeout(resize, 100);
 
-    const ctxM = document.getElementById('mainCanvas').getContext('2d'), ctxB = document.getElementById('bgCanvas').getContext('2d'),
-          ctxT = document.getElementById('thermCanvas').getContext('2d'), ctxG = document.getElementById('gravesCanvas').getContext('2d'),
-          ctxI1 = document.getElementById('inset1').getContext('2d'), ctxI2 = document.getElementById('inset2').getContext('2d'),
-          ctxI3 = document.getElementById('inset3').getContext('2d'), ctxI4 = document.getElementById('inset4').getContext('2d');
+    const FOV = 800;
+    const ATOM_COLORS = [{c:'#e0e0e0', s:'Ni'}, {c:'#3366ff', s:'Co'}, {c:'#9933cc', s:'Cr'}, {c:'#00ff00', s:'Mo'}, {c:'#ffaa00', s:'W'}, {c:'#00ffff', s:'Nb'}, {c:'#ff0000', s:'Hf'}];
+    const MICRO_LAYERS = 300, MACRO_LAYERS = 600;
+    const MICRO_SPEED = MICRO_LAYERS / (10 * 60), MACRO_SPEED = MACRO_LAYERS / (15 * 60);
 
-    function initConsole() {
-        ui.targetId.innerText = `TARGET: RANK ${BLUEPRINT_DATA.rank} // ${BLUEPRINT_DATA.name.toUpperCase()}`;
-        ui.targetComp.innerText = `COMPOSITION: ${BLUEPRINT_DATA.composition}`;
-    }
+    let state = { phase: 0, layer: 0, totalLayers: 100, rotation: 0, tilt: 0.3, points: [], wireframe: [], speed: 0.5, temp: 300, time: 0 };
+    let audioCtx = null, synthOsc = null, synthGain = null;
+    let microOsc = null, microGain = null;
 
-    function initAudio() {
-        if(!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            osc = audioCtx.createOscillator();
-            gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            gain.gain.value = 0;
-        }
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-    }
-
-    function updateAudio(val) {
-        if(!audioCtx) initAudio();
-        let dist = Math.abs(val - LOCK_CENTER);
-        let freq = 0, vol = 0, type = 'sawtooth';
-        
-        if (isLocked()) {
-            freq = 880; type = 'sine'; vol = 0.15;
-        } else if (dist < 2.0) {
-            let n = 1 - (dist / 2.0);
-            freq = 60 + (800 * Math.pow(n, 4));
-            vol = 0.05 + (0.1 * n);
-        }
-        if(step > 0) vol = 0; // Quiet when engaged
-
-        osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
-        gain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.1);
-        osc.type = type;
-    }
-
-    function playTone(f, t, d, v=0.1) {
-        if(!audioCtx) return;
-        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-        o.type=t; o.frequency.value=f; o.connect(g); g.connect(audioCtx.destination);
-        g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+d);
-        o.start(); o.stop(audioCtx.currentTime+d);
-    }
-
-    function setTorsion(val) {
-        if(step !== 0) return;
-        let safeVal = Math.round(Math.max(0, Math.min(10, parseFloat(val)||0)) * 10000) / 10000;
-        torsion = safeVal;
-        ui.inputT.value = torsion.toFixed(4); ui.sliderT.value = torsion;
-        updateState(); updateAudio(torsion);
-    }
-
-    ui.sliderT.addEventListener('input', (e) => setTorsion(e.target.value));
-    ui.inputT.addEventListener('change', (e) => setTorsion(e.target.value));
-    ui.wrapT.addEventListener('wheel', (e) => { e.preventDefault(); setTorsion(torsion + (Math.sign(e.deltaY)*-1 * TORSION_STEP_FINE)); }, { passive: false });
+    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
     
-    function isLocked() { return (torsion >= LOCK_MIN && torsion <= LOCK_MAX); }
-
-    function handleBtnClick() {
-        initAudio();
-        if(tempK > 790 && step < 1) { log("!! ABORT: THERMAL LOCKOUT (>790K) !!"); playTone(150,'sawtooth',0.3); return; }
-        
-        if(step===0) {
-            if(isLocked()) {
-                step=1; playTone(880,'sine',0.5,0.2);
-                ui.sliderT.classList.add('locked-input'); ui.inputT.disabled=true; ui.wrapT.classList.add('locked-input');
-                ui.btn.className="main-btn ready-fab"; ui.btn.innerText="RENDER PHYSICAL COMPOUND";
-                log(">>> GEOMETRY LOCKED.");
-            } else { updateState(true); playTone(200,'sawtooth',0.2); }
-        } else if(step===1) {
-            step=2; playTone(400,'sine',0.1);
-            ui.btn.className="main-btn confirm-mode"; ui.btn.innerText="CONFIRM RENDER COMPOUND";
-            log(">>> CONFIRMATION REQUIRED...");
-        } else if(step===2) {
-            step=3; playTone(880,'sine',1.0);
-            ui.sliderK.classList.add('locked-input'); ui.inputK.classList.add('locked-input'); ui.wrapK.classList.add('locked-input'); ui.envSelector.classList.add('locked-input');
-            document.documentElement.style.setProperty('--active-color', '#ffffff');
-            document.body.classList.add('flash-white');
-            
-            // SHOW LATTICE STATE + NEW BUTTON (NO AUTO REDIRECT)
-            ui.btn.className = "main-btn global-pulse";
-            ui.btn.innerText = "INITIATE MACRO";
-            ui.topo.innerText="CLOSED (PROTECTED)"; ui.topo.style.color="#fff"; ui.statText.innerText="ZERO SLACK (FLAT)";
-            
-            log(">>> PHYSICAL OUTPUT INITIATED...");
-            log(">>> BLUEPRINT RENDERED.");
-        } else if(step===3) {
-            // STEP 3 CLICK -> GO TO FABRICATION
-            window.location.href = "https://protodynamics01.github.io/zero_slack_simulator/fabrication.html";
-        }
+    function playBtnClick(type) { 
+        initAudio(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); 
+        if (type === 'start') { o.type = 'sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); o.start(); o.stop(audioCtx.currentTime + 0.1); } 
+        else if (type === 'success') { o.type = 'sine'; o.frequency.setValueAtTime(880, audioCtx.currentTime); g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3); o.start(); o.stop(audioCtx.currentTime + 0.3); } 
     }
 
-    function calcRaw(k) { return (k<=1000) ? (k/1000)*25 : 25+75*Math.sqrt((k-1000)/99000); }
-    function calcTemp(r) { return (r<=25) ? (r/25)*1000 : 1000+(Math.pow((r-25)/75,2)*99000); }
-    function setEnv(type) { if(step>=3) return; initAudio(); if(type==='CRYO') tempK=4; else if(type==='STRESS') tempK=50000; else tempK=300; ui.inputK.value=Math.floor(tempK); ui.sliderK.value=calcRaw(tempK); updateState(); }
-    
-    function updateState(forcedWarn=false) {
-        tempK=parseFloat(ui.inputK.value)||300; if(tempK<=100000) ui.sliderK.value=calcRaw(tempK);
-        ui.bar.style.width=(torsion/10)*100+"%";
-        
-        if(tempK>790 && step < 2) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="THERMAL LOCKOUT<br><span style='font-size:0.5em'>LIMIT 790 K</span>"; if(isLocked()){ui.btn.className="main-btn thermal-lock"; ui.btn.innerText="THERMAL LOCKOUT (>790K)";} return; }
-        
-        if(isLocked()) {
-            document.body.className="mode-cyan"; document.documentElement.style.setProperty('--active-color', '#00ffcc'); ui.warn.style.display="none";
-            if(step===0) { ui.btn.className="main-btn can-lock"; ui.btn.innerText="READY TO LOCK GEOMETRY"; }
-            ui.slack.innerText="0.000000 eV"; ui.statText.innerText="WINDOW MATCHED"; ui.statText.style.color="var(--cyan)"; ui.lblCurrent.innerText="166.083 (NATIVE)"; ui.lblCurrent.style.color="var(--cyan)"; ui.targetId.style.color="var(--cyan)";
-        } else {
-            if(step===0) {
-                ui.btn.className="main-btn"; ui.btn.innerText="TEST LOCK PARAMETERS";
-                ui.warn.style.display=(forcedWarn||(torsion>0.1))?"block":"none";
-                if(torsion>LOCK_MAX){ document.body.className="mode-orange"; ui.statText.innerText="OVER TORQUE"; ui.warn.className="warn-orange"; ui.warn.innerHTML="GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>OVER TORQUE</span>"; }
-                else { document.body.className="mode-red"; ui.statText.innerText="UNDER TORQUE"; ui.warn.className="warn-red"; ui.warn.innerHTML="GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>UNDER TORQUE</span>"; }
-            }
-            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
-        }
-        
-        // VISUAL OVERRIDES FOR STEP 3
-        if(step>=3) {
-            ui.warn.style.display="none"; ui.slack.innerText="0.000000 eV"; setTheme('diamond');
-            ui.thermalLabel.classList.add('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.add('thermal-label-white');
-            ui.entropyLabel.classList.add('white-header-text'); ui.dephasingLabel.classList.add('white-header-text');
-            ui.targetId.style.color = "var(--cyan)"; ui.targetComp.style.color = "var(--cyan)";
-            ui.blueprintDiv.style.display = "block"; ui.blueprintDiv.innerText = BLUEPRINT_DATA.specs;
-        } else {
-            ui.thermalLabel.classList.remove('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.remove('thermal-label-white');
-            ui.entropyLabel.classList.remove('white-header-text'); ui.dephasingLabel.classList.remove('white-header-text');
-            ui.targetId.style.color = "#888"; ui.targetComp.style.color = "#555"; ui.blueprintDiv.style.display = "none";
-        }
-    }
-    
-    function setTheme(c) { ui.body.className="mode-"+c; document.documentElement.style.setProperty('--active-color', c==='red'?'#ff3333':(c==='orange'?'#ffaa00':(c==='diamond'?'#ffffff':'#00ffcc'))); }
+    function startMicroSound() { initAudio(); if(microOsc) return; microOsc = audioCtx.createOscillator(); microGain = audioCtx.createGain(); microOsc.type = 'sine'; microOsc.frequency.setValueAtTime(800, audioCtx.currentTime); microOsc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 10); microGain.gain.value = 0.05; microOsc.connect(microGain); microGain.connect(audioCtx.destination); microOsc.start(); }
+    function stopMicroSound() { if(microOsc && microGain) { microGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); setTimeout(()=>{ if(microOsc){microOsc.stop(); microOsc=null;} }, 200); } }
 
-    const TYPES = { Ni:{c:'#e0e0e0',s:'Ni',r:6}, Co:{c:'#3366ff',s:'Co',r:5}, Cr:{c:'#9933cc',s:'Cr',r:5}, Mo:{c:'#00ff00',s:'Mo',r:5}, W:{c:'#ffaa00',s:'W',r:5}, Nb:{c:'#00ffff',s:'Nb',r:4}, Hf:{c:'#ff0000',s:'Hf',r:3} };
-    let atoms=[]; function initAtoms(){ atoms=[]; [[0,1,1.618],[0,-1,1.618],[0,1,-1.618],[0,-1,-1.618],[1,1.618,0],[-1,1.618,0],[1,-1.618,0],[-1,-1.618,0],[1.618,0,1],[-1.618,0,1],[1.618,0,-1],[-1.618,0,-1]].forEach((p,i)=>atoms.push({x:p[0]*40,y:p[1]*40,z:p[2]*40,type:i%2==0?TYPES.Co:TYPES.Cr})); atoms.push({x:0,y:0,z:0,type:TYPES.Ni}); } initAtoms();
-    
-    function draw() {
-        time++; ctxM.clearRect(0,0,ctxM.canvas.width,ctxM.canvas.height); ctxB.clearRect(0,0,ctxB.canvas.width,ctxB.canvas.height);
-        const w=ctxB.canvas.width, h=ctxB.canvas.height, cx=w/2, cy=h/2;
-        
-        ctxB.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--active-color'); ctxB.lineWidth=1; ctxB.globalAlpha=0.3; ctxB.beginPath();
-        let amp=(step<1&&!isLocked())?(tempK/300)*15+Math.abs(torsion-LOCK_CENTER)*10:0; if(amp>120)amp=120;
-        for(let r=0;r<Math.max(w,h);r+=25){ ctxB.moveTo(w/2+r,h/2); for(let a=0;a<=Math.PI*2;a+=0.1) ctxB.lineTo(w/2+(r+Math.sin(r*0.05-time*0.05)*amp*0.5)*Math.cos(a),h/2+(r+Math.sin(r*0.05-time*0.05)*amp*0.5)*Math.sin(a)*0.6); } ctxB.stroke(); ctxB.globalAlpha=1;
+    function startMacroSound() { initAudio(); if (synthOsc) return; synthOsc = audioCtx.createOscillator(); synthGain = audioCtx.createGain(); synthOsc.type = 'sawtooth'; synthOsc.frequency.value = 80; let lfo = audioCtx.createOscillator(); lfo.frequency.value = 8; let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 30; lfo.connect(lfoGain); lfoGain.connect(synthOsc.frequency); lfo.start(); synthGain.gain.value = 0.05; synthOsc.connect(synthGain); synthGain.connect(audioCtx.destination); synthOsc.start(); }
+    function stopMacroSound() { if(synthOsc && synthGain) { synthGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); setTimeout(()=>{ if(synthOsc) { synthOsc.stop(); synthOsc=null; } }, 200); } }
 
-        let rot=time*((step>=3)?0.001:0.005), jit=(step<3&&!isLocked())?Math.min(80,20+(tempK/500)):0;
-        atoms.forEach(a=>{
-            let jx=(Math.random()-0.5)*jit, jy=(Math.random()-0.5)*jit, jz=(Math.random()-0.5)*jit;
-            let x=(a.x+jx)*Math.cos(rot)-(a.z+jz)*Math.sin(rot), z=(a.x+jx)*Math.sin(rot)+(a.z+jz)*Math.cos(rot);
-            let s=600/(600+(a.y+jy)*Math.sin(0.3)+z*Math.cos(0.3)+200);
-            
-            if(step>=3) {
-                // RENDER NAMES IN STEP 3
-                ctxM.fillStyle = a.type.c;
-                ctxM.font = "bold 12px Courier New";
-                ctxM.textAlign = "center";
-                ctxM.textBaseline = "middle";
-                ctxM.fillText(a.type.s, cx+x*s, cy+((a.y+jy)*Math.cos(0.3)-z*Math.sin(0.3))*s);
-            } else {
-                ctxM.beginPath(); ctxM.arc(cx+x*s,cy+((a.y+jy)*Math.cos(0.3)-z*Math.sin(0.3))*s,a.type.r*s,0,Math.PI*2); ctxM.fillStyle=a.type.c; ctxM.fill();
-            }
-        });
-        
-        let col=ctxB.strokeStyle;
-        ctxI1.clearRect(0,0,150,85); ctxI1.strokeStyle=col; ctxI1.lineWidth=2; ctxI1.beginPath(); for(let x=0;x<150;x++){ let nx=(x-75)/35,y=isLocked()?(nx*nx):(Math.pow(nx,4)-Math.pow(nx,2)); ctxI1.lineTo(x,60-y*25); } ctxI1.stroke();
-        ctxI4.clearRect(0,0,150,85); let grad=ctxI4.createLinearGradient(0,0,150,0); grad.addColorStop(0,"#330000"); grad.addColorStop(0.5,isLocked()?"#00ffcc":"#ff3333"); grad.addColorStop(1,"#330000"); ctxI4.fillStyle=grad; ctxI4.beginPath(); ctxI4.arc(75,85,60,Math.PI,0); ctxI4.fill();
-        let ang=-Math.PI/2+(Math.random()-0.5)*(isLocked()?0.02:0.5); ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(75,85); ctxI4.lineTo(75+55*Math.cos(ang),85+55*Math.sin(ang)); ctxI4.stroke();
-
-        requestAnimationFrame(draw);
-    }
-
-    ui.sliderK.addEventListener('input',(e)=>{ if(step<3){ let t=parseFloat(e.target.value); ui.inputK.value=Math.floor(calcTemp(t)); updateState(); } });
-    ui.inputK.addEventListener('input',(e)=>{ if(step<3){ let k=parseFloat(e.target.value); if(!isNaN(k)){ tempK=k; ui.sliderK.value=calcRaw(k); updateState(); } } });
-
-    resize(); setEnv('ROOM'); setTorsion(0); initConsole(); draw();
-    function log(msg){ ui.console.innerHTML+=`<div><span class="log-hl">>></span> ${msg}</div>`; ui.console.scrollTop=ui.console.scrollHeight; }
-    function logOnce(msg){ if(lastLog!==msg){ log(msg); lastLog=msg; } } let lastLog="";
-</script>
-</body>
-</html>
+    function handleMainAction() {
+        if(state.phase === 0) { playBtnClick('start'); startMicro(); }
+        else if(state.phase === 1.5) { playBtnClick('start'); startMacro(); }
+        else if(state.phase === 4) { playBtnClick('success'); retrieveItem(); }
+        else if
