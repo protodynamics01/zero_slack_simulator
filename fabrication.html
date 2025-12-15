@@ -3,136 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AEP 5.1 | FABRICATION UNIT (FINAL)</title>
+    <title>AEP 5.1 | FABRICATION UNIT (PERFORMANCE)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --cyan: #00ffcc;
-            --diamond: #ffffff;
-            --red: #ff3333;
-            --orange: #ffaa00;
-            --bg: #050505;
-            
+            --cyan: #00ffcc; --diamond: #ffffff; --red: #ff3333; --orange: #ffaa00; --bg: #050505;
             --glass-bg: rgba(10, 15, 20, 0.95);
             --glass-border: 1px solid rgba(0, 255, 204, 0.2);
             --font-main: "Inter", sans-serif;
             --font-mono: 'Courier New', monospace;
         }
-
         * { box-sizing: border-box; user-select: none; }
-
         body {
             margin: 0; background-color: var(--bg); color: #e0e0e0;
             font-family: var(--font-main); height: 100vh; width: 100vw;
             display: flex; flex-direction: column; overflow: hidden;
             background: radial-gradient(circle at center, #080808 0%, #000 100%);
         }
-
-        /* HEADER */
         #global-header {
             background: rgba(0,0,0,0.9); border-bottom: var(--glass-border); height: 50px;
             flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
             padding: 0 25px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px; z-index: 50;
             backdrop-filter: blur(5px);
         }
-
         #main-container { display: flex; flex: 1; overflow: hidden; }
-
-        /* SIDEBAR */
         #sidebar {
-            width: 380px; background: var(--glass-bg);
-            border-right: var(--glass-border); padding: 20px;
-            display: flex; flex-direction: column; gap: 15px;
-            flex-shrink: 0; z-index: 40; backdrop-filter: blur(15px); overflow-y: auto;
+            width: 380px; background: var(--glass-bg); border-right: var(--glass-border); 
+            padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-shrink: 0; z-index: 40;
+            overflow-y: auto;
         }
-
         #view-container { flex: 1; position: relative; overflow: hidden; background: #000; }
-
-        /* UI COMPONENTS */
+        
         .panel-box { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         .panel-box:last-child { border-bottom: none; }
         .label-sm { font-size: 0.65em; color: #666; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
-        
-        .data-val { 
-            font-family: var(--font-mono); font-size: 1.1em; color: var(--diamond); 
-            display: flex; justify-content: space-between; align-items: baseline;
-        }
+        .data-val { font-family: var(--font-mono); font-size: 1.1em; color: var(--diamond); display: flex; justify-content: space-between; align-items: baseline; }
         .data-val.cyan { color: var(--cyan); text-shadow: 0 0 15px rgba(0,255,204,0.3); }
         .data-val.hot { color: var(--red); text-shadow: 0 0 15px var(--red); }
         
-        /* DIAGNOSTICS GRID */
         .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-        .inset-box { 
-            width: 100%; height: 85px; background: rgba(0,0,0,0.6); 
-            border: 1px solid rgba(255,255,255,0.1); position: relative; 
-        }
-        .inset-label { 
-            position: absolute; top: 4px; left: 6px; font-size: 8px; 
-            color: #666; font-weight: bold; font-family: var(--font-mono); 
-        }
+        .inset-box { width: 100%; height: 85px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .inset-label { position: absolute; top: 4px; left: 6px; font-size: 8px; color: #666; font-weight: bold; font-family: var(--font-mono); }
         .inset-canvas { width: 100%; height: 100%; display: block; }
-
-        /* MINI LATTICE VIEW */
-        #mini-view {
-            width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
-            position: relative; overflow: hidden; margin-top: 5px;
-        }
+        
+        #mini-view { width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; margin-top: 5px; }
         #miniCanvas { width: 100%; height: 100%; }
 
-        /* BUTTONS */
         .action-btn {
             width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.1);
             border: 1px solid var(--cyan); color: var(--cyan);
             font-family: var(--font-main); font-weight: 700; letter-spacing: 2px;
-            cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+            cursor: pointer; transition: all 0.1s; text-transform: uppercase;
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.1); margin-top: 10px;
         }
-        .action-btn:hover { background: rgba(0, 255, 204, 0.2); box-shadow: 0 0 25px rgba(0, 255, 204, 0.3); }
+        .action-btn:hover { background: rgba(0, 255, 204, 0.2); }
+        .action-btn:active { transform: scale(0.98); }
         .action-btn:disabled { cursor: not-allowed; opacity: 0.8; pointer-events: none; }
 
-        /* BUTTON STATES */
         .btn-cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.1); }
-        .btn-orange-flash { 
-            border-color: var(--orange); color: var(--orange); 
-            background: rgba(255,170,0,0.1); 
-            animation: pulseFast 0.5s infinite alternate;
-            box-shadow: 0 0 15px rgba(255,170,0,0.2);
-        }
-        .btn-white-pulse {
-            border-color: #fff; color: #fff; 
-            background: rgba(255,255,255,0.1);
-            animation: pulseWhite 1s infinite alternate;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-        .btn-restart { 
-            border-color: var(--red); color: var(--red); 
-            background: rgba(255,50,50,0.1); 
-            box-shadow: 0 0 20px rgba(255,50,50,0.2);
-        }
+        .btn-orange-flash { border-color: var(--orange); color: var(--orange); background: rgba(255,170,0,0.1); animation: pulseFast 0.5s infinite alternate; box-shadow: 0 0 15px rgba(255,170,0,0.2); }
+        .btn-white-pulse { border-color: #fff; color: #fff; background: rgba(255,255,255,0.1); animation: pulseWhite 1s infinite alternate; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .btn-restart { border-color: var(--red); color: var(--red); background: rgba(255,50,50,0.1); }
 
         @keyframes pulseFast { 0% { opacity: 0.7; } 100% { opacity: 1.0; text-shadow: 0 0 10px var(--orange); } }
         @keyframes pulseWhite { 0% { box-shadow: 0 0 10px rgba(255,255,255,0.1); } 100% { box-shadow: 0 0 30px rgba(255,255,255,0.4); } }
 
-        /* PROGRESS */
         .print-progress-container { height: 4px; background: #222; width: 100%; position: relative; overflow: hidden; border-radius: 2px; }
         .print-progress-fill { height: 100%; width: 0%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width 0.1s linear; }
 
-        /* TEMP GAUGE */
         #temp-gauge-wrap { height: 4px; width: 100%; background: linear-gradient(90deg, #00ccff, #ffffff, #ff3333); margin-top: 5px; position: relative; border-radius: 2px; }
         #temp-marker { width: 4px; height: 12px; background: #fff; position: absolute; top: -4px; left: 0%; box-shadow: 0 0 5px #fff; transition: left 0.1s linear; }
 
         canvas#mainCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
-        /* OVERLAYS */
+        
         #print-status-overlay {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
             text-align: center; z-index: 20; pointer-events: none;
         }
-        .status-text { 
-            font-family: var(--font-main); font-weight: 800; letter-spacing: 3px; 
-            color: var(--cyan); font-size: 1em; margin-bottom: 5px;
-            text-shadow: 0 0 20px var(--cyan);
-        }
+        .status-text { font-family: var(--font-main); font-weight: 800; letter-spacing: 3px; color: var(--cyan); font-size: 1em; margin-bottom: 5px; text-shadow: 0 0 20px var(--cyan); }
         .sub-status { font-family: var(--font-mono); font-size: 0.65em; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
 
         .scan-line {
@@ -174,7 +122,6 @@
 
             <div class="panel-box">
                 <div class="label-sm" style="color:var(--cyan);">REAL-TIME DIAGNOSTICS</div>
-                
                 <div class="diag-grid">
                     <div class="inset-box">
                         <div class="inset-label">POTENTIAL (2D)</div>
@@ -213,7 +160,6 @@
         <div id="view-container">
             <div class="scan-line"></div>
             <canvas id="mainCanvas"></canvas>
-            
             <div id="print-status-overlay">
                 <div class="status-text" id="main-status">SYSTEM READY</div>
                 <div class="sub-status" id="sub-status">AWAITING INPUT</div>
@@ -241,7 +187,6 @@
         temp: document.getElementById('temp-display'),
         headerTemp: document.getElementById('header-temp'),
         marker: document.getElementById('temp-marker'),
-        // SINGLE BUTTON REF
         mainBtn: document.getElementById('main-action-btn')
     };
 
@@ -266,7 +211,6 @@
         {c:'#e0e0e0', s:'Ni'}, {c:'#3366ff', s:'Co'}, {c:'#9933cc', s:'Cr'},
         {c:'#00ff00', s:'Mo'}, {c:'#ffaa00', s:'W'}, {c:'#00ffff', s:'Nb'}, {c:'#ff0000', s:'Hf'}
     ];
-    
     // TIMING (10s Micro, 15s Macro)
     const MICRO_LAYERS = 300; 
     const MACRO_LAYERS = 600;
@@ -275,100 +219,142 @@
 
     // --- STATE ---
     let state = {
-        phase: 0, // 0:Idle, 1:Micro, 1.5:MicroDone, 2:Macro, 3:Cooling, 4:Retrieve, 5:RestartReady
-        layer: 0,
-        totalLayers: 100,
-        rotation: 0,
-        tilt: 0.3,
-        points: [],
-        wireframe: [],
-        speed: 0.5,
-        temp: 300,
-        time: 0
+        phase: 0, // 0:Idle, 1:Micro, 1.5:MicroDone, 2:Macro, 3:Cooling, 4:Retrieve, 5:Restart
+        layer: 0, totalLayers: 100, rotation: 0, tilt: 0.3,
+        points: [], wireframe: [], speed: 0.5, temp: 300, time: 0
     };
 
-    // --- BUTTON CONTROLLER ---
-    function handleMainAction() {
-        // STATE 0 -> 1 (Start Micro)
-        if(state.phase === 0) {
-            startMicro();
-        }
-        // STATE 1.5 -> 2 (Start Macro)
-        else if(state.phase === 1.5) {
-            startMacro();
-        }
-        // STATE 4 -> 5 (Retrieve -> Restart)
-        else if(state.phase === 4) {
-            retrieveItem();
-        }
-        // STATE 5 -> 0 (Soft Reset)
-        else if(state.phase === 5) {
-            softReset();
+    // --- AUDIO SYSTEM ---
+    let audioCtx = null;
+    let synthOsc = null, synthGain = null;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playBtnClick(type) {
+        initAudio();
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        
+        if (type === 'start') {
+            // High-tech chirp (Tuning console style)
+            o.type = 'sine';
+            o.frequency.setValueAtTime(800, audioCtx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            o.start(); o.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'success') {
+            // Lock tone
+            o.type = 'sine';
+            o.frequency.setValueAtTime(880, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            o.start(); o.stop(audioCtx.currentTime + 0.3);
         }
     }
 
-    // --- LOGIC ---
-
-    function startMicro() {
-        state.phase = 1;
-        state.temp = 300; 
-        initMicro();
+    function startPrintSound(isMacro) {
+        initAudio();
+        if (synthOsc) return;
+        synthOsc = audioCtx.createOscillator();
+        synthGain = audioCtx.createGain();
         
-        // Button Logic: Printing... (Disabled, Orange)
+        if(isMacro) {
+            // Heavy pulse
+            synthOsc.type = 'sawtooth';
+            synthOsc.frequency.value = 80;
+            // FM LFO
+            let lfo = audioCtx.createOscillator();
+            lfo.frequency.value = 8;
+            let lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 30;
+            lfo.connect(lfoGain);
+            lfoGain.connect(synthOsc.frequency);
+            lfo.start();
+        } else {
+            // Micro shimmer
+            synthOsc.type = 'sine';
+            synthOsc.frequency.value = 600;
+            let lfo = audioCtx.createOscillator();
+            lfo.frequency.value = 15;
+            let lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 20;
+            lfo.connect(lfoGain);
+            lfoGain.connect(synthOsc.frequency);
+            lfo.start();
+        }
+
+        synthGain.gain.value = 0.05;
+        synthOsc.connect(synthGain);
+        synthGain.connect(audioCtx.destination);
+        synthOsc.start();
+    }
+
+    function stopPrintSound() {
+        if(synthOsc && synthGain) {
+            synthGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+            setTimeout(()=>{ if(synthOsc) { synthOsc.stop(); synthOsc=null; } }, 200);
+        }
+    }
+
+    // --- BUTTON CONTROLLER ---
+    function handleMainAction() {
+        if(state.phase === 0) { playBtnClick('start'); startMicro(); }
+        else if(state.phase === 1.5) { playBtnClick('start'); startMacro(); }
+        else if(state.phase === 4) { playBtnClick('success'); retrieveItem(); }
+        else if(state.phase === 5) { playBtnClick('start'); softReset(); }
+    }
+
+    // --- LOGIC ---
+    function startMicro() {
+        state.phase = 1; state.temp = 300; initMicro();
+        startPrintSound(false);
         ui.mainBtn.innerText = "PRINTING MICRO-LATTICE...";
         ui.mainBtn.className = "action-btn btn-orange-flash";
         ui.mainBtn.disabled = true;
-
         ui.phase.innerText = "MICRO-VERIFICATION";
         ui.status.innerText = "PRINTING MICRO-LATTICE";
         ui.subStatus.innerText = "VERIFYING ATOMIC ALIGNMENT (5.037°)";
     }
 
     function microComplete() {
+        stopPrintSound();
         state.phase = 1.5;
-        // Button Logic: Proceed (Enabled, Cyan)
         ui.mainBtn.innerText = "PROCEED TO MACRO-SCALE";
         ui.mainBtn.className = "action-btn btn-cyan";
         ui.mainBtn.disabled = false;
-
         ui.status.innerText = "MICRO-LATTICE VERIFIED";
         ui.subStatus.innerText = "READY FOR MACRO SCALING";
     }
 
     function startMacro() {
-        state.phase = 2;
-        state.temp = 1850; 
-        updateTempUI();
-        initMacro();
-        
-        // Button Logic: Rendering... (Disabled, Orange)
+        state.phase = 2; state.temp = 1850; updateTempUI(); initMacro();
+        startPrintSound(true);
         ui.mainBtn.innerText = "RENDERING MACRO-SCALE...";
         ui.mainBtn.className = "action-btn btn-orange-flash";
         ui.mainBtn.disabled = true;
-
         ui.phase.innerText = "MACRO-FABRICATION";
         ui.status.innerText = "MULTI-LASER ARRAY ACTIVE";
         ui.subStatus.innerText = "FULL VOLUME DEPOSITION";
     }
 
     function startCooling() {
+        stopPrintSound();
         state.phase = 3;
-        
-        // Button Logic: Stabilizing (Disabled, Orange)
         ui.mainBtn.innerText = "STABILIZING THERMO...";
-        
         ui.phase.innerText = "COOLING CYCLE";
         ui.status.innerText = "THERMAL STABILIZATION";
         ui.subStatus.innerText = "DROPPING TO 300K";
         
         let coolInterval = setInterval(() => {
-            if(state.temp > 300) {
-                state.temp -= 25; 
-                updateTempUI();
-            } else {
+            if(state.temp > 300) { state.temp -= 25; updateTempUI(); } 
+            else {
                 clearInterval(coolInterval);
-                state.temp = 300;
-                updateTempUI();
+                state.temp = 300; updateTempUI();
                 readyForRetrieval();
             }
         }, 100);
@@ -376,40 +362,27 @@
 
     function readyForRetrieval() {
         state.phase = 4;
-        // Button Logic: Retrieve (Enabled, White Pulse)
         ui.mainBtn.innerText = "RETRIEVE ITEM";
         ui.mainBtn.className = "action-btn btn-white-pulse";
         ui.mainBtn.disabled = false;
-
         ui.status.innerText = "FABRICATION COMPLETE";
         ui.subStatus.innerText = "SAFE FOR RETRIEVAL";
         ui.phase.innerText = "CYCLE COMPLETE";
     }
 
     function retrieveItem() {
-        // Animation
-        ui.mainBtn.disabled = true; 
-        ui.mainBtn.style.opacity = 0; // Hide temporarily
+        ui.mainBtn.disabled = true; ui.mainBtn.style.opacity = 0;
         ui.status.innerText = "TRANSFERRING ASSET";
         ui.subStatus.innerText = "CLEARING CHAMBER";
-        
         let anim = setInterval(() => {
-            state.tilt += 0.1;
-            width += 50; 
+            state.tilt += 0.1; width += 50; 
             if(state.tilt > 2.0) {
                 clearInterval(anim);
-                
-                // RESET VISUALS
-                state.points = []; state.wireframe=[];
-                resize();
-                
-                // GO TO PHASE 5: RESTART
+                state.points = []; state.wireframe=[]; resize();
                 state.phase = 5;
                 ui.mainBtn.innerText = "SYSTEM RESTART";
                 ui.mainBtn.className = "action-btn btn-restart";
-                ui.mainBtn.disabled = false;
-                ui.mainBtn.style.opacity = 1;
-                
+                ui.mainBtn.disabled = false; ui.mainBtn.style.opacity = 1;
                 ui.status.innerText = "CHAMBER CLEAR";
                 ui.subStatus.innerText = "READY FOR NEXT CYCLE";
             }
@@ -417,19 +390,10 @@
     }
 
     function softReset() {
-        state.phase = 0;
-        state.layer = 0;
-        state.temp = 300;
-        state.rotation = 0;
-        state.tilt = 0.3;
-        
-        ui.fill.style.width = "0%";
-        updateTempUI();
-        
-        // Reset Button to Start
+        state.phase = 0; state.layer = 0; state.temp = 300; state.rotation = 0; state.tilt = 0.3;
+        ui.fill.style.width = "0%"; updateTempUI();
         ui.mainBtn.innerText = "GENERATE MICRO-LATTICE";
         ui.mainBtn.className = "action-btn btn-cyan";
-        
         ui.phase.innerText = "STANDBY";
         ui.status.innerText = "SYSTEM READY";
         ui.subStatus.innerText = "AWAITING INPUT";
@@ -439,16 +403,9 @@
         ui.temp.innerText = state.temp.toFixed(1) + " K";
         ui.headerTemp.innerText = state.temp.toFixed(1) + " K";
         let pct = ((state.temp - 300) / 1550) * 100;
-        if(pct < 0) pct = 0; if(pct > 100) pct = 100;
-        ui.marker.style.left = pct + "%";
-        
-        if(state.temp > 800) {
-            ui.temp.classList.add('hot');
-            ui.headerTemp.style.color = "var(--red)";
-        } else {
-            ui.temp.classList.remove('hot');
-            ui.headerTemp.style.color = "var(--cyan)";
-        }
+        ui.marker.style.left = Math.max(0, Math.min(100, pct)) + "%";
+        if(state.temp > 800) { ui.temp.classList.add('hot'); ui.headerTemp.style.color = "var(--red)"; } 
+        else { ui.temp.classList.remove('hot'); ui.headerTemp.style.color = "var(--cyan)"; }
     }
 
     // --- GENERATORS ---
@@ -486,11 +443,10 @@
         state.points.sort((a,b)=>a.y-b.y);
     }
 
-    // --- 3D RENDER (Optimized: No heavy blur) ---
+    // --- 3D RENDER ---
     function project3D(x, y, z) {
         let scale = FOV / (FOV + z);
-        let x2d = (x * scale) + width/2;
-        let y2d = (y * scale) + height/2;
+        let x2d = (x * scale) + width/2; let y2d = (y * scale) + height/2;
         return { x: x2d, y: y2d, scale: scale, d: z };
     }
     function rotY(x, z, angle) { return { x: x*Math.cos(angle) - z*Math.sin(angle), z: x*Math.sin(angle) + z*Math.cos(angle) }; }
@@ -499,18 +455,13 @@
     function draw() {
         ctx.clearRect(0, 0, width, height);
         
-        // GRID
-        if(state.phase > 0 && state.phase < 5) {
+        if(state.phase > 0 && state.phase < 4) {
             let pts = [];
-            for(let i=0; i<Math.PI*2; i+=0.2) {
-                pts.push({x:Math.cos(i)*250, y:(state.phase==1?200:300), z:Math.sin(i)*250});
-            }
+            for(let i=0; i<Math.PI*2; i+=0.2) { pts.push({x:Math.cos(i)*250, y:(state.phase==1?200:300), z:Math.sin(i)*250}); }
             pts.forEach(p=>{
-                let r1 = rotY(p.x, p.z, state.rotation);
-                let r2 = rotX(p.y, r1.z, state.tilt);
+                let r1 = rotY(p.x, p.z, state.rotation); let r2 = rotX(p.y, r1.z, state.tilt);
                 let proj = project3D(r1.x, r2.y, r2.z);
-                ctx.fillStyle = 'rgba(0,255,204,0.1)';
-                ctx.fillRect(proj.x, proj.y, 2, 2);
+                ctx.fillStyle = 'rgba(0,255,204,0.1)'; ctx.fillRect(proj.x, proj.y, 2, 2);
             });
         }
 
@@ -519,51 +470,33 @@
         let renderList = [];
         let completion = state.layer / state.totalLayers;
         let activeIdx = Math.floor(state.points.length * completion);
-
-        // COOLING EFFECT
         let heatColor = null;
         if(state.phase === 3 || state.phase === 4) { 
-            if(state.temp > 1000) heatColor = 'rgba(255, 100, 50, 0.8)'; // Red hot
-            else if(state.temp > 500) heatColor = 'rgba(255, 200, 100, 0.5)'; // Warm
+            if(state.temp > 1000) heatColor = 'rgba(255, 100, 50, 0.8)'; else if(state.temp > 500) heatColor = 'rgba(255, 200, 100, 0.5)';
         }
 
         state.points.forEach((p, i) => {
             if(i > activeIdx) return;
-            let r1 = rotY(p.x, p.z, state.rotation);
-            let r2 = rotX(p.y, r1.z, state.tilt);
+            let r1 = rotY(p.x, p.z, state.rotation); let r2 = rotX(p.y, r1.z, state.tilt);
             let proj = project3D(r1.x, r2.y, r2.z);
             let alpha = Math.max(0.4, 1 - (r2.z + 500)/1000);
-            
             let finalColor = p.c.c; 
             if(heatColor) finalColor = heatColor;
             if(state.phase === 2 && i > activeIdx - 20) finalColor = '#ffffff'; 
-
-            renderList.push({ 
-                x: proj.x, y: proj.y, s: p.s * proj.scale, 
-                c: finalColor, a: alpha, d: r2.z,
-                isNew: (i > activeIdx - 10 && state.phase === 2)
-            });
+            renderList.push({ x: proj.x, y: proj.y, s: p.s * proj.scale, c: finalColor, a: alpha, d: r2.z, isNew: (i > activeIdx - 10 && state.phase === 2) });
         });
 
         renderList.sort((a, b) => b.d - a.d);
-
-        ctx.globalCompositeOperation = "screen"; 
-
+        
+        // NO SHADOWBLUR / NO SCREEN BLEND (Optimization)
+        ctx.globalCompositeOperation = "source-over";
         renderList.forEach(p => {
             ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
-            if(p.isNew) {
-                ctx.fillStyle = '#fff'; 
-            } else {
-                ctx.fillStyle = p.c; 
-            }
-            ctx.globalAlpha = p.a; 
-            ctx.fill(); 
-            ctx.globalAlpha = 1.0; 
+            ctx.fillStyle = p.isNew ? '#fff' : p.c;
+            ctx.globalAlpha = p.a; ctx.fill(); 
         });
-        
-        ctx.globalCompositeOperation = "source-over"; 
+        ctx.globalAlpha = 1.0;
 
-        // LASERS
         if(state.phase === 2 && state.layer < state.totalLayers) {
             let hot = renderList.find(p => p.isNew);
             if(hot) {
@@ -581,112 +514,57 @@
         ctx.strokeStyle=g; ctx.lineWidth=1+Math.random()*2; ctx.stroke();
     }
 
-    // --- DIAGNOSTICS DRAW ---
+    // --- DIAGNOSTICS ---
     function drawDiagnostics() {
-        state.time++;
-        let col = "#00ffcc";
-        let w = ctxI1.canvas.width; let h = ctxI1.canvas.height;
-
-        // 1. POTENTIAL (Parabola)
+        state.time++; let col = "#00ffcc"; let w = ctxI1.canvas.width; let h = ctxI1.canvas.height;
+        // Potential
         ctxI1.clearRect(0,0,w,h); ctxI1.strokeStyle=col; ctxI1.lineWidth=2; ctxI1.beginPath();
-        for(let x=0;x<w;x++) { 
-            let nx=(x-w/2)/35; 
-            let y = (nx*nx) + (Math.random()*0.1); 
-            ctxI1.lineTo(x, h-20-(y*20)); 
-        } ctxI1.stroke();
-
-        // 2. PHASE SPACE (Circle)
-        ctxI2.clearRect(0,0,w,h); ctxI2.strokeStyle=col; ctxI2.lineWidth=1; ctxI2.beginPath();
-        ctxI2.arc(w/2, h/2, 20, 0, Math.PI*2); ctxI2.stroke();
-
-        // 3. FLUX (Lissajous)
+        for(let x=0;x<w;x++) { let nx=(x-w/2)/35; let y=(nx*nx)+(Math.random()*0.1); ctxI1.lineTo(x, h-20-(y*20)); } ctxI1.stroke();
+        // Phase
+        ctxI2.clearRect(0,0,w,h); ctxI2.strokeStyle=col; ctxI2.lineWidth=1; ctxI2.beginPath(); ctxI2.arc(w/2, h/2, 20, 0, Math.PI*2); ctxI2.stroke();
+        // Flux
         ctxI3.clearRect(0,0,w,h); ctxI3.strokeStyle=col; ctxI3.lineWidth=1.5; ctxI3.beginPath();
-        for(let t=0; t<Math.PI*2; t+=0.1) {
-            let x = w/2 + 25 * Math.sin(t*3 + state.time*0.1);
-            let y = h/2 + 25 * Math.sin(t*2);
-            if(t===0) ctxI3.moveTo(x,y); else ctxI3.lineTo(x,y);
-        } ctxI3.stroke();
-
-        // 4. DEUTERIUM CLOCK (Gauge)
-        ctxI4.clearRect(0,0,w,h);
-        let cx=w/2, cy=h; let r=h-5;
-        let grad = ctxI4.createLinearGradient(0,0,w,0);
-        grad.addColorStop(0,"#004433"); grad.addColorStop(0.5,"#00ffcc"); grad.addColorStop(1,"#004433");
+        for(let t=0; t<Math.PI*2; t+=0.1) { let x=w/2+25*Math.sin(t*3+state.time*0.1); let y=h/2+25*Math.sin(t*2); if(t===0)ctxI3.moveTo(x,y);else ctxI3.lineTo(x,y); } ctxI3.stroke();
+        // Clock
+        ctxI4.clearRect(0,0,w,h); let cx=w/2, cy=h, r=h-5;
+        let grad = ctxI4.createLinearGradient(0,0,w,0); grad.addColorStop(0,"#004433"); grad.addColorStop(0.5,"#00ffcc"); grad.addColorStop(1,"#004433");
         ctxI4.fillStyle=grad; ctxI4.beginPath(); ctxI4.arc(cx,cy,r,Math.PI,0); ctxI4.fill();
-        
-        let ang = -Math.PI/2 + (Math.random()-0.5)*0.05; 
-        ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(cx,cy);
-        ctxI4.lineTo(cx+(r-5)*Math.cos(ang), cy+(r-5)*Math.sin(ang)); ctxI4.stroke();
+        let ang = -Math.PI/2 + (Math.random()-0.5)*0.05;
+        ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(cx,cy); ctxI4.lineTo(cx+(r-5)*Math.cos(ang), cy+(r-5)*Math.sin(ang)); ctxI4.stroke();
     }
 
-    // DRAW MINI LATTICE (Sidebar)
     function drawMiniLattice() {
-        miniCtx.clearRect(0,0,330,150);
-        let t = state.time * 0.01;
-        const PHI = (1 + Math.sqrt(5)) / 2;
-        const v = [
-            [0,1,PHI], [0,-1,PHI], [0,1,-PHI], [0,-1,-PHI],
-            [1,PHI,0], [-1,PHI,0], [1,-PHI,0], [-1,-PHI,0],
-            [PHI,0,1], [-PHI,0,1], [PHI,0,-1], [-PHI,0,-1]
-        ];
-        
-        let projected = [];
+        miniCtx.clearRect(0,0,330,150); let t = state.time * 0.01;
+        const v = [[0,1,1.618],[0,-1,1.618],[0,1,-1.618],[0,-1,-1.618],[1,1.618,0],[-1,1.618,0],[1,-1.618,0],[-1,-1.618,0],[1.618,0,1],[-1.618,0,1],[1.618,0,-1],[-1.618,0,-1]];
+        let proj = [];
         v.forEach((p, i) => {
-            let x = p[0]*30, y=p[1]*30, z=p[2]*30;
-            // Rotate
-            let r1 = rotY(x, z, t);
-            let r2 = rotX(y, r1.z, 0.5);
-            // Project to mini center (165, 75)
-            projected.push({x: r1.x + 165, y: r2.y + 75, z: r2.z, c: ATOM_COLORS[i%6].c});
+            let x=p[0]*30, y=p[1]*30, z=p[2]*30;
+            let r1 = rotY(x, z, t); let r2 = rotX(y, r1.z, 0.5);
+            proj.push({x:r1.x+165, y:r2.y+75, z:r2.z, c:ATOM_COLORS[i%6].c});
         });
-
-        // Draw Links
-        miniCtx.strokeStyle = "rgba(0, 255, 204, 0.2)";
-        miniCtx.beginPath();
-        for(let i=0; i<projected.length; i++) {
-            for(let j=i+1; j<projected.length; j++) {
-                if(Math.hypot(projected[i].x - projected[j].x, projected[i].y - projected[j].y) < 70) {
-                    miniCtx.moveTo(projected[i].x, projected[i].y);
-                    miniCtx.lineTo(projected[j].x, projected[j].y);
-                }
-            }
-        }
+        miniCtx.strokeStyle = "rgba(0, 255, 204, 0.2)"; miniCtx.beginPath();
+        for(let i=0; i<proj.length; i++) for(let j=i+1; j<proj.length; j++) if(Math.hypot(proj[i].x-proj[j].x, proj[i].y-proj[j].y)<70) { miniCtx.moveTo(proj[i].x, proj[i].y); miniCtx.lineTo(proj[j].x, proj[j].y); }
         miniCtx.stroke();
-
-        // Draw Nodes
-        projected.sort((a,b)=>b.z - a.z);
-        projected.forEach(p => {
-            miniCtx.fillStyle = p.c;
-            miniCtx.beginPath(); miniCtx.arc(p.x, p.y, 4, 0, Math.PI*2); miniCtx.fill();
-        });
+        proj.sort((a,b)=>b.z-a.z);
+        proj.forEach(p => { miniCtx.fillStyle=p.c; miniCtx.beginPath(); miniCtx.arc(p.x, p.y, 4, 0, Math.PI*2); miniCtx.fill(); });
     }
 
     function loop() {
         state.rotation += 0.01;
         if(state.phase > 0) {
-            // Printing logic
             if(state.phase === 1 || state.phase === 2) {
-                if(state.layer < state.totalLayers) {
-                    state.layer += state.speed;
-                } else {
-                    if(state.phase === 1) {
-                        microComplete();
-                    }
-                    if(state.phase === 2) {
-                        startCooling();
-                    }
+                if(state.layer < state.totalLayers) state.layer += state.speed;
+                else {
+                    if(state.phase === 1) microComplete();
+                    if(state.phase === 2) startCooling();
                 }
                 ui.fill.style.width = (state.layer / state.totalLayers * 100) + "%";
             }
         }
-        
-        draw();
-        drawDiagnostics();
-        drawMiniLattice();
+        draw(); drawDiagnostics(); drawMiniLattice();
         requestAnimationFrame(loop);
     }
     loop();
-
 </script>
 </body>
 </html>
