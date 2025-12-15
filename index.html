@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v36.9 | TARGET IDENTIFICATION</title>
+    <title>GRAVES CONSOLE v37.0 | TARGET IDENTIFICATION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -34,6 +34,10 @@
         body.mode-orange { box-shadow: inset 0 0 80px rgba(255, 170, 0, 0.3); }
         body.mode-cyan { box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.2); }
         body.mode-diamond { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4); }
+        
+        /* FLASH ANIMATION FOR TRANSITION */
+        body.flash-white { animation: flashWhiteAnim 1.5s forwards; }
+        @keyframes flashWhiteAnim { 0% { background-color: #fff; } 100% { background-color: var(--bg); } }
 
         /* HEADER */
         #global-header {
@@ -129,6 +133,7 @@
         button.main-btn.confirm-mode { background: rgba(255, 170, 0, 0.2); color: var(--orange); border-color: var(--orange); box-shadow: 0 0 30px rgba(255,170,0,0.3); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.global-pulse { background: #fff; color: #000; border: 2px solid #fff; box-shadow: 0 0 50px rgba(255,255,255,0.5); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.reset-mode { background: rgba(255, 50, 50, 0.2); color: #ff3333; border-color: #ff3333; cursor: pointer; animation: none; }
+        button.main-btn.thermal-lock { background: rgba(100, 0, 0, 0.3); color: #ff5555; border-color: #ff3333; cursor: not-allowed; animation: none; box-shadow: none; opacity: 0.7; }
         
         @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         @keyframes pulseFast { 0% { box-shadow: 0 0 20px rgba(255,255,255,0.2); } 100% { box-shadow: 0 0 60px rgba(255,255,255,0.6); } }
@@ -179,7 +184,6 @@
         .col-cyan { color: var(--cyan); text-shadow: 0 0 0 var(--cyan); }
         .col-grey { color: #888; }
         
-        /* HUD UPDATES */
         .hud-label {
             position: absolute; top: 20px; left: 20px; z-index: 10;
             font-family: 'Courier New'; font-weight: bold; color: #666; font-size: 12px;
@@ -207,7 +211,7 @@
     <div id="pulse-overlay"></div>
 
     <div id="global-header">
-        <div>GRAVES CONSOLE v36.9 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
+        <div>GRAVES CONSOLE v37.0 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
         <div class="header-controls">
             <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
             <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
@@ -309,389 +313,210 @@
     </div>
 
 <script>
-    // --- BLUEPRINT DATA (EDIT THIS BLOCK FOR NEW RANKS) ---
-    // User can replace this object to simulate other materials (e.g. Rank 0002)
     const BLUEPRINT_DATA = {
         rank: "0001",
         name: "Zero-Slack Turbine Blade",
         composition: "Ni–20Co–15Cr–6Al–5Ti–4Mo–2W–1Nb–0.1Hf",
         specs: "Applications: (1) Jet engine hot section; (2) 1 blade → 1850 °C capability, 100,000 h life; (3) Ni–Al icosahedral γ′ lattice.\nProduction yield: 99.999% efficiency in sims; cost: $0.05/g via vapor deposition.\nEnables all downstream ranks (2–900)."
     };
+    const LOCK_MIN = 5.0370, LOCK_MAX = 5.0375, LOCK_CENTER = 5.0372;
+    const TORSION_STEP_COARSE = 0.1, TORSION_STEP_FINE = 0.0001, PHI = 1.618033988749895;
+    let torsion = 0.0, tempK = 300, step = 0, time = 0, audioCtx = null, osc = null, gain = null;
 
-    // --- TIER 0 AXIOMATIC CONSTANTS ---
-    const ALPHA_NATIVE = 166.08367698920713463; 
-    const PHI = 1.618033988749895;
-    
-    // STRICT BOUNDARIES (TABLE 1)
-    const LOCK_MIN = 5.0370; 
-    const LOCK_MAX = 5.0375; 
-    const LOCK_CENTER = 5.0372; 
-    
-    const TORSION_STEP_COARSE = 0.1; const TORSION_STEP_FINE = 0.0001;
-
-    // --- STATE ---
-    let torsion = 0.0; let tempK = 300; let step = 0; let time = 0; let audioCtx = null;
-
-    // --- DOM REFERENCES ---
     const ui = {
-        body: document.body,
-        sliderT: document.getElementById('torsion-slider'),
-        inputT: document.getElementById('torsion-text'),
-        wrapT: document.getElementById('torsion-wrap'),
-        sliderK: document.getElementById('temp-slider'),
-        inputK: document.getElementById('temp-text'),
-        wrapK: document.getElementById('thermal-wrap'),
-        bar: document.getElementById('proj-bar'),
-        lblCurrent: document.getElementById('label-val-current'),
-        slack: document.getElementById('val-slack'),
-        topo: document.getElementById('val-topo'),
-        statText: document.getElementById('sys-status-text'),
-        btn: document.getElementById('main-btn'),
-        console: document.getElementById('console-log'),
-        warn: document.getElementById('warning-box'),
-        slackStat: document.getElementById('slack-status'),
-        gravesStat: document.getElementById('graves-status'),
-        entropyLabel: document.getElementById('entropy-label'),
-        dephasingLabel: document.getElementById('dephasing-label'),
+        body: document.body, sliderT: document.getElementById('torsion-slider'), inputT: document.getElementById('torsion-text'), wrapT: document.getElementById('torsion-wrap'),
+        sliderK: document.getElementById('temp-slider'), inputK: document.getElementById('temp-text'), wrapK: document.getElementById('thermal-wrap'),
+        bar: document.getElementById('proj-bar'), lblCurrent: document.getElementById('label-val-current'), slack: document.getElementById('val-slack'),
+        topo: document.getElementById('val-topo'), statText: document.getElementById('sys-status-text'), btn: document.getElementById('main-btn'),
+        console: document.getElementById('console-log'), warn: document.getElementById('warning-box'), slackStat: document.getElementById('slack-status'),
+        gravesStat: document.getElementById('graves-status'), entropyLabel: document.getElementById('entropy-label'), dephasingLabel: document.getElementById('dephasing-label'),
         btnCryo: document.getElementById('btn-cryo'), btnRoom: document.getElementById('btn-room'), btnStress: document.getElementById('btn-stress'),
-        envSelector: document.getElementById('env-selector'),
-        thermalLabel: document.getElementById('thermal-label'), tempUnit: document.getElementById('temp-unit'),
-        pulseOverlay: document.getElementById('pulse-overlay'),
-        clkJit: document.getElementById('clk-jit'),
-        clkCoh: document.getElementById('clk-coh'),
-        targetId: document.getElementById('target-id'),
-        targetComp: document.getElementById('target-comp'),
-        blueprintDiv: document.getElementById('blueprint-data')
+        envSelector: document.getElementById('env-selector'), thermalLabel: document.getElementById('thermal-label'), tempUnit: document.getElementById('temp-unit'),
+        pulseOverlay: document.getElementById('pulse-overlay'), clkJit: document.getElementById('clk-jit'), clkCoh: document.getElementById('clk-coh'),
+        targetId: document.getElementById('target-id'), targetComp: document.getElementById('target-comp'), blueprintDiv: document.getElementById('blueprint-data')
     };
 
-    const ctxM = document.getElementById('mainCanvas').getContext('2d');
-    const ctxB = document.getElementById('bgCanvas').getContext('2d');
-    const ctxT = document.getElementById('thermCanvas').getContext('2d');
-    const ctxG = document.getElementById('gravesCanvas').getContext('2d');
-    const ctxI1 = document.getElementById('inset1').getContext('2d');
-    const ctxI2 = document.getElementById('inset2').getContext('2d');
-    const ctxI3 = document.getElementById('inset3').getContext('2d');
-    const ctxI4 = document.getElementById('inset4').getContext('2d');
+    const ctxM = document.getElementById('mainCanvas').getContext('2d'), ctxB = document.getElementById('bgCanvas').getContext('2d'),
+          ctxT = document.getElementById('thermCanvas').getContext('2d'), ctxG = document.getElementById('gravesCanvas').getContext('2d'),
+          ctxI1 = document.getElementById('inset1').getContext('2d'), ctxI2 = document.getElementById('inset2').getContext('2d'),
+          ctxI3 = document.getElementById('inset3').getContext('2d'), ctxI4 = document.getElementById('inset4').getContext('2d');
 
-    // --- INITIALIZATION ---
     function initConsole() {
         ui.targetId.innerText = `TARGET: RANK ${BLUEPRINT_DATA.rank} // ${BLUEPRINT_DATA.name.toUpperCase()}`;
         ui.targetComp.innerText = `COMPOSITION: ${BLUEPRINT_DATA.composition}`;
     }
 
-    // --- PRECISION CONTROL ---
-    function setTorsion(val) {
-        if(step !== 0) return;
-        let safeVal = Math.max(0, Math.min(10, parseFloat(val) || 0));
-        safeVal = Math.round(safeVal * 10000) / 10000;
-        torsion = safeVal;
-        ui.inputT.value = torsion.toFixed(4);
-        ui.sliderT.value = torsion;
-        updateState();
-    }
-
-    ui.sliderT.addEventListener('input', (e) => setTorsion(parseFloat(e.target.value)));
-    ui.inputT.addEventListener('change', (e) => setTorsion(parseFloat(e.target.value)));
-    ui.wrapT.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const delta = Math.sign(e.deltaY) * -1;
-        setTorsion(torsion + (delta * TORSION_STEP_FINE));
-    }, { passive: false });
-    
-    document.addEventListener('keydown', (e) => {
-        if (step !== 0) return;
-        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') setTorsion(torsion + (e.shiftKey ? TORSION_STEP_COARSE : TORSION_STEP_FINE));
-        else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') setTorsion(torsion - (e.shiftKey ? TORSION_STEP_COARSE : TORSION_STEP_FINE));
-    });
-
-    // --- AUDIO & UTILS ---
-    function initAudio() { 
-        if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); 
+    function initAudio() {
+        if(!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            osc = audioCtx.createOscillator();
+            gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.value = 0;
+        }
         if(audioCtx.state === 'suspended') audioCtx.resume();
     }
-    
-    function playTone(freq, type, dur, vol=0.1) {
+
+    function updateAudio(val) {
+        if(!audioCtx) initAudio();
+        let dist = Math.abs(val - LOCK_CENTER);
+        let freq = 0, vol = 0, type = 'sawtooth';
+        
+        if (isLocked()) {
+            freq = 880; type = 'sine'; vol = 0.15;
+        } else if (dist < 2.0) {
+            let n = 1 - (dist / 2.0);
+            freq = 60 + (800 * Math.pow(n, 4));
+            vol = 0.05 + (0.1 * n);
+        }
+        if(step > 0) vol = 0; // Quiet when engaged
+
+        osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+        gain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.1);
+        osc.type = type;
+    }
+
+    function playTone(f, t, d, v=0.1) {
         if(!audioCtx) return;
-        const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
-        o.type=type; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
-        g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
-        o.start(); o.stop(audioCtx.currentTime+dur);
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type=t; o.frequency.value=f; o.connect(g); g.connect(audioCtx.destination);
+        g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+d);
+        o.start(); o.stop(audioCtx.currentTime+d);
     }
-    function playLockSound() { playTone(880,'sine',0.5,0.2); setTimeout(()=>playTone(1760,'sine',1.0,0.1), 100); }
-    function playPulseSound() { if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.frequency.setValueAtTime(100, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime+3); o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.5, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+3); o.start(); o.stop(audioCtx.currentTime+3); }
-    function toggleFullScreen() { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else if(document.exitFullscreen) document.exitFullscreen(); }
-    function captureScreen() { html2canvas(document.body).then(c=>{ let a=document.createElement('a'); a.download='graves.png'; a.href=c.toDataURL(); a.click(); }); }
-    function exportLog() { let b=new Blob([ui.console.innerText],{type:"text/plain"}); let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='graves.txt'; a.click(); }
 
-    // --- RENDER ---
-    function resize() {
-        const v = document.getElementById('view-container'); 
-        const m = document.querySelector('.monitor-box');
-        ctxM.canvas.width = v.offsetWidth; ctxM.canvas.height = v.offsetHeight;
-        ctxB.canvas.width = v.offsetWidth; ctxB.canvas.height = v.offsetHeight;
-        
-        let mw = m ? m.offsetWidth : 300;
-        let mh = m ? m.offsetHeight : 150;
-        
-        [ctxT, ctxG].forEach(c => { c.canvas.width = mw; c.canvas.height = mh - 25; });
-        [ctxI1, ctxI2, ctxI3, ctxI4].forEach(c => { c.canvas.width = 150; c.canvas.height = 85; });
+    function setTorsion(val) {
+        if(step !== 0) return;
+        let safeVal = Math.round(Math.max(0, Math.min(10, parseFloat(val)||0)) * 10000) / 10000;
+        torsion = safeVal;
+        ui.inputT.value = torsion.toFixed(4); ui.sliderT.value = torsion;
+        updateState(); updateAudio(torsion);
     }
-    window.addEventListener('resize', resize);
 
-    function calcRaw(k) { return (k<=1000) ? (k/1000)*25 : 25+75*Math.sqrt((k-1000)/99000); }
-    function calcTemp(r) { return (r<=25) ? (r/25)*1000 : 1000+(Math.pow((r-25)/75,2)*99000); }
+    ui.sliderT.addEventListener('input', (e) => setTorsion(e.target.value));
+    ui.inputT.addEventListener('change', (e) => setTorsion(e.target.value));
+    ui.wrapT.addEventListener('wheel', (e) => { e.preventDefault(); setTorsion(torsion + (Math.sign(e.deltaY)*-1 * TORSION_STEP_FINE)); }, { passive: false });
     
-    function setEnv(type, fromUser=false) {
-        if(step>=3) return; 
-        if(fromUser) initAudio(); 
-        [ui.btnCryo, ui.btnRoom, ui.btnStress].forEach(b=>{b.classList.remove('active'); b.classList.remove('active-stress');});
-        if(type==='CRYO') { ui.btnCryo.classList.add('active'); tempK=4; log(">>> ENVIRONMENT: CRYO (4K)"); }
-        else if(type==='STRESS') { ui.btnStress.classList.add('active-stress'); tempK=50000; log(">>> ENVIRONMENT: STRESS TEST (50,000K)"); }
-        else { ui.btnRoom.classList.add('active'); tempK=300; log(">>> ENVIRONMENT: ROOM (300K)"); }
-        ui.inputK.value=Math.floor(tempK); ui.sliderK.value=calcRaw(tempK); updateState();
-    }
-
-    function isLocked() {
-        return (torsion >= LOCK_MIN && torsion <= LOCK_MAX);
-    }
+    function isLocked() { return (torsion >= LOCK_MIN && torsion <= LOCK_MAX); }
 
     function handleBtnClick() {
         initAudio();
-        // STEP 0 -> 1: LOCK TORSION, KEEP THERMAL OPEN
+        if(tempK > 790 && step < 1) { log("!! ABORT: THERMAL LOCKOUT (>790K) !!"); playTone(150,'sawtooth',0.3); return; }
+        
         if(step===0) {
             if(isLocked()) {
-                if(tempK>50000) { log("!! ABORT: THERMAL OVERLOAD !!"); return; }
-                step=1; 
-                playLockSound();
+                step=1; playTone(880,'sine',0.5,0.2);
                 ui.sliderT.classList.add('locked-input'); ui.inputT.disabled=true; ui.wrapT.classList.add('locked-input');
-                
-                ui.btn.className="main-btn ready-fab"; ui.btn.innerText="RENDER PHYSICAL COMPOUND"; 
-                log(">>> GEOMETRY LOCKED. THERMAL SYSTEMS ACTIVE.");
+                ui.btn.className="main-btn ready-fab"; ui.btn.innerText="RENDER PHYSICAL COMPOUND";
+                log(">>> GEOMETRY LOCKED.");
             } else { updateState(true); playTone(200,'sawtooth',0.2); }
-        } 
-        // STEP 1 -> 2: CONFIRMATION STATE
-        else if(step===1) {
-            step=2;
-            playTone(400,'sine',0.1);
-            ui.btn.className="main-btn confirm-mode"; 
-            ui.btn.innerText="CONFIRM RENDER COMPOUND";
+        } else if(step===1) {
+            step=2; playTone(400,'sine',0.1);
+            ui.btn.className="main-btn confirm-mode"; ui.btn.innerText="CONFIRM RENDER COMPOUND";
             log(">>> CONFIRMATION REQUIRED...");
-        }
-        // STEP 2 -> 3: FLASH & BLUEPRINT
-        else if(step===2) { 
-            step=3; 
-            playLockSound(); 
-            
+        } else if(step===2) {
+            step=3; playTone(880,'sine',1.0);
             ui.sliderK.classList.add('locked-input'); ui.inputK.classList.add('locked-input'); ui.wrapK.classList.add('locked-input'); ui.envSelector.classList.add('locked-input');
+            document.documentElement.style.setProperty('--active-color', '#ffffff');
+            document.body.classList.add('flash-white');
             
-            document.documentElement.style.setProperty('--active-color', '#ffffff'); 
-            document.body.classList.add('flash-white'); 
-            setTimeout(()=>document.body.classList.remove('flash-white'),800); 
+            // SHOW LATTICE STATE + NEW BUTTON (NO AUTO REDIRECT)
+            ui.btn.className = "main-btn global-pulse";
+            ui.btn.innerText = "INITIATE MACRO";
+            ui.topo.innerText="CLOSED (PROTECTED)"; ui.topo.style.color="#fff"; ui.statText.innerText="ZERO SLACK (FLAT)";
             
-            ui.btn.className="main-btn reset-mode"; ui.btn.innerText="SYSTEM RESET"; 
-            ui.topo.innerText="CLOSED (PROTECTED)"; ui.topo.style.color="#fff"; ui.statText.innerText="ZERO SLACK (FLAT)"; 
-            
-            playPulseSound(); 
-            ui.pulseOverlay.style.opacity=1; 
-            log(">>> PHYSICAL OUTPUT INITIATED..."); 
+            log(">>> PHYSICAL OUTPUT INITIATED...");
             log(">>> BLUEPRINT RENDERED.");
-            
-            setTimeout(()=>{ 
-                ui.pulseOverlay.style.opacity=0; 
-                log(">>> PRINT COMPLETE."); 
-            }, 500);
-        } 
-        // STEP 3 -> 0: RESET
-        else if(step===3) { 
-            step=0; 
-            document.documentElement.style.setProperty('--active-color', '#ff3333'); 
-            ui.sliderT.classList.remove('locked-input'); ui.inputT.disabled=false; ui.wrapT.classList.remove('locked-input'); 
-            ui.envSelector.classList.remove('locked-input');
-            ui.sliderK.classList.add('locked-input'); ui.inputK.classList.add('locked-input'); ui.wrapK.classList.add('locked-input');
-            
-            setEnv('ROOM'); setTorsion(0); 
-            log(">>> SYSTEM RESET."); 
+        } else if(step===3) {
+            // STEP 3 CLICK -> GO TO FABRICATION
+            window.location.href = "./fabrication.html";
         }
     }
+
+    function calcRaw(k) { return (k<=1000) ? (k/1000)*25 : 25+75*Math.sqrt((k-1000)/99000); }
+    function calcTemp(r) { return (r<=25) ? (r/25)*1000 : 1000+(Math.pow((r-25)/75,2)*99000); }
+    function setEnv(type) { if(step>=3) return; initAudio(); if(type==='CRYO') tempK=4; else if(type==='STRESS') tempK=50000; else tempK=300; ui.inputK.value=Math.floor(tempK); ui.sliderK.value=calcRaw(tempK); updateState(); }
     
     function updateState(forcedWarn=false) {
-        tempK=parseFloat(ui.inputK.value); if(isNaN(tempK)) tempK=300; 
-        if(tempK<=100000) ui.sliderK.value=calcRaw(tempK); 
-        let fill=(torsion/10)*100; ui.bar.style.width=fill+"%";
-
-        // VISUAL STATES
-        if(step>=3) { 
-            ui.warn.style.display="none"; ui.slack.innerText="0.000000 eV"; setTheme('diamond'); 
-            ui.thermalLabel.classList.add('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.add('thermal-label-white'); 
-            ui.entropyLabel.classList.add('white-header-text'); ui.dephasingLabel.classList.add('white-header-text'); 
-            
-            ui.targetId.style.color = "var(--cyan)";
-            ui.targetComp.style.color = "var(--cyan)";
-            
-            ui.blueprintDiv.style.display = "block";
-            ui.blueprintDiv.innerText = BLUEPRINT_DATA.specs;
-            return; 
-        }
+        tempK=parseFloat(ui.inputK.value)||300; if(tempK<=100000) ui.sliderK.value=calcRaw(tempK);
+        ui.bar.style.width=(torsion/10)*100+"%";
         
-        ui.thermalLabel.classList.remove('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.remove('thermal-label-white'); ui.entropyLabel.classList.remove('white-header-text'); ui.dephasingLabel.classList.remove('white-header-text');
-        
-        // Reset colors
-        ui.targetId.style.color = "#888";
-        ui.targetComp.style.color = "#555";
-        ui.blueprintDiv.style.display = "none";
-        
-        if(step < 3) {
-            ui.sliderK.classList.remove('locked-input'); ui.inputK.classList.remove('locked-input'); ui.wrapK.classList.remove('locked-input');
-        }
-
-        if(tempK>800&&tempK<49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="THERMAL DECAY<br><span style='font-size:0.5em'>LIMIT 800 K</span>"; setTheme('red'); return; }
-        if(tempK>=49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="STRESS TEST<br><span style='font-size:0.5em'>LEDGER LIMIT</span>"; setTheme('red'); return; }
+        if(tempK>790 && step < 2) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="THERMAL LOCKOUT<br><span style='font-size:0.5em'>LIMIT 790 K</span>"; if(isLocked()){ui.btn.className="main-btn thermal-lock"; ui.btn.innerText="THERMAL LOCKOUT (>790K)";} return; }
         
         if(isLocked()) {
-            setTheme('cyan'); ui.warn.style.display="none"; 
-            if(step===0) {
-                ui.btn.className="main-btn can-lock"; ui.btn.innerText="READY TO LOCK GEOMETRY"; 
-            }
-            ui.slack.innerText="0.000000 eV"; ui.statText.innerText="WINDOW MATCHED"; ui.statText.style.color="var(--cyan)"; ui.slackStat.innerText="SHUNTED"; ui.slackStat.style.color="var(--cyan)"; ui.gravesStat.innerText="LOCKED"; ui.gravesStat.style.color="var(--cyan)"; ui.lblCurrent.innerText="166.083 (NATIVE)"; ui.lblCurrent.style.color="var(--cyan)"; 
-            ui.targetId.style.color = "var(--cyan)";
-            logOnce(">>> WINDOW MATCHED. READY.");
+            document.body.className="mode-cyan"; document.documentElement.style.setProperty('--active-color', '#00ffcc'); ui.warn.style.display="none";
+            if(step===0) { ui.btn.className="main-btn can-lock"; ui.btn.innerText="READY TO LOCK GEOMETRY"; }
+            ui.slack.innerText="0.000000 eV"; ui.statText.innerText="WINDOW MATCHED"; ui.statText.style.color="var(--cyan)"; ui.lblCurrent.innerText="166.083 (NATIVE)"; ui.lblCurrent.style.color="var(--cyan)"; ui.targetId.style.color="var(--cyan)";
         } else {
             if(step===0) {
-                ui.btn.className="main-btn"; ui.btn.innerText="TEST LOCK PARAMETERS"; 
-                ui.warn.style.display=(forcedWarn||(torsion>0.1&&!isLocked()))?"block":"none"; 
-                
-                if(torsion > LOCK_MAX) { // CLIFF
-                    setTheme('orange'); 
-                    ui.statText.innerText="OVER TORQUE"; 
-                    ui.warn.className="warn-orange"; ui.warn.innerHTML="GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>OVER TORQUE</span>"; 
-                    ui.lblCurrent.innerText="OVER TORQUE (ARTIFACT)"; ui.lblCurrent.style.color="var(--orange)"; 
-                    ui.slack.innerText="0.214700 eV"; 
-                }
-                else { // WALL
-                    setTheme('red'); 
-                    ui.statText.innerText="UNDER TORQUE"; 
-                    ui.warn.className="warn-red"; 
-                    let dist = Math.abs(torsion-LOCK_MIN);
-                    let sVal = (torsion >= 5.0360) ? (0.18 + (dist*10)) : (8.7 + dist);
-                    ui.slack.innerText=sVal.toFixed(4) + " eV";
-
-                    ui.warn.innerHTML=torsion<4.8?"GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>UNDER TORQUE</span>":"APPROACHING LOCK...<br><span style='font-size:0.5em'>UNDER TORQUE</span>"; 
-                    ui.lblCurrent.innerText="UNDER TORQUE (ARTIFACT)"; ui.lblCurrent.style.color="var(--red)"; 
-                }
+                ui.btn.className="main-btn"; ui.btn.innerText="TEST LOCK PARAMETERS";
+                ui.warn.style.display=(forcedWarn||(torsion>0.1))?"block":"none";
+                if(torsion>LOCK_MAX){ document.body.className="mode-orange"; ui.statText.innerText="OVER TORQUE"; ui.warn.className="warn-orange"; ui.warn.innerHTML="GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>OVER TORQUE</span>"; }
+                else { document.body.className="mode-red"; ui.statText.innerText="UNDER TORQUE"; ui.warn.className="warn-red"; ui.warn.innerHTML="GEOMETRY UNSTABLE<br><span style='font-size:0.5em'>UNDER TORQUE</span>"; }
             }
-            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
+            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
         }
-    }
-    function setTheme(c) { ui.body.className="mode-"+c; document.documentElement.style.setProperty('--active-color', c==='red'?'#ff3333':(c==='orange'?'#ffaa00':(c==='diamond'?'#ffffff':'#00ffcc'))); }
-    let lastLog=""; function log(msg) { ui.console.innerHTML+=`<div><span class="log-hl">>></span> ${msg}</div>`; ui.console.scrollTop=ui.console.scrollHeight; }
-    function logOnce(msg) { if(lastLog!==msg){ log(msg); lastLog=msg; } }
-
-    // --- ANIMATION KERNEL ---
-    // ATOMS FOR RANK 1 (Ni Superalloy)
-    const TYPES = {
-        Ni: {c:'#e0e0e0', s:'Ni', r:6},
-        Co: {c:'#3366ff', s:'Co', r:5},
-        Cr: {c:'#9933cc', s:'Cr', r:5},
-        Mo: {c:'#00ff00', s:'Mo', r:5},
-        W:  {c:'#ffaa00', s:'W',  r:5},
-        Nb: {c:'#00ffff', s:'Nb', r:4},
-        Hf: {c:'#ff0000', s:'Hf', r:3}
-    };
-
-    let atoms=[];
-    function initAtoms() {
-        atoms = [];
-        const v = [[0,1,PHI],[0,-1,PHI],[0,1,-PHI],[0,-1,-PHI],[1,PHI,0],[-1,PHI,0],[1,-PHI,0],[-1,-PHI,0],[PHI,0,1],[-PHI,0,1],[PHI,0,-1],[-PHI,0,-1]];
-        atoms.push({x:0, y:0, z:0, type:TYPES.Ni});
-        v.forEach((p, i) => {
-            let t = (i%2===0) ? TYPES.Co : TYPES.Cr;
-            atoms.push({x:p[0]*40, y:p[1]*40, z:p[2]*40, type:t});
-        });
-        const duals = [[1,1,1],[1,1,-1],[1,-1,1],[-1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
-        duals.forEach((p, i) => {
-            let t = (i%2===0) ? TYPES.Mo : TYPES.W;
-            atoms.push({x:p[0]*70, y:p[1]*70, z:p[2]*70, type:t});
-        });
-        v.forEach((p) => { atoms.push({x:p[0]*90, y:p[1]*90, z:p[2]*90, type:TYPES.Nb}); });
-        v.forEach((p) => { atoms.push({x:p[0]*110, y:p[1]*110, z:p[2]*110, type:TYPES.Hf}); });
-    }
-    initAtoms();
-
-    let waveS=[], waveG=[];
-    function draw() {
-        time++; ctxM.clearRect(0,0,ctxM.canvas.width,ctxM.canvas.height); ctxB.clearRect(0,0,ctxB.canvas.width,ctxB.canvas.height);
-        const w=ctxB.canvas.width, h=ctxB.canvas.height;
-        ctxB.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--active-color'); ctxB.lineWidth=1; ctxB.globalAlpha=0.3; ctxB.beginPath();
-        let hatAmp=(step<1&&!isLocked())?(tempK/300)*15+Math.abs(torsion-LOCK_CENTER)*10:0; if(hatAmp>120) hatAmp=120;
-        for(let r=0;r<Math.max(w,h);r+=25) { ctxB.moveTo(w/2+r,h/2); for(let a=0;a<=Math.PI*2;a+=0.1) { let z=Math.sin(r*0.05-time*0.05)*hatAmp; ctxB.lineTo(w/2+(r+z*0.5)*Math.cos(a),h/2+(r+z*0.5)*Math.sin(a)*0.6); } }
-        ctxB.stroke(); ctxB.globalAlpha=1.0;
-
-        let cx=w/2, cy=h/2, rot=time*((step>=3)?0.001:0.005), jitter=(step<3&&!isLocked())?Math.min(80,20+(tempK/500)):0;
-        let proj=[]; atoms.forEach(a=>{ let jx=(Math.random()-0.5)*jitter, jy=(Math.random()-0.5)*jitter, jz=(Math.random()-0.5)*jitter; let x1=(a.x+jx)*Math.cos(rot)-(a.z+jz)*Math.sin(rot), z1=(a.x+jx)*Math.sin(rot)+(a.z+jz)*Math.cos(rot); let s=600/(600+(a.y+jy)*Math.sin(0.3)+z1*Math.cos(0.3)+200); proj.push({x:cx+x1*s,y:cy+((a.y+jy)*Math.cos(0.3)-z1*Math.sin(0.3))*s,s:s,z:z1,type:a.type}); });
-        ctxM.lineWidth=(step>=3)?1:0.5; ctxM.strokeStyle=(step>=3)?'rgba(255,255,255,0.4)':ctxB.strokeStyle; ctxM.beginPath();
-        for(let i=0;i<proj.length;i++) for(let j=i+1;j<proj.length;j++) if(Math.hypot(proj[i].x-proj[j].x,proj[i].y-proj[j].y)<100*proj[i].s) { ctxM.moveTo(proj[i].x,proj[i].y); ctxM.lineTo(proj[j].x,proj[j].y); } ctxM.stroke();
         
-        proj.forEach(p=>{ 
-            if(step>=3) {
-                ctxM.fillStyle = p.type.c;
-                ctxM.font = "bold 10px Courier New";
-                ctxM.textAlign = "center";
-                ctxM.textBaseline = "middle";
-                ctxM.fillText(p.type.s, p.x, p.y);
-            } else {
-                ctxM.fillStyle=(step>=3)?'#fff':((step<1&&jitter>10)?ctxB.strokeStyle:p.type.c); 
-                ctxM.beginPath(); ctxM.arc(p.x,p.y,p.type.r*p.s,0,Math.PI*2); ctxM.fill(); 
-            }
-        });
-
-        let col=getComputedStyle(document.documentElement).getPropertyValue('--active-color'), locked=isLocked();
-        ctxI1.clearRect(0,0,150,85); ctxI1.strokeStyle=col; ctxI1.lineWidth=2; ctxI1.beginPath(); for(let x=0;x<150;x++) { let nx=(x-75)/35, y=locked?(nx*nx):(Math.pow(nx,4)-Math.pow(nx,2)); ctxI1.lineTo(x,60-(y*25)); } ctxI1.stroke();
-        ctxI2.clearRect(0,0,150,85); ctxI2.strokeStyle=col; ctxI2.lineWidth=1; ctxI2.beginPath(); ctxI2.arc(75,42,25+(Math.random()-0.5)*(locked?0:20),0,Math.PI*2); ctxI2.stroke();
-        ctxI3.clearRect(0,0,150,85); ctxI3.strokeStyle=col; ctxI3.beginPath();
-        if(locked) { ctxI3.lineWidth=1.5; for(let t=0;t<Math.PI*2;t+=0.1) { let x=75+30*Math.sin(t*3+time*0.1), y=42+30*Math.sin(t*2); if(t===0)ctxI3.moveTo(x,y); else ctxI3.lineTo(x,y); } }
-        else { ctxI3.lineWidth=1; for(let x=0;x<150;x+=5) ctxI3.lineTo(x,42+(Math.random()-0.5)*(tempK/5)); } ctxI3.stroke();
-
-        ctxI4.clearRect(0,0,150,85);
-        let grad = ctxI4.createLinearGradient(0,0,150,0);
-        grad.addColorStop(0, "#ff3333"); grad.addColorStop(0.5, "#ffaa00"); grad.addColorStop(1, "#ff3333");
-        if(locked) { grad = ctxI4.createLinearGradient(0,0,150,0); grad.addColorStop(0.4, "#004433"); grad.addColorStop(0.5, "#00ffcc"); grad.addColorStop(0.6, "#004433"); }
-        ctxI4.fillStyle=grad; ctxI4.beginPath(); ctxI4.arc(75,85,60,Math.PI,0); ctxI4.fill();
-        let angle = -Math.PI/2; 
-        if(!locked) angle += (Math.random()-0.5)*(tempK/100);
-        ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(75,85); 
-        ctxI4.lineTo(75+55*Math.cos(angle), 85+55*Math.sin(angle)); ctxI4.stroke();
-        if(locked) { ui.clkJit.innerText="<10fs"; ui.clkJit.style.color="var(--cyan)"; ui.clkCoh.innerText="1.000"; }
-        else { ui.clkJit.innerText="HIGH"; ui.clkJit.style.color="#ff3333"; ui.clkCoh.innerText=Math.random().toFixed(2); }
-
-        const wt=ctxT.canvas.width, ht=ctxT.canvas.height; ctxT.clearRect(0,0,wt,ht); ctxG.clearRect(0,0,wt,ht);
-        if(locked) {
-            let mc=(step>=3)?'var(--diamond)':'var(--cyan)';
-            ctxT.strokeStyle=mc; ctxT.lineWidth=1+(tempK/20000); ctxT.beginPath(); ctxT.moveTo(0,ht/2); ctxT.lineTo(wt,ht/2); ctxT.stroke();
-            ctxG.strokeStyle=mc; ctxG.lineWidth=3; ctxG.shadowColor=mc; ctxG.shadowBlur=10; ctxG.beginPath(); ctxG.moveTo(0,ht/2); ctxG.lineTo(wt,ht/2); ctxG.stroke(); ctxG.shadowBlur=0;
+        // VISUAL OVERRIDES FOR STEP 3
+        if(step>=3) {
+            ui.warn.style.display="none"; ui.slack.innerText="0.000000 eV"; setTheme('diamond');
+            ui.thermalLabel.classList.add('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.add('thermal-label-white');
+            ui.entropyLabel.classList.add('white-header-text'); ui.dephasingLabel.classList.add('white-header-text');
+            ui.targetId.style.color = "var(--cyan)"; ui.targetComp.style.color = "var(--cyan)";
+            ui.blueprintDiv.style.display = "block"; ui.blueprintDiv.innerText = BLUEPRINT_DATA.specs;
         } else {
-            let amp=Math.min(ht/2,(tempK/300)*10); waveS.push((Math.random()-0.5)*amp*2); if(waveS.length>wt/2) waveS.shift();
-            ctxT.strokeStyle=col; ctxT.lineWidth=1; ctxT.beginPath(); for(let i=0;i<waveS.length;i++) ctxT.lineTo(i*2,ht/2+waveS[i]); ctxT.stroke();
-            let gVal=Math.sin(time*0.1)*(ht*0.3); let jAmp=(tempK>400)?(tempK/10000):0; gVal+=(Math.random()-0.5)*jAmp*50; waveG.push(gVal); if(waveG.length>wt/2) waveG.shift();
-            ctxG.strokeStyle=(step<2&&!locked&&torsion>LOCK_MAX)?'#ffaa00':col; ctxG.lineWidth=2; ctxG.beginPath(); for(let i=0;i<waveG.length;i++) ctxG.lineTo(i*2,ht/2+waveG[i]); ctxG.stroke();
+            ui.thermalLabel.classList.remove('thermal-label-white'); ui.inputK.style.color='var(--diamond)'; ui.tempUnit.classList.remove('thermal-label-white');
+            ui.entropyLabel.classList.remove('white-header-text'); ui.dephasingLabel.classList.remove('white-header-text');
+            ui.targetId.style.color = "#888"; ui.targetComp.style.color = "#555"; ui.blueprintDiv.style.display = "none";
         }
-        if(locked) {
-            ui.entropyLabel.innerText="PHONON ALIGNMENT (166)"; ui.slackStat.innerText="ALIGNED"; ui.slackStat.style.color=(step>=3)?'var(--diamond)':'var(--cyan)';
-            ui.gravesStat.innerText="LOCKED"; ui.gravesStat.style.color=(step>=3)?'var(--diamond)':'var(--cyan)';
-        } else {
-            ui.entropyLabel.innerText="PHONON ENTROPY (137)"; ui.slackStat.innerText=tempK>800?"MELTING":"CRITICAL"; ui.slackStat.style.color=col;
-            ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
-        }
-        if(step>=3) { ui.dephasingLabel.style.color='var(--diamond)'; ui.gravesStat.style.color='var(--diamond)'; } else ui.dephasingLabel.style.color='var(--cyan)';
-        requestAnimationFrame(draw);
     }
     
-    // --- UI EVENTS ---
+    function setTheme(c) { ui.body.className="mode-"+c; document.documentElement.style.setProperty('--active-color', c==='red'?'#ff3333':(c==='orange'?'#ffaa00':(c==='diamond'?'#ffffff':'#00ffcc'))); }
+
+    const TYPES = { Ni:{c:'#e0e0e0',s:'Ni',r:6}, Co:{c:'#3366ff',s:'Co',r:5}, Cr:{c:'#9933cc',s:'Cr',r:5}, Mo:{c:'#00ff00',s:'Mo',r:5}, W:{c:'#ffaa00',s:'W',r:5}, Nb:{c:'#00ffff',s:'Nb',r:4}, Hf:{c:'#ff0000',s:'Hf',r:3} };
+    let atoms=[]; function initAtoms(){ atoms=[]; [[0,1,1.618],[0,-1,1.618],[0,1,-1.618],[0,-1,-1.618],[1,1.618,0],[-1,1.618,0],[1,-1.618,0],[-1,-1.618,0],[1.618,0,1],[-1.618,0,1],[1.618,0,-1],[-1.618,0,-1]].forEach((p,i)=>atoms.push({x:p[0]*40,y:p[1]*40,z:p[2]*40,type:i%2==0?TYPES.Co:TYPES.Cr})); atoms.push({x:0,y:0,z:0,type:TYPES.Ni}); } initAtoms();
+    
+    function draw() {
+        time++; ctxM.clearRect(0,0,ctxM.canvas.width,ctxM.canvas.height); ctxB.clearRect(0,0,ctxB.canvas.width,ctxB.canvas.height);
+        const w=ctxB.canvas.width, h=ctxB.canvas.height, cx=w/2, cy=h/2;
+        
+        ctxB.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--active-color'); ctxB.lineWidth=1; ctxB.globalAlpha=0.3; ctxB.beginPath();
+        let amp=(step<1&&!isLocked())?(tempK/300)*15+Math.abs(torsion-LOCK_CENTER)*10:0; if(amp>120)amp=120;
+        for(let r=0;r<Math.max(w,h);r+=25){ ctxB.moveTo(w/2+r,h/2); for(let a=0;a<=Math.PI*2;a+=0.1) ctxB.lineTo(w/2+(r+Math.sin(r*0.05-time*0.05)*amp*0.5)*Math.cos(a),h/2+(r+Math.sin(r*0.05-time*0.05)*amp*0.5)*Math.sin(a)*0.6); } ctxB.stroke(); ctxB.globalAlpha=1;
+
+        let rot=time*((step>=3)?0.001:0.005), jit=(step<3&&!isLocked())?Math.min(80,20+(tempK/500)):0;
+        atoms.forEach(a=>{
+            let jx=(Math.random()-0.5)*jit, jy=(Math.random()-0.5)*jit, jz=(Math.random()-0.5)*jit;
+            let x=(a.x+jx)*Math.cos(rot)-(a.z+jz)*Math.sin(rot), z=(a.x+jx)*Math.sin(rot)+(a.z+jz)*Math.cos(rot);
+            let s=600/(600+(a.y+jy)*Math.sin(0.3)+z*Math.cos(0.3)+200);
+            
+            if(step>=3) {
+                // RENDER NAMES IN STEP 3
+                ctxM.fillStyle = a.type.c;
+                ctxM.font = "bold 12px Courier New";
+                ctxM.textAlign = "center";
+                ctxM.textBaseline = "middle";
+                ctxM.fillText(a.type.s, cx+x*s, cy+((a.y+jy)*Math.cos(0.3)-z*Math.sin(0.3))*s);
+            } else {
+                ctxM.beginPath(); ctxM.arc(cx+x*s,cy+((a.y+jy)*Math.cos(0.3)-z*Math.sin(0.3))*s,a.type.r*s,0,Math.PI*2); ctxM.fillStyle=a.type.c; ctxM.fill();
+            }
+        });
+        
+        let col=ctxB.strokeStyle;
+        ctxI1.clearRect(0,0,150,85); ctxI1.strokeStyle=col; ctxI1.lineWidth=2; ctxI1.beginPath(); for(let x=0;x<150;x++){ let nx=(x-75)/35,y=isLocked()?(nx*nx):(Math.pow(nx,4)-Math.pow(nx,2)); ctxI1.lineTo(x,60-y*25); } ctxI1.stroke();
+        ctxI4.clearRect(0,0,150,85); let grad=ctxI4.createLinearGradient(0,0,150,0); grad.addColorStop(0,"#330000"); grad.addColorStop(0.5,isLocked()?"#00ffcc":"#ff3333"); grad.addColorStop(1,"#330000"); ctxI4.fillStyle=grad; ctxI4.beginPath(); ctxI4.arc(75,85,60,Math.PI,0); ctxI4.fill();
+        let ang=-Math.PI/2+(Math.random()-0.5)*(isLocked()?0.02:0.5); ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(75,85); ctxI4.lineTo(75+55*Math.cos(ang),85+55*Math.sin(ang)); ctxI4.stroke();
+
+        requestAnimationFrame(draw);
+    }
+
     ui.sliderK.addEventListener('input',(e)=>{ if(step<3){ let t=parseFloat(e.target.value); ui.inputK.value=Math.floor(calcTemp(t)); updateState(); } });
     ui.inputK.addEventListener('input',(e)=>{ if(step<3){ let k=parseFloat(e.target.value); if(!isNaN(k)){ tempK=k; ui.sliderK.value=calcRaw(k); updateState(); } } });
 
-    // START
-    resize(); setEnv('ROOM'); setTorsion(0); initConsole();
-    draw(); 
+    resize(); setEnv('ROOM'); setTorsion(0); initConsole(); draw();
+    function log(msg){ ui.console.innerHTML+=`<div><span class="log-hl">>></span> ${msg}</div>`; ui.console.scrollTop=ui.console.scrollHeight; }
+    function logOnce(msg){ if(lastLog!==msg){ log(msg); lastLog=msg; } } let lastLog="";
 </script>
 </body>
 </html>
