@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v36.11 | THERMAL LOCKOUT</title>
+    <title>GRAVES CONSOLE v37.0 | TARGET IDENTIFICATION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -35,8 +35,8 @@
         body.mode-cyan { box-shadow: inset 0 0 40px rgba(0, 255, 204, 0.2); }
         body.mode-diamond { box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.4); }
         
-        /* FLASH ANIMATION */
-        body.flash-white { animation: flashWhiteAnim 0.8s forwards; }
+        /* FLASH ANIMATION FOR TRANSITION */
+        body.flash-white { animation: flashWhiteAnim 1.5s forwards; }
         @keyframes flashWhiteAnim { 0% { background-color: #fff; } 100% { background-color: var(--bg); } }
 
         /* HEADER */
@@ -211,7 +211,7 @@
     <div id="pulse-overlay"></div>
 
     <div id="global-header">
-        <div>GRAVES CONSOLE v36.11 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
+        <div>GRAVES CONSOLE v37.0 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
         <div class="header-controls">
             <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
             <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
@@ -486,7 +486,7 @@
             ui.btn.innerText="CONFIRM RENDER COMPOUND";
             log(">>> CONFIRMATION REQUIRED...");
         }
-        // STEP 2 -> 3: FLASH & BLUEPRINT
+        // STEP 2 -> 3: FLASH & BLUEPRINT (NOW INITIATE FAB)
         else if(step===2) { 
             step=3; 
             playLockSound(); 
@@ -497,8 +497,8 @@
             document.body.classList.add('flash-white'); 
             setTimeout(()=>document.body.classList.remove('flash-white'),800); 
             
-            // --- MODIFIED BUTTON STATE ---
-            ui.btn.className="main-btn reset-mode"; ui.btn.innerText="[INITIATE FAB]"; // Changed text here
+            // --- NEW BUTTON STATE: INITIATE FAB ---
+            ui.btn.className="main-btn global-pulse"; ui.btn.innerText="[INITIATE FAB]"; 
             ui.topo.innerText="CLOSED (PROTECTED)"; ui.topo.style.color="#fff"; ui.statText.innerText="ZERO SLACK (FLAT)"; 
             
             playPulseSound(); 
@@ -511,16 +511,9 @@
                 log(">>> PRINT COMPLETE."); 
             }, 500);
         } 
-        // STEP 3 -> 0: RESET
+        // STEP 3 -> REDIRECT TO FABRICATION
         else if(step===3) { 
-            step=0; 
-            document.documentElement.style.setProperty('--active-color', '#ff3333'); 
-            ui.sliderT.classList.remove('locked-input'); ui.inputT.disabled=false; ui.wrapT.classList.remove('locked-input'); 
-            ui.envSelector.classList.remove('locked-input');
-            ui.sliderK.classList.add('locked-input'); ui.inputK.classList.add('locked-input'); ui.wrapK.classList.add('locked-input');
-            
-            setEnv('ROOM'); setTorsion(0); 
-            log(">>> SYSTEM RESET."); 
+            window.location.href = "https://protodynamics01.github.io/zero_slack_simulator/fabrication.html";
         }
     }
     
