@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AEP 5.1 | FABRICATION UNIT (OPTIMIZED)</title>
+    <title>AEP 5.1 | FABRICATION UNIT (FINAL)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -104,7 +104,11 @@
             animation: pulseWhite 1s infinite alternate;
             box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        .btn-restart { border-color: var(--red); color: var(--red); background: rgba(255,50,50,0.1); }
+        .btn-restart { 
+            border-color: var(--red); color: var(--red); 
+            background: rgba(255,50,50,0.1); 
+            box-shadow: 0 0 20px rgba(255,50,50,0.2);
+        }
 
         @keyframes pulseFast { 0% { opacity: 0.7; } 100% { opacity: 1.0; text-shadow: 0 0 10px var(--orange); } }
         @keyframes pulseWhite { 0% { box-shadow: 0 0 10px rgba(255,255,255,0.1); } 100% { box-shadow: 0 0 30px rgba(255,255,255,0.4); } }
@@ -262,16 +266,16 @@
         {c:'#e0e0e0', s:'Ni'}, {c:'#3366ff', s:'Co'}, {c:'#9933cc', s:'Cr'},
         {c:'#00ff00', s:'Mo'}, {c:'#ffaa00', s:'W'}, {c:'#00ffff', s:'Nb'}, {c:'#ff0000', s:'Hf'}
     ];
-    const MICRO_LAYERS = 200; 
-    const MACRO_LAYERS = 400;
     
-    // TIMING (SPEED UP: 3.5s Micro, 5.0s Macro)
-    const MICRO_SPEED = MICRO_LAYERS / (3.5 * 60); 
-    const MACRO_SPEED = MACRO_LAYERS / (5.0 * 60);
+    // TIMING (10s Micro, 15s Macro)
+    const MICRO_LAYERS = 300; 
+    const MACRO_LAYERS = 600;
+    const MICRO_SPEED = MICRO_LAYERS / (10 * 60); 
+    const MACRO_SPEED = MACRO_LAYERS / (15 * 60);
 
     // --- STATE ---
     let state = {
-        phase: 0, // 0:Idle, 1:Micro, 1.5:MicroDone, 2:Macro, 3:Cooling, 4:Retrieve
+        phase: 0, // 0:Idle, 1:Micro, 1.5:MicroDone, 2:Macro, 3:Cooling, 4:Retrieve, 5:RestartReady
         layer: 0,
         totalLayers: 100,
         rotation: 0,
@@ -293,9 +297,13 @@
         else if(state.phase === 1.5) {
             startMacro();
         }
-        // STATE 4 -> 0 (Retrieve & Restart)
+        // STATE 4 -> 5 (Retrieve -> Restart)
         else if(state.phase === 4) {
-            retrieveAndRestart();
+            retrieveItem();
+        }
+        // STATE 5 -> 0 (Soft Reset)
+        else if(state.phase === 5) {
+            softReset();
         }
     }
 
@@ -334,7 +342,7 @@
         initMacro();
         
         // Button Logic: Rendering... (Disabled, Orange)
-        ui.mainBtn.innerText = "RENDERING MACRO";
+        ui.mainBtn.innerText = "RENDERING MACRO-SCALE...";
         ui.mainBtn.className = "action-btn btn-orange-flash";
         ui.mainBtn.disabled = true;
 
@@ -347,7 +355,7 @@
         state.phase = 3;
         
         // Button Logic: Stabilizing (Disabled, Orange)
-        ui.mainBtn.innerText = "STABILIZING THERMO";
+        ui.mainBtn.innerText = "STABILIZING THERMO...";
         
         ui.phase.innerText = "COOLING CYCLE";
         ui.status.innerText = "THERMAL STABILIZATION";
@@ -363,7 +371,7 @@
                 updateTempUI();
                 readyForRetrieval();
             }
-        }, 50); // Faster updates for smoother drop
+        }, 100);
     }
 
     function readyForRetrieval() {
@@ -378,9 +386,10 @@
         ui.phase.innerText = "CYCLE COMPLETE";
     }
 
-    function retrieveAndRestart() {
-        // Animation & Logic
+    function retrieveItem() {
+        // Animation
         ui.mainBtn.disabled = true; 
+        ui.mainBtn.style.opacity = 0; // Hide temporarily
         ui.status.innerText = "TRANSFERRING ASSET";
         ui.subStatus.innerText = "CLEARING CHAMBER";
         
@@ -389,9 +398,41 @@
             width += 50; 
             if(state.tilt > 2.0) {
                 clearInterval(anim);
-                location.reload(); 
+                
+                // RESET VISUALS
+                state.points = []; state.wireframe=[];
+                resize();
+                
+                // GO TO PHASE 5: RESTART
+                state.phase = 5;
+                ui.mainBtn.innerText = "SYSTEM RESTART";
+                ui.mainBtn.className = "action-btn btn-restart";
+                ui.mainBtn.disabled = false;
+                ui.mainBtn.style.opacity = 1;
+                
+                ui.status.innerText = "CHAMBER CLEAR";
+                ui.subStatus.innerText = "READY FOR NEXT CYCLE";
             }
         }, 30);
+    }
+
+    function softReset() {
+        state.phase = 0;
+        state.layer = 0;
+        state.temp = 300;
+        state.rotation = 0;
+        state.tilt = 0.3;
+        
+        ui.fill.style.width = "0%";
+        updateTempUI();
+        
+        // Reset Button to Start
+        ui.mainBtn.innerText = "GENERATE MICRO-LATTICE";
+        ui.mainBtn.className = "action-btn btn-cyan";
+        
+        ui.phase.innerText = "STANDBY";
+        ui.status.innerText = "SYSTEM READY";
+        ui.subStatus.innerText = "AWAITING INPUT";
     }
 
     function updateTempUI() {
@@ -410,7 +451,7 @@
         }
     }
 
-    // --- GENERATORS (BRIGHTNESS FIX APPLIED: SIZE INCREASE) ---
+    // --- GENERATORS ---
     function initMicro() {
         state.points = []; state.wireframe = []; state.totalLayers = MICRO_LAYERS; state.speed = MICRO_SPEED;
         state.layer = 0; state.tilt = 0.4;
@@ -418,7 +459,6 @@
         for (let i=0; i<NUM; i++) {
             let y = 1 - (i/(NUM-1))*2; let r = Math.sqrt(1-y*y); let theta = 2*Math.PI*i/PHI;
             let cIdx = Math.floor(Math.random()*6);
-            // SIZE INCREASED TO 3 + RAND(3)
             state.points.push({ x:Math.cos(theta)*r*RAD, y:y*RAD, z:Math.sin(theta)*r*RAD, c:ATOM_COLORS[cIdx], s:3+Math.random()*3 });
         }
         state.points.sort((a,b)=>b.y-a.y);
@@ -439,7 +479,6 @@
                 state.wireframe.push({x:x, y:y-h/2, z:z});
                 if(Math.random()>0.3) {
                     let fs = Math.sqrt(Math.random());
-                    // SIZE INCREASED TO 2.5
                     state.points.push({ x:x*fs, y:y-h/2+(Math.random()*5), z:z*fs, c:ATOM_COLORS[Math.floor(Math.random()*6)], s:2.5 });
                 }
             }
@@ -447,7 +486,7 @@
         state.points.sort((a,b)=>a.y-b.y);
     }
 
-    // --- 3D RENDER (OPTIMIZED: NO SHADOWBLUR) ---
+    // --- 3D RENDER (Optimized: No heavy blur) ---
     function project3D(x, y, z) {
         let scale = FOV / (FOV + z);
         let x2d = (x * scale) + width/2;
@@ -461,7 +500,7 @@
         ctx.clearRect(0, 0, width, height);
         
         // GRID
-        if(state.phase > 0 && state.phase < 4) {
+        if(state.phase > 0 && state.phase < 5) {
             let pts = [];
             for(let i=0; i<Math.PI*2; i+=0.2) {
                 pts.push({x:Math.cos(i)*250, y:(state.phase==1?200:300), z:Math.sin(i)*250});
@@ -493,13 +532,11 @@
             let r1 = rotY(p.x, p.z, state.rotation);
             let r2 = rotX(p.y, r1.z, state.tilt);
             let proj = project3D(r1.x, r2.y, r2.z);
-            
-            // ALPHA BOOST
             let alpha = Math.max(0.4, 1 - (r2.z + 500)/1000);
             
-            let finalColor = p.c.c; // p.c is now object from ATOM_COLORS
+            let finalColor = p.c.c; 
             if(heatColor) finalColor = heatColor;
-            if(state.phase === 2 && i > activeIdx - 20) finalColor = '#ffffff'; // Hot print head
+            if(state.phase === 2 && i > activeIdx - 20) finalColor = '#ffffff'; 
 
             renderList.push({ 
                 x: proj.x, y: proj.y, s: p.s * proj.scale, 
@@ -510,20 +547,22 @@
 
         renderList.sort((a, b) => b.d - a.d);
 
+        ctx.globalCompositeOperation = "screen"; 
+
         renderList.forEach(p => {
             ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
             if(p.isNew) {
                 ctx.fillStyle = '#fff'; 
-                // Removed shadowBlur
             } else {
                 ctx.fillStyle = p.c; 
             }
-            
             ctx.globalAlpha = p.a; 
             ctx.fill(); 
             ctx.globalAlpha = 1.0; 
         });
         
+        ctx.globalCompositeOperation = "source-over"; 
+
         // LASERS
         if(state.phase === 2 && state.layer < state.totalLayers) {
             let hot = renderList.find(p => p.isNew);
