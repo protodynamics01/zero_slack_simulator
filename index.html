@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CONSOLE v36.11 | THERMAL LOCKOUT</title>
+    <title>GRAVES CONSOLE v36.9 | TARGET IDENTIFICATION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -129,7 +129,6 @@
         button.main-btn.confirm-mode { background: rgba(255, 170, 0, 0.2); color: var(--orange); border-color: var(--orange); box-shadow: 0 0 30px rgba(255,170,0,0.3); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.global-pulse { background: #fff; color: #000; border: 2px solid #fff; box-shadow: 0 0 50px rgba(255,255,255,0.5); cursor: pointer; animation: pulseFast 0.5s infinite alternate; }
         button.main-btn.reset-mode { background: rgba(255, 50, 50, 0.2); color: #ff3333; border-color: #ff3333; cursor: pointer; animation: none; }
-        button.main-btn.thermal-lock { background: rgba(100, 0, 0, 0.3); color: #ff5555; border-color: #ff3333; cursor: not-allowed; animation: none; box-shadow: none; opacity: 0.7; }
         
         @keyframes pulseWhite { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         @keyframes pulseFast { 0% { box-shadow: 0 0 20px rgba(255,255,255,0.2); } 100% { box-shadow: 0 0 60px rgba(255,255,255,0.6); } }
@@ -180,6 +179,7 @@
         .col-cyan { color: var(--cyan); text-shadow: 0 0 0 var(--cyan); }
         .col-grey { color: #888; }
         
+        /* HUD UPDATES */
         .hud-label {
             position: absolute; top: 20px; left: 20px; z-index: 10;
             font-family: 'Courier New'; font-weight: bold; color: #666; font-size: 12px;
@@ -207,7 +207,7 @@
     <div id="pulse-overlay"></div>
 
     <div id="global-header">
-        <div>GRAVES CONSOLE v36.11 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
+        <div>GRAVES CONSOLE v36.9 <span style="color:#666; font-size:0.8em;">// DARPA-PA-26-03</span></div>
         <div class="header-controls">
             <div class="icon-btn" onclick="toggleFullScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
             <div class="icon-btn" onclick="captureScreen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span style="font-size:0.7em;">CAPTURE</span></div>
@@ -310,6 +310,7 @@
 
 <script>
     // --- BLUEPRINT DATA (EDIT THIS BLOCK FOR NEW RANKS) ---
+    // User can replace this object to simulate other materials (e.g. Rank 0002)
     const BLUEPRINT_DATA = {
         rank: "0001",
         name: "Zero-Slack Turbine Blade",
@@ -456,16 +457,10 @@
 
     function handleBtnClick() {
         initAudio();
-        // THERMAL LOCKOUT CHECK
-        if(tempK > 790) {
-            log("!! ABORT: THERMAL LOCKOUT (>790K) !!");
-            playTone(150, 'sawtooth', 0.3);
-            return; 
-        }
-
         // STEP 0 -> 1: LOCK TORSION, KEEP THERMAL OPEN
         if(step===0) {
             if(isLocked()) {
+                if(tempK>50000) { log("!! ABORT: THERMAL OVERLOAD !!"); return; }
                 step=1; 
                 playLockSound();
                 ui.sliderT.classList.add('locked-input'); ui.inputT.disabled=true; ui.wrapT.classList.add('locked-input');
@@ -549,22 +544,6 @@
             ui.sliderK.classList.remove('locked-input'); ui.inputK.classList.remove('locked-input'); ui.wrapK.classList.remove('locked-input');
         }
 
-        // --- THERMAL LOCKOUT LOGIC ---
-        if(tempK > 790 && step < 2) {
-             ui.warn.style.display="block"; 
-             ui.warn.className="warn-red"; 
-             ui.warn.innerHTML="THERMAL LOCKOUT<br><span style='font-size:0.5em'>LIMIT 790 K</span>"; 
-             setTheme('red'); 
-             
-             // Disable button if over limit
-             if(isLocked()) {
-                 ui.btn.className="main-btn thermal-lock"; 
-                 ui.btn.innerText="THERMAL LOCKOUT (>790K)";
-             }
-             return; 
-        }
-
-        // Standard Thermal Warnings
         if(tempK>800&&tempK<49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="THERMAL DECAY<br><span style='font-size:0.5em'>LIMIT 800 K</span>"; setTheme('red'); return; }
         if(tempK>=49000) { ui.warn.style.display="block"; ui.warn.className="warn-red"; ui.warn.innerHTML="STRESS TEST<br><span style='font-size:0.5em'>LEDGER LIMIT</span>"; setTheme('red'); return; }
         
@@ -600,7 +579,7 @@
                     ui.lblCurrent.innerText="UNDER TORQUE (ARTIFACT)"; ui.lblCurrent.style.color="var(--red)"; 
                 }
             }
-            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
+            ui.slackStat.innerText="CRITICAL"; ui.slackStat.style.color="var(--active-color)"; ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
         }
     }
     function setTheme(c) { ui.body.className="mode-"+c; document.documentElement.style.setProperty('--active-color', c==='red'?'#ff3333':(c==='orange'?'#ffaa00':(c==='diamond'?'#ffffff':'#00ffcc'))); }
@@ -608,6 +587,7 @@
     function logOnce(msg) { if(lastLog!==msg){ log(msg); lastLog=msg; } }
 
     // --- ANIMATION KERNEL ---
+    // ATOMS FOR RANK 1 (Ni Superalloy)
     const TYPES = {
         Ni: {c:'#e0e0e0', s:'Ni', r:6},
         Co: {c:'#3366ff', s:'Co', r:5},
@@ -691,18 +671,7 @@
         } else {
             let amp=Math.min(ht/2,(tempK/300)*10); waveS.push((Math.random()-0.5)*amp*2); if(waveS.length>wt/2) waveS.shift();
             ctxT.strokeStyle=col; ctxT.lineWidth=1; ctxT.beginPath(); for(let i=0;i<waveS.length;i++) ctxT.lineTo(i*2,ht/2+waveS[i]); ctxT.stroke();
-            
-            // LIVE DEPHASING LOGIC
-            let torsionDist = Math.abs(torsion - LOCK_CENTER);
-            let gFreq = 0.1 + (torsionDist * 0.2); 
-            let gAmp = Math.min(ht/2, 10 + (torsionDist * 20)); 
-            
-            // Thermal Noise
-            let noise = (tempK > 300) ? (Math.random()-0.5) * (tempK/1000) : 0;
-            
-            let gVal = Math.sin(time*gFreq)*gAmp + noise;
-            waveG.push(gVal); if(waveG.length>wt/2) waveG.shift();
-            
+            let gVal=Math.sin(time*0.1)*(ht*0.3); let jAmp=(tempK>400)?(tempK/10000):0; gVal+=(Math.random()-0.5)*jAmp*50; waveG.push(gVal); if(waveG.length>wt/2) waveG.shift();
             ctxG.strokeStyle=(step<2&&!locked&&torsion>LOCK_MAX)?'#ffaa00':col; ctxG.lineWidth=2; ctxG.beginPath(); for(let i=0;i<waveG.length;i++) ctxG.lineTo(i*2,ht/2+waveG[i]); ctxG.stroke();
         }
         if(locked) {
@@ -710,7 +679,7 @@
             ui.gravesStat.innerText="LOCKED"; ui.gravesStat.style.color=(step>=3)?'var(--diamond)':'var(--cyan)';
         } else {
             ui.entropyLabel.innerText="PHONON ENTROPY (137)"; ui.slackStat.innerText=tempK>800?"MELTING":"CRITICAL"; ui.slackStat.style.color=col;
-            ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="var(--active-color)";
+            ui.gravesStat.innerText="SYNC LOST"; ui.gravesStat.style.color="#555";
         }
         if(step>=3) { ui.dephasingLabel.style.color='var(--diamond)'; ui.gravesStat.style.color='var(--diamond)'; } else ui.dephasingLabel.style.color='var(--cyan)';
         requestAnimationFrame(draw);
