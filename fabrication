@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEP 5.1 | FABRICATION UNIT (OPTIMIZED)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --cyan: #00ffcc;
+            --diamond: #ffffff;
+            --red: #ff3333;
+            --orange: #ffaa00;
+            --bg: #050505;
+            
+            --glass-bg: rgba(10, 15, 20, 0.95);
+            --glass-border: 1px solid rgba(0, 255, 204, 0.2);
+            --font-main: "Inter", sans-serif;
+            --font-mono: 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            margin: 0; background-color: var(--bg); color: #e0e0e0;
+            font-family: var(--font-main); height: 100vh; width: 100vw;
+            display: flex; flex-direction: column; overflow: hidden;
+            background: radial-gradient(circle at center, #080808 0%, #000 100%);
+        }
+
+        /* HEADER */
+        #global-header {
+            background: rgba(0,0,0,0.9); border-bottom: var(--glass-border); height: 50px;
+            flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px; z-index: 50;
+            backdrop-filter: blur(5px);
+        }
+
+        #main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* SIDEBAR */
+        #sidebar {
+            width: 380px; background: var(--glass-bg);
+            border-right: var(--glass-border); padding: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+            flex-shrink: 0; z-index: 40; backdrop-filter: blur(15px); overflow-y: auto;
+        }
+
+        #view-container { flex: 1; position: relative; overflow: hidden; background: #000; }
+
+        /* UI COMPONENTS */
+        .panel-box { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .panel-box:last-child { border-bottom: none; }
+        .label-sm { font-size: 0.65em; color: #666; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
+        
+        .data-val { 
+            font-family: var(--font-mono); font-size: 1.1em; color: var(--diamond); 
+            display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .data-val.cyan { color: var(--cyan); text-shadow: 0 0 15px rgba(0,255,204,0.3); }
+        .data-val.hot { color: var(--red); text-shadow: 0 0 15px var(--red); }
+        
+        /* DIAGNOSTICS GRID */
+        .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .inset-box { 
+            width: 100%; height: 85px; background: rgba(0,0,0,0.6); 
+            border: 1px solid rgba(255,255,255,0.1); position: relative; 
+        }
+        .inset-label { 
+            position: absolute; top: 4px; left: 6px; font-size: 8px; 
+            color: #666; font-weight: bold; font-family: var(--font-mono); 
+        }
+        .inset-canvas { width: 100%; height: 100%; display: block; }
+
+        /* MINI LATTICE VIEW */
+        #mini-view {
+            width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            position: relative; overflow: hidden; margin-top: 5px;
+        }
+        #miniCanvas { width: 100%; height: 100%; }
+
+        /* BUTTONS */
+        .action-btn {
+            width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.1);
+            border: 1px solid var(--cyan); color: var(--cyan);
+            font-family: var(--font-main); font-weight: 700; letter-spacing: 2px;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.1); margin-top: 10px;
+        }
+        .action-btn:hover { background: rgba(0, 255, 204, 0.2); box-shadow: 0 0 25px rgba(0, 255, 204, 0.3); }
+        .action-btn:disabled { cursor: not-allowed; opacity: 0.8; pointer-events: none; }
+
+        /* BUTTON STATES */
+        .btn-cyan { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.1); }
+        .btn-orange-flash { 
+            border-color: var(--orange); color: var(--orange); 
+            background: rgba(255,170,0,0.1); 
+            animation: pulseFast 0.5s infinite alternate;
+            box-shadow: 0 0 15px rgba(255,170,0,0.2);
+        }
+        .btn-white-pulse {
+            border-color: #fff; color: #fff; 
+            background: rgba(255,255,255,0.1);
+            animation: pulseWhite 1s infinite alternate;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .btn-restart { border-color: var(--red); color: var(--red); background: rgba(255,50,50,0.1); }
+
+        @keyframes pulseFast { 0% { opacity: 0.7; } 100% { opacity: 1.0; text-shadow: 0 0 10px var(--orange); } }
+        @keyframes pulseWhite { 0% { box-shadow: 0 0 10px rgba(255,255,255,0.1); } 100% { box-shadow: 0 0 30px rgba(255,255,255,0.4); } }
+
+        /* PROGRESS */
+        .print-progress-container { height: 4px; background: #222; width: 100%; position: relative; overflow: hidden; border-radius: 2px; }
+        .print-progress-fill { height: 100%; width: 0%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); transition: width 0.1s linear; }
+
+        /* TEMP GAUGE */
+        #temp-gauge-wrap { height: 4px; width: 100%; background: linear-gradient(90deg, #00ccff, #ffffff, #ff3333); margin-top: 5px; position: relative; border-radius: 2px; }
+        #temp-marker { width: 4px; height: 12px; background: #fff; position: absolute; top: -4px; left: 0%; box-shadow: 0 0 5px #fff; transition: left 0.1s linear; }
+
+        canvas#mainCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        /* OVERLAYS */
+        #print-status-overlay {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            text-align: center; z-index: 20; pointer-events: none;
+        }
+        .status-text { 
+            font-family: var(--font-main); font-weight: 800; letter-spacing: 3px; 
+            color: var(--cyan); font-size: 1em; margin-bottom: 5px;
+            text-shadow: 0 0 20px var(--cyan);
+        }
+        .sub-status { font-family: var(--font-mono); font-size: 0.65em; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 255, 204, 0.05) 50%, transparent 100%);
+            background-size: 100% 80px; pointer-events: none; z-index: 5;
+            animation: scanScroll 4s linear infinite;
+        }
+        @keyframes scanScroll { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="global-header">
+        <div>AEP 5.1 // FABRICATION SUITE <span style="color:#666;">// RANK 0001</span></div>
+        <div style="display:flex; gap:20px; font-family:'Courier New'; font-size:0.9em;">
+            <span style="color:#444">VACUUM: <span style="color:#888">10⁻⁹ Torr</span></span>
+            <span style="color:#444">TEMP: <span style="color:var(--cyan)" id="header-temp">300.0 K</span></span>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="sidebar">
+            <div class="panel-box">
+                <div class="label-sm">FABRICATION PHASE</div>
+                <div class="data-val cyan" id="phase-display">STANDBY</div>
+                <div class="print-progress-container" style="margin-top:5px;">
+                    <div class="print-progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="label-sm">THERMAL MONITOR</div>
+                <div class="data-val" id="temp-display">300.0 K</div>
+                <div id="temp-gauge-wrap">
+                    <div id="temp-marker"></div>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="label-sm" style="color:var(--cyan);">REAL-TIME DIAGNOSTICS</div>
+                
+                <div class="diag-grid">
+                    <div class="inset-box">
+                        <div class="inset-label">POTENTIAL (2D)</div>
+                        <canvas id="inset1" class="inset-canvas"></canvas>
+                    </div>
+                    <div class="inset-box">
+                        <div class="inset-label">PHASE SPACE</div>
+                        <canvas id="inset2" class="inset-canvas"></canvas>
+                    </div>
+                    <div class="inset-box">
+                        <div class="inset-label">VACUUM FLUX</div>
+                        <canvas id="inset3" class="inset-canvas"></canvas>
+                    </div>
+                    <div class="inset-box">
+                        <div class="inset-label">DEUTERIUM CLOCK</div>
+                        <canvas id="inset4" class="inset-canvas"></canvas>
+                        <div style="position:absolute; bottom:2px; left:4px; font-size:7px; font-family:'Courier New'; color:#666;">
+                            COH: <span style="color:#fff">1.000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="label-sm" style="color:var(--diamond)">LATTICE STRUCTURE (ZERO-SLACK)</div>
+                <div id="mini-view">
+                    <canvas id="miniCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="panel-box" style="border:none; margin-top:auto;">
+                <button id="main-action-btn" class="action-btn btn-cyan" onclick="handleMainAction()">GENERATE MICRO-LATTICE</button>
+            </div>
+        </div>
+
+        <div id="view-container">
+            <div class="scan-line"></div>
+            <canvas id="mainCanvas"></canvas>
+            
+            <div id="print-status-overlay">
+                <div class="status-text" id="main-status">SYSTEM READY</div>
+                <div class="sub-status" id="sub-status">AWAITING INPUT</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Diagnostic Contexts
+    const ctxI1 = document.getElementById('inset1').getContext('2d');
+    const ctxI2 = document.getElementById('inset2').getContext('2d');
+    const ctxI3 = document.getElementById('inset3').getContext('2d');
+    const ctxI4 = document.getElementById('inset4').getContext('2d');
+    const miniCanvas = document.getElementById('miniCanvas');
+    const miniCtx = miniCanvas.getContext('2d');
+
+    const ui = {
+        phase: document.getElementById('phase-display'),
+        fill: document.getElementById('progress-fill'),
+        status: document.getElementById('main-status'),
+        subStatus: document.getElementById('sub-status'),
+        temp: document.getElementById('temp-display'),
+        headerTemp: document.getElementById('header-temp'),
+        marker: document.getElementById('temp-marker'),
+        // SINGLE BUTTON REF
+        mainBtn: document.getElementById('main-action-btn')
+    };
+
+    let width, height;
+    function resize() {
+        width = canvas.width = window.innerWidth - 380;
+        height = canvas.height = window.innerHeight - 50;
+        // Resize Insets
+        [ctxI1, ctxI2, ctxI3, ctxI4].forEach(c => {
+            const rect = c.canvas.parentElement.getBoundingClientRect();
+            c.canvas.width = rect.width;
+            c.canvas.height = rect.height;
+        });
+        miniCanvas.width = 330; miniCanvas.height = 150;
+    }
+    window.addEventListener('resize', resize);
+    setTimeout(resize, 100); 
+
+    // --- CONFIG ---
+    const FOV = 800;
+    const ATOM_COLORS = [
+        {c:'#e0e0e0', s:'Ni'}, {c:'#3366ff', s:'Co'}, {c:'#9933cc', s:'Cr'},
+        {c:'#00ff00', s:'Mo'}, {c:'#ffaa00', s:'W'}, {c:'#00ffff', s:'Nb'}, {c:'#ff0000', s:'Hf'}
+    ];
+    const MICRO_LAYERS = 200; 
+    const MACRO_LAYERS = 400;
+    
+    // TIMING (SPEED UP: 3.5s Micro, 5.0s Macro)
+    const MICRO_SPEED = MICRO_LAYERS / (3.5 * 60); 
+    const MACRO_SPEED = MACRO_LAYERS / (5.0 * 60);
+
+    // --- STATE ---
+    let state = {
+        phase: 0, // 0:Idle, 1:Micro, 1.5:MicroDone, 2:Macro, 3:Cooling, 4:Retrieve
+        layer: 0,
+        totalLayers: 100,
+        rotation: 0,
+        tilt: 0.3,
+        points: [],
+        wireframe: [],
+        speed: 0.5,
+        temp: 300,
+        time: 0
+    };
+
+    // --- BUTTON CONTROLLER ---
+    function handleMainAction() {
+        // STATE 0 -> 1 (Start Micro)
+        if(state.phase === 0) {
+            startMicro();
+        }
+        // STATE 1.5 -> 2 (Start Macro)
+        else if(state.phase === 1.5) {
+            startMacro();
+        }
+        // STATE 4 -> 0 (Retrieve & Restart)
+        else if(state.phase === 4) {
+            retrieveAndRestart();
+        }
+    }
+
+    // --- LOGIC ---
+
+    function startMicro() {
+        state.phase = 1;
+        state.temp = 300; 
+        initMicro();
+        
+        // Button Logic: Printing... (Disabled, Orange)
+        ui.mainBtn.innerText = "PRINTING MICRO-LATTICE...";
+        ui.mainBtn.className = "action-btn btn-orange-flash";
+        ui.mainBtn.disabled = true;
+
+        ui.phase.innerText = "MICRO-VERIFICATION";
+        ui.status.innerText = "PRINTING MICRO-LATTICE";
+        ui.subStatus.innerText = "VERIFYING ATOMIC ALIGNMENT (5.037°)";
+    }
+
+    function microComplete() {
+        state.phase = 1.5;
+        // Button Logic: Proceed (Enabled, Cyan)
+        ui.mainBtn.innerText = "PROCEED TO MACRO-SCALE";
+        ui.mainBtn.className = "action-btn btn-cyan";
+        ui.mainBtn.disabled = false;
+
+        ui.status.innerText = "MICRO-LATTICE VERIFIED";
+        ui.subStatus.innerText = "READY FOR MACRO SCALING";
+    }
+
+    function startMacro() {
+        state.phase = 2;
+        state.temp = 1850; 
+        updateTempUI();
+        initMacro();
+        
+        // Button Logic: Rendering... (Disabled, Orange)
+        ui.mainBtn.innerText = "RENDERING MACRO";
+        ui.mainBtn.className = "action-btn btn-orange-flash";
+        ui.mainBtn.disabled = true;
+
+        ui.phase.innerText = "MACRO-FABRICATION";
+        ui.status.innerText = "MULTI-LASER ARRAY ACTIVE";
+        ui.subStatus.innerText = "FULL VOLUME DEPOSITION";
+    }
+
+    function startCooling() {
+        state.phase = 3;
+        
+        // Button Logic: Stabilizing (Disabled, Orange)
+        ui.mainBtn.innerText = "STABILIZING THERMO";
+        
+        ui.phase.innerText = "COOLING CYCLE";
+        ui.status.innerText = "THERMAL STABILIZATION";
+        ui.subStatus.innerText = "DROPPING TO 300K";
+        
+        let coolInterval = setInterval(() => {
+            if(state.temp > 300) {
+                state.temp -= 25; 
+                updateTempUI();
+            } else {
+                clearInterval(coolInterval);
+                state.temp = 300;
+                updateTempUI();
+                readyForRetrieval();
+            }
+        }, 50); // Faster updates for smoother drop
+    }
+
+    function readyForRetrieval() {
+        state.phase = 4;
+        // Button Logic: Retrieve (Enabled, White Pulse)
+        ui.mainBtn.innerText = "RETRIEVE ITEM";
+        ui.mainBtn.className = "action-btn btn-white-pulse";
+        ui.mainBtn.disabled = false;
+
+        ui.status.innerText = "FABRICATION COMPLETE";
+        ui.subStatus.innerText = "SAFE FOR RETRIEVAL";
+        ui.phase.innerText = "CYCLE COMPLETE";
+    }
+
+    function retrieveAndRestart() {
+        // Animation & Logic
+        ui.mainBtn.disabled = true; 
+        ui.status.innerText = "TRANSFERRING ASSET";
+        ui.subStatus.innerText = "CLEARING CHAMBER";
+        
+        let anim = setInterval(() => {
+            state.tilt += 0.1;
+            width += 50; 
+            if(state.tilt > 2.0) {
+                clearInterval(anim);
+                location.reload(); 
+            }
+        }, 30);
+    }
+
+    function updateTempUI() {
+        ui.temp.innerText = state.temp.toFixed(1) + " K";
+        ui.headerTemp.innerText = state.temp.toFixed(1) + " K";
+        let pct = ((state.temp - 300) / 1550) * 100;
+        if(pct < 0) pct = 0; if(pct > 100) pct = 100;
+        ui.marker.style.left = pct + "%";
+        
+        if(state.temp > 800) {
+            ui.temp.classList.add('hot');
+            ui.headerTemp.style.color = "var(--red)";
+        } else {
+            ui.temp.classList.remove('hot');
+            ui.headerTemp.style.color = "var(--cyan)";
+        }
+    }
+
+    // --- GENERATORS (BRIGHTNESS FIX APPLIED: SIZE INCREASE) ---
+    function initMicro() {
+        state.points = []; state.wireframe = []; state.totalLayers = MICRO_LAYERS; state.speed = MICRO_SPEED;
+        state.layer = 0; state.tilt = 0.4;
+        const NUM = 500; const RAD = 180; const PHI = (1+Math.sqrt(5))/2;
+        for (let i=0; i<NUM; i++) {
+            let y = 1 - (i/(NUM-1))*2; let r = Math.sqrt(1-y*y); let theta = 2*Math.PI*i/PHI;
+            let cIdx = Math.floor(Math.random()*6);
+            // SIZE INCREASED TO 3 + RAND(3)
+            state.points.push({ x:Math.cos(theta)*r*RAD, y:y*RAD, z:Math.sin(theta)*r*RAD, c:ATOM_COLORS[cIdx], s:3+Math.random()*3 });
+        }
+        state.points.sort((a,b)=>b.y-a.y);
+    }
+
+    function initMacro() {
+        state.points = []; state.wireframe = []; state.totalLayers = MACRO_LAYERS; state.speed = MACRO_SPEED;
+        state.layer = 0; state.tilt = 0.2;
+        const h = 500; const layers = 60; const pts = 40;
+        for(let y=0; y<=h; y+=(h/layers)) {
+            let prog = y/h; let twist = prog*Math.PI*0.6; let scale = 1-(prog*0.2);
+            for(let i=0; i<pts; i++) {
+                let t = (i/pts)*Math.PI*2;
+                let xB = 100*Math.cos(t); let zB = 40*Math.sin(t);
+                if(Math.cos(t)>0) zB *= 0.2; 
+                let x = (xB*Math.cos(twist)-zB*Math.sin(twist))*scale;
+                let z = (xB*Math.sin(twist)+zB*Math.cos(twist))*scale;
+                state.wireframe.push({x:x, y:y-h/2, z:z});
+                if(Math.random()>0.3) {
+                    let fs = Math.sqrt(Math.random());
+                    // SIZE INCREASED TO 2.5
+                    state.points.push({ x:x*fs, y:y-h/2+(Math.random()*5), z:z*fs, c:ATOM_COLORS[Math.floor(Math.random()*6)], s:2.5 });
+                }
+            }
+        }
+        state.points.sort((a,b)=>a.y-b.y);
+    }
+
+    // --- 3D RENDER (OPTIMIZED: NO SHADOWBLUR) ---
+    function project3D(x, y, z) {
+        let scale = FOV / (FOV + z);
+        let x2d = (x * scale) + width/2;
+        let y2d = (y * scale) + height/2;
+        return { x: x2d, y: y2d, scale: scale, d: z };
+    }
+    function rotY(x, z, angle) { return { x: x*Math.cos(angle) - z*Math.sin(angle), z: x*Math.sin(angle) + z*Math.cos(angle) }; }
+    function rotX(y, z, angle) { return { y: y*Math.cos(angle) - z*Math.sin(angle), z: y*Math.sin(angle) + z*Math.cos(angle) }; }
+
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // GRID
+        if(state.phase > 0 && state.phase < 4) {
+            let pts = [];
+            for(let i=0; i<Math.PI*2; i+=0.2) {
+                pts.push({x:Math.cos(i)*250, y:(state.phase==1?200:300), z:Math.sin(i)*250});
+            }
+            pts.forEach(p=>{
+                let r1 = rotY(p.x, p.z, state.rotation);
+                let r2 = rotX(p.y, r1.z, state.tilt);
+                let proj = project3D(r1.x, r2.y, r2.z);
+                ctx.fillStyle = 'rgba(0,255,204,0.1)';
+                ctx.fillRect(proj.x, proj.y, 2, 2);
+            });
+        }
+
+        if(state.phase === 0 || state.points.length === 0) return;
+
+        let renderList = [];
+        let completion = state.layer / state.totalLayers;
+        let activeIdx = Math.floor(state.points.length * completion);
+
+        // COOLING EFFECT
+        let heatColor = null;
+        if(state.phase === 3 || state.phase === 4) { 
+            if(state.temp > 1000) heatColor = 'rgba(255, 100, 50, 0.8)'; // Red hot
+            else if(state.temp > 500) heatColor = 'rgba(255, 200, 100, 0.5)'; // Warm
+        }
+
+        state.points.forEach((p, i) => {
+            if(i > activeIdx) return;
+            let r1 = rotY(p.x, p.z, state.rotation);
+            let r2 = rotX(p.y, r1.z, state.tilt);
+            let proj = project3D(r1.x, r2.y, r2.z);
+            
+            // ALPHA BOOST
+            let alpha = Math.max(0.4, 1 - (r2.z + 500)/1000);
+            
+            let finalColor = p.c.c; // p.c is now object from ATOM_COLORS
+            if(heatColor) finalColor = heatColor;
+            if(state.phase === 2 && i > activeIdx - 20) finalColor = '#ffffff'; // Hot print head
+
+            renderList.push({ 
+                x: proj.x, y: proj.y, s: p.s * proj.scale, 
+                c: finalColor, a: alpha, d: r2.z,
+                isNew: (i > activeIdx - 10 && state.phase === 2)
+            });
+        });
+
+        renderList.sort((a, b) => b.d - a.d);
+
+        renderList.forEach(p => {
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
+            if(p.isNew) {
+                ctx.fillStyle = '#fff'; 
+                // Removed shadowBlur
+            } else {
+                ctx.fillStyle = p.c; 
+            }
+            
+            ctx.globalAlpha = p.a; 
+            ctx.fill(); 
+            ctx.globalAlpha = 1.0; 
+        });
+        
+        // LASERS
+        if(state.phase === 2 && state.layer < state.totalLayers) {
+            let hot = renderList.find(p => p.isNew);
+            if(hot) {
+                drawLaser(hot.x, hot.y, width/2 - 400, 100, '#00ffff');
+                drawLaser(hot.x, hot.y, width/2 + 400, 100, '#ff00ff');
+                drawLaser(hot.x, hot.y, width/2, 50, '#ffffff');
+            }
+        }
+    }
+
+    function drawLaser(tx, ty, ox, oy, c) {
+        let g = ctx.createLinearGradient(ox, oy, tx, ty);
+        g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.5, c); g.addColorStop(1, '#fff');
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(tx, ty);
+        ctx.strokeStyle=g; ctx.lineWidth=1+Math.random()*2; ctx.stroke();
+    }
+
+    // --- DIAGNOSTICS DRAW ---
+    function drawDiagnostics() {
+        state.time++;
+        let col = "#00ffcc";
+        let w = ctxI1.canvas.width; let h = ctxI1.canvas.height;
+
+        // 1. POTENTIAL (Parabola)
+        ctxI1.clearRect(0,0,w,h); ctxI1.strokeStyle=col; ctxI1.lineWidth=2; ctxI1.beginPath();
+        for(let x=0;x<w;x++) { 
+            let nx=(x-w/2)/35; 
+            let y = (nx*nx) + (Math.random()*0.1); 
+            ctxI1.lineTo(x, h-20-(y*20)); 
+        } ctxI1.stroke();
+
+        // 2. PHASE SPACE (Circle)
+        ctxI2.clearRect(0,0,w,h); ctxI2.strokeStyle=col; ctxI2.lineWidth=1; ctxI2.beginPath();
+        ctxI2.arc(w/2, h/2, 20, 0, Math.PI*2); ctxI2.stroke();
+
+        // 3. FLUX (Lissajous)
+        ctxI3.clearRect(0,0,w,h); ctxI3.strokeStyle=col; ctxI3.lineWidth=1.5; ctxI3.beginPath();
+        for(let t=0; t<Math.PI*2; t+=0.1) {
+            let x = w/2 + 25 * Math.sin(t*3 + state.time*0.1);
+            let y = h/2 + 25 * Math.sin(t*2);
+            if(t===0) ctxI3.moveTo(x,y); else ctxI3.lineTo(x,y);
+        } ctxI3.stroke();
+
+        // 4. DEUTERIUM CLOCK (Gauge)
+        ctxI4.clearRect(0,0,w,h);
+        let cx=w/2, cy=h; let r=h-5;
+        let grad = ctxI4.createLinearGradient(0,0,w,0);
+        grad.addColorStop(0,"#004433"); grad.addColorStop(0.5,"#00ffcc"); grad.addColorStop(1,"#004433");
+        ctxI4.fillStyle=grad; ctxI4.beginPath(); ctxI4.arc(cx,cy,r,Math.PI,0); ctxI4.fill();
+        
+        let ang = -Math.PI/2 + (Math.random()-0.5)*0.05; 
+        ctxI4.strokeStyle='#fff'; ctxI4.lineWidth=2; ctxI4.beginPath(); ctxI4.moveTo(cx,cy);
+        ctxI4.lineTo(cx+(r-5)*Math.cos(ang), cy+(r-5)*Math.sin(ang)); ctxI4.stroke();
+    }
+
+    // DRAW MINI LATTICE (Sidebar)
+    function drawMiniLattice() {
+        miniCtx.clearRect(0,0,330,150);
+        let t = state.time * 0.01;
+        const PHI = (1 + Math.sqrt(5)) / 2;
+        const v = [
+            [0,1,PHI], [0,-1,PHI], [0,1,-PHI], [0,-1,-PHI],
+            [1,PHI,0], [-1,PHI,0], [1,-PHI,0], [-1,-PHI,0],
+            [PHI,0,1], [-PHI,0,1], [PHI,0,-1], [-PHI,0,-1]
+        ];
+        
+        let projected = [];
+        v.forEach((p, i) => {
+            let x = p[0]*30, y=p[1]*30, z=p[2]*30;
+            // Rotate
+            let r1 = rotY(x, z, t);
+            let r2 = rotX(y, r1.z, 0.5);
+            // Project to mini center (165, 75)
+            projected.push({x: r1.x + 165, y: r2.y + 75, z: r2.z, c: ATOM_COLORS[i%6].c});
+        });
+
+        // Draw Links
+        miniCtx.strokeStyle = "rgba(0, 255, 204, 0.2)";
+        miniCtx.beginPath();
+        for(let i=0; i<projected.length; i++) {
+            for(let j=i+1; j<projected.length; j++) {
+                if(Math.hypot(projected[i].x - projected[j].x, projected[i].y - projected[j].y) < 70) {
+                    miniCtx.moveTo(projected[i].x, projected[i].y);
+                    miniCtx.lineTo(projected[j].x, projected[j].y);
+                }
+            }
+        }
+        miniCtx.stroke();
+
+        // Draw Nodes
+        projected.sort((a,b)=>b.z - a.z);
+        projected.forEach(p => {
+            miniCtx.fillStyle = p.c;
+            miniCtx.beginPath(); miniCtx.arc(p.x, p.y, 4, 0, Math.PI*2); miniCtx.fill();
+        });
+    }
+
+    function loop() {
+        state.rotation += 0.01;
+        if(state.phase > 0) {
+            // Printing logic
+            if(state.phase === 1 || state.phase === 2) {
+                if(state.layer < state.totalLayers) {
+                    state.layer += state.speed;
+                } else {
+                    if(state.phase === 1) {
+                        microComplete();
+                    }
+                    if(state.phase === 2) {
+                        startCooling();
+                    }
+                }
+                ui.fill.style.width = (state.layer / state.totalLayers * 100) + "%";
+            }
+        }
+        
+        draw();
+        drawDiagnostics();
+        drawMiniLattice();
+        requestAnimationFrame(loop);
+    }
+    loop();
+
+</script>
+</body>
+</html>
