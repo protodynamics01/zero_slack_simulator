@@ -146,8 +146,11 @@
         </div>
         
         <div class="input-group" style="background:#111; border:1px solid #333; padding:10px;">
-            <label style="color:#666; font-size:0.6em;">WAAM (Weighted Atomic Mass)</label>
-            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.9em;">-- g/mol</div>
+            <label style="color:#666; font-size:0.6em;">STRUCTURAL PARAMETERS</label>
+            <div id="struct-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.8em;">
+                SHELLS: --<br>
+                BONDS: --
+            </div>
         </div>
         
         <button id="btn-scan" onclick="runScan()" disabled>INITIATE TORSION SCAN</button>
@@ -155,7 +158,7 @@
 
     <div id="stage">
         <div class="graph-box" style="flex: 1;">
-            <div class="graph-header">HYPERFINE LOCK SCANNER (5.030° - 5.045°)</div>
+            <div class="graph-header">VACUUM-DEBT SCANNER (4.8° - 6.0°)</div>
             <div class="lock-indicator" id="lock-indicator">STANDBY</div>
             <canvas id="scanCanvas"></canvas>
             <div id="scan-line"></div>
@@ -174,7 +177,7 @@
             <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1.2em;">
         </div>
         <div class="input-group">
-            <label>RESIDUAL SLACK</label>
+            <label>VACUUM DEBT</label>
             <input type="text" id="res-slack" readonly style="color:var(--cyan);">
         </div>
         
@@ -188,41 +191,33 @@
 </div>
 
 <script>
-    const ATOMIC_MASS = {
-        "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
-        "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
-        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, "Cu": 63.546, "Zn": 65.38,
-        "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224,
-        "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71,
-        "Sb": 121.76, "Te": 127.6, "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
-        "Pm": 145, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.5, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
-        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, "Hg": 200.59,
-        "Pb": 207.2, "U": 238.029
-    };
-
-    // DATABASE - Replace this section with your PDF data
     const DB = {
         "001": { 
             name: "Defense Alloys (Ni-Co)", 
             elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], 
             detail: "PROCESS CLAIM:\nNickel Superalloy formation via controlled cooling with icosahedral phase stabilization. Multi-stage heat treatment at 1200°C followed by rapid quench.\n\nUSE CLAIM:\nHigh-temperature turbine components, aerospace structural elements, military aircraft engine components.\n\nUTILITY PATENT:\nProvides superior creep resistance and thermal stability in extreme environments through quasicrystalline phase formation. Enables 15% performance improvement over conventional superalloys.",
-            lattice: "Icosahedral" 
+            lattice: "Icosahedral",
+            shells: 4,
+            bonds: 24
         },
         "002": { 
             name: "Hyper-Naval Armor (Co-Cr)", 
             elements: ["Co","Cr","Ni","W","Al","Ta"], 
             detail: "PROCESS CLAIM:\nCobalt-Based Decagonal Superalloy formed through precision casting with controlled solidification rates.\n\nUSE CLAIM:\nNaval vessel armor plating, submarine hull reinforcement, ballistic protection systems.\n\nUTILITY PATENT:\nHigh shear strength and impact resistance through decagonal quasicrystalline structure. Superior corrosion resistance in marine environments.",
-            lattice: "Decagonal" 
+            lattice: "Decagonal",
+            shells: 3,
+            bonds: 20
         },
         "003": { 
             name: "Hypersonic Leading Edge (W)", 
             elements: ["W","Re","Hf","C"], 
             detail: "PROCESS CLAIM:\nTungsten-Rhenium Matrix formed via powder metallurgy with carbide dispersion strengthening.\n\nUSE CLAIM:\nHypersonic vehicle leading edges, re-entry vehicle components, rocket nozzle liners.\n\nUTILITY PATENT:\nExtreme temperature resistance up to 3400°C. Maintains structural integrity during atmospheric re-entry.",
-            lattice: "Icosahedral" 
+            lattice: "Icosahedral",
+            shells: 5,
+            bonds: 30
         }
     };
 
-    // Generate placeholder data for ranks 4-100
     const safeElements = ["C", "Si", "Fe", "Al", "Ti", "Ni", "Co", "Cr", "Cu", "Zn"];
     for(let i=4; i<=100; i++) {
         let id = i.toString().padStart(3, '0');
@@ -235,14 +230,16 @@
             name: `Rank ${id} Advanced Material System`,
             elements: [el1, el2, el3], 
             detail: `PROCESS CLAIM:\nProprietary Graves-Law formulation ${id} with ${type} symmetry stabilization.\n\nUSE CLAIM:\nSpecialized industrial and defense applications requiring advanced material properties.\n\nUTILITY PATENT:\nNovel quasicrystalline structure provides unique combination of strength, thermal stability, and functional properties.`,
-            lattice: type
+            lattice: type,
+            shells: 2 + (i % 5),
+            bonds: 15 + (i % 20)
         };
     }
 
     let currentRank = null;
     let isScanning = false;
     let isLocked = false;
-    let uniqueAngle = 0;
+    let lockedAngle = 0;
     let atoms = [];
     
     const invList = document.getElementById('inv-list');
@@ -275,24 +272,27 @@
         drawGrid(scanCtx);
     }
 
-    function calculateLock(id, elements) {
-        const BASE_ANGLE = 5.0372; 
+    function calculateVacuumDebt(angle, shells, bonds, lattice) {
+        const BASE_REF = 5.03;
         
-        let total = 0, count = 0;
-        elements.forEach(el => {
-            let m = ATOMIC_MASS[el];
-            if(m) { total += m; count++; }
-        });
+        let baseDebt = shells * 10;
+        let torsionalTerm = Math.pow(Math.abs(angle - BASE_REF), 2) * bonds;
         
-        let avg = count > 0 ? total/count : 50.0;
-        let diff = avg - 77.1; 
-        let shift = diff * 0.00005;
+        let symmetryWaste = 0;
+        if (lattice !== "Icosahedral" && lattice !== "Decagonal" && lattice !== "Pentagonal") {
+            symmetryWaste = 10000;
+        }
         
-        if(shift > 0.007) shift = 0.007;
-        if(shift < -0.007) shift = -0.007;
+        let translationalSlack = 0;
+        if (lattice === "Cubic") {
+            translationalSlack = 500;
+        }
         
-        document.getElementById('mass-readout').innerText = `~${avg.toFixed(2)} g/mol`;
-        return parseFloat((BASE_ANGLE + shift).toFixed(4));
+        let entropyPenalty = 0.005 * Math.pow(angle - BASE_REF, 2);
+        
+        let totalDebt = baseDebt + torsionalTerm + symmetryWaste + translationalSlack + entropyPenalty;
+        
+        return totalDebt;
     }
 
     function selectRank(id) {
@@ -306,6 +306,7 @@
         document.getElementById('comp-elements').value = data.elements.join(" - ");
         document.getElementById('comp-detail').value = data.detail;
         document.getElementById('lattice-type').value = data.lattice;
+        document.getElementById('struct-readout').innerHTML = `SHELLS: ${data.shells}<br>BONDS: ${data.bonds}`;
         document.getElementById('btn-scan').disabled = false;
         
         document.getElementById('res-angle').value = "--";
@@ -313,15 +314,13 @@
         document.getElementById('lock-indicator').innerText = "READY";
         document.getElementById('lock-indicator').style.color = "#555";
         
-        uniqueAngle = calculateLock(id, data.elements);
-        
         isLocked = false;
         clearLabels();
         updateAtomTargets(data.lattice);
         
         drawGrid(scanCtx);
         log(`SELECTED RANK ${id}: ${data.name}`);
-        log(`CALCULATING WAAM... TARGET: ${uniqueAngle}°`);
+        log(`LATTICE: ${data.lattice} | SHELLS: ${data.shells} | BONDS: ${data.bonds}`);
     }
 
     function log(msg, type='') {
@@ -336,59 +335,95 @@
 
     function runScan() {
         if(!currentRank) return;
+        const data = DB[currentRank];
+        
         isScanning = true;
         document.getElementById('btn-scan').disabled = true;
         document.getElementById('lock-indicator').innerText = "SCANNING...";
         document.getElementById('lock-indicator').style.color = "var(--cyan)";
         document.getElementById('scan-line').style.opacity = 1;
         
-        log(`SCANNING [5.030° - 5.045°]...`, "cyan");
+        log(`INITIATING TORSIONAL SWEEP [4.8° - 6.0°]...`, "cyan");
+        log(`STEP SIZE: 0.0001° | CALCULATING VACUUM-DEBT...`);
+        
+        const MIN_ANGLE = 4.8;
+        const MAX_ANGLE = 6.0;
+        const STEP = 0.0001;
         
         let w = scanCtx.canvas.width;
         let h = scanCtx.canvas.height;
-        let x = 0;
-        
-        const MIN_SCAN = 5.030;
-        const RANGE = 0.015;
         
         scanCtx.fillStyle = '#000'; 
         scanCtx.fillRect(0,0,w,h);
         drawGrid(scanCtx);
 
-        let timer = setInterval(() => {
-            x += 2;
-            document.getElementById('scan-line').style.left = x + "px";
+        let minDebt = Infinity;
+        let lockAngle = 0;
+        let debtAtLock = 0;
+        
+        let allDebts = [];
+        
+        for(let angle = MIN_ANGLE; angle <= MAX_ANGLE; angle += STEP) {
+            let debt = calculateVacuumDebt(angle, data.shells, data.bonds, data.lattice);
+            allDebts.push({angle: angle, debt: debt});
             
-            let pct = x / w;
-            let angle = MIN_SCAN + (pct * RANGE);
-            
-            let dist = Math.abs(angle - uniqueAngle);
-            let energy = Math.min(1, Math.pow(dist * 300, 2));
-            let y = (energy * (h * 0.7)) + (h * 0.15);
-            
-            scanCtx.fillStyle = (dist < 0.0005) ? "#fff" : "#ff3333";
-            scanCtx.fillRect(x, y, 2, 2);
-            
-            if(x >= w) {
-                clearInterval(timer);
-                finishLock(uniqueAngle);
+            if(debt < minDebt) {
+                minDebt = debt;
+                lockAngle = angle;
+                debtAtLock = debt;
             }
-        }, 10);
+        }
+        
+        let maxDebtForScale = Math.max(...allDebts.map(d => d.debt));
+        if(maxDebtForScale > 1000) maxDebtForScale = 1000;
+        
+        let step = 0;
+        let totalSteps = allDebts.length;
+        let renderInterval = Math.floor(totalSteps / 500);
+        
+        let timer = setInterval(() => {
+            for(let i=0; i<renderInterval && step < totalSteps; i++, step++) {
+                let entry = allDebts[step];
+                let pct = (entry.angle - MIN_ANGLE) / (MAX_ANGLE - MIN_ANGLE);
+                let x = pct * w;
+                
+                let debtNorm = Math.min(entry.debt / maxDebtForScale, 1);
+                let y = h - (debtNorm * h * 0.9) - (h * 0.05);
+                
+                let isNearLock = Math.abs(entry.angle - lockAngle) < 0.001;
+                scanCtx.fillStyle = isNearLock ? "#ffaa00" : (entry.debt < 50 ? "#00ffcc" : "#ff3333");
+                scanCtx.fillRect(x, y, 2, 2);
+            }
+            
+            let scanPct = step / totalSteps;
+            document.getElementById('scan-line').style.left = (scanPct * w) + "px";
+            
+            if(step >= totalSteps) {
+                clearInterval(timer);
+                finishLock(lockAngle, debtAtLock);
+            }
+        }, 1);
     }
 
-    function finishLock(angle) {
+    function finishLock(angle, debt) {
         isScanning = false;
         isLocked = true;
+        lockedAngle = angle;
         document.getElementById('btn-scan').disabled = false;
         document.getElementById('scan-line').style.opacity = 0;
         document.getElementById('lock-indicator').innerText = "LOCKED";
         document.getElementById('lock-indicator').style.color = "var(--gold)";
         
-        document.getElementById('res-angle').value = angle.toFixed(4) + "°";
-        document.getElementById('res-slack').value = "0.000 nm (PERFECT)";
+        document.getElementById('res-angle').value = angle.toFixed(6) + "°";
+        document.getElementById('res-slack').value = debt.toFixed(3);
         
-        log(`LOCK FOUND AT ${angle.toFixed(4)}°`, "gold");
-        log(`SLACK ELIMINATED. ATOMS FROZEN IN STATE.`, "cyan");
+        log(`═══════════════════════════════════════`, "gold");
+        log(`LOCK CERTIFICATE`, "gold");
+        log(`═══════════════════════════════════════`, "gold");
+        log(`ANGLE: ${angle.toFixed(6)}°`, "cyan");
+        log(`VACUUM-DEBT: ${debt.toFixed(6)}`, "cyan");
+        log(`STATUS: ${debt < 0.1 ? 'PERFECT LOCK' : 'EQUILIBRIUM FOUND'}`, debt < 0.1 ? "gold" : "cyan");
+        log(`═══════════════════════════════════════`, "gold");
         
         createLabels();
     }
@@ -406,7 +441,6 @@
             });
         }
     }
-
     function updateAtomTargets(latticeType) {
         const phi = 1.618;
         let targets = [];
@@ -562,7 +596,7 @@
         document.querySelectorAll('.atom-label').forEach(el => el.remove());
     }
 
-   function getElementColor(el) {
+    function getElementColor(el) {
         const colors = {"C": "#888", "Si": "#b0b0ff", "Fe": "#ff8844", "Al": "#aaaaff",
             "Ti": "#ccccff", "Ni": "#99ff99", "Co": "#ff99dd", "Cr": "#ffaa44",
             "W": "#ffff66", "Mo": "#cc99ff", "Nb": "#88ddff", "Cu": "#ff9955",
