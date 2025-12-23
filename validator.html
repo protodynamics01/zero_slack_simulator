@@ -1258,6 +1258,127 @@ CERTIFICATION: This structure incurs ZERO excess vacuum-debt and represents the 
         };
     }
 
+    // === ASCII STRUCTURE GENERATOR ===
+    function generateASCIIStructure(data, angle) {
+        const elements = data.elements;
+        const n = elements.length;
+        
+        // Create a 40x25 character grid
+        const width = 60;
+        const height = 25;
+        let grid = [];
+        for(let y = 0; y < height; y++) {
+            grid[y] = [];
+            for(let x = 0; x < width; x++) {
+                grid[y][x] = ' ';
+            }
+        }
+        
+        const cx = Math.floor(width / 2);
+        const cy = Math.floor(height / 2);
+        const radius = Math.min(width, height) * 0.35;
+        
+        // Calculate positions based on lattice type
+        let positions = [];
+        
+        if(data.lattice === "Icosahedral") {
+            // Core + shell
+            if(n >= 1) positions.push({x: cx, y: cy, el: elements[0]});
+            for(let i = 1; i < n; i++) {
+                let ang = ((i-1) / (n-1)) * Math.PI * 2 - Math.PI/2;
+                positions.push({
+                    x: Math.round(cx + Math.cos(ang) * radius),
+                    y: Math.round(cy + Math.sin(ang) * radius * 0.5),
+                    el: elements[i]
+                });
+            }
+        } else if(data.lattice === "Decagonal") {
+            // 10-fold radial
+            for(let i = 0; i < n; i++) {
+                let ang = (i / n) * Math.PI * 2 - Math.PI/2;
+                let r = i === 0 ? 0 : radius * (0.4 + 0.6 * (i / n));
+                positions.push({
+                    x: Math.round(cx + Math.cos(ang) * r),
+                    y: Math.round(cy + Math.sin(ang) * r * 0.5),
+                    el: elements[i]
+                });
+            }
+        } else {
+            // Pentagonal
+            for(let i = 0; i < n; i++) {
+                let ang = (i / Math.max(n-1, 1)) * Math.PI * 2 - Math.PI/2;
+                let r = i === 0 ? 0 : radius * 0.7;
+                positions.push({
+                    x: Math.round(cx + Math.cos(ang) * r),
+                    y: Math.round(cy + Math.sin(ang) * r * 0.5),
+                    el: elements[i]
+                });
+            }
+        }
+        
+        // Draw bonds first (lines between atoms)
+        for(let i = 0; i < positions.length; i++) {
+            for(let j = i + 1; j < positions.length; j++) {
+                let x1 = positions[i].x, y1 = positions[i].y;
+                let x2 = positions[j].x, y2 = positions[j].y;
+                let dist = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+                if(dist < radius * 1.2) {
+                    // Draw line
+                    let steps = Math.max(Math.abs(x2-x1), Math.abs(y2-y1));
+                    for(let s = 1; s < steps; s++) {
+                        let t = s / steps;
+                        let x = Math.round(x1 + (x2-x1) * t);
+                        let y = Math.round(y1 + (y2-y1) * t);
+                        if(y >= 0 && y < height && x >= 0 && x < width && grid[y][x] === ' ') {
+                            // Determine line character
+                            let dx = x2 - x1, dy = y2 - y1;
+                            if(Math.abs(dx) > Math.abs(dy) * 2) grid[y][x] = '─';
+                            else if(Math.abs(dy) > Math.abs(dx) * 2) grid[y][x] = '│';
+                            else if((dx > 0 && dy > 0) || (dx < 0 && dy < 0)) grid[y][x] = '╲';
+                            else grid[y][x] = '╱';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Draw atoms (overwrite bonds)
+        positions.forEach((pos, i) => {
+            let x = pos.x, y = pos.y;
+            let el = pos.el.padEnd(2).substring(0, 2);
+            if(y >= 0 && y < height && x >= 1 && x < width - 1) {
+                grid[y][x-1] = '(';
+                grid[y][x] = el[0];
+                if(el[1] && el[1] !== ' ') {
+                    grid[y][x+1] = el[1];
+                    grid[y][x+2] = ')';
+                } else {
+                    grid[y][x+1] = ')';
+                }
+            }
+        });
+        
+        // Convert grid to string
+        let ascii = '';
+        ascii += '┌' + '─'.repeat(width + 2) + '┐\n';
+        for(let y = 0; y < height; y++) {
+            ascii += '│ ' + grid[y].join('') + ' │\n';
+        }
+        ascii += '└' + '─'.repeat(width + 2) + '┘\n';
+        
+        // Add legend
+        ascii += '\nLEGEND:\n';
+        elements.forEach((el, i) => {
+            let mass = ATOMIC_MASS[el] || 0;
+            let site = i === 0 ? 'Core' : (i < 3 ? 'Primary' : 'Secondary');
+            ascii += `  (${el.padEnd(2)}) = ${el.padEnd(3)} [${mass.toFixed(2).padStart(7)} g/mol] - ${site}\n`;
+        });
+        ascii += `\nLattice: ${data.lattice} | Lock Angle: ${angle.toFixed(6)}°`;
+        if(data.molecular) ascii += ` | Target: ${data.molecular}`;
+        
+        return ascii;
+    }
+
     // === EXPORT FABRICATION FUNCTION ===
     function exportFabrication() {
         if(!currentRank) return;
@@ -1444,6 +1565,12 @@ All positions given in normalized coordinates at lock angle ${angle.toFixed(6)}�
 Reference frame: Cartesian (x, y, z) with origin at lattice center
 
 ${vertices}
+
+════════════════════════════════════════════════════════════════════════════════
+                      SECTION 3B: ASCII ATOMIC STRUCTURE
+════════════════════════════════════════════════════════════════════════════════
+
+${generateASCIIStructure(data, angle)}
 
 ════════════════════════════════════════════════════════════════════════════════
                       SECTION 4: SUPERPOSITION STATES
