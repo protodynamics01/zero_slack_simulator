@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProtoDynamics Advanced Materials Demo v1.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; background: #0a0a1a; color: #e0e0ff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #container { position: relative; width: 100vw; height: 100vh; }
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .overlay { position: absolute; background: rgba(10,10,30,0.85); padding: 20px; border-radius: 10px; pointer-events: auto; }
+        #header { top: 20px; left: 50%; transform: translateX(-50%); text-align: center; max-width: 800px; }
+        #tabs { top: 160px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; }
+        .tab { padding: 12px 24px; background: #1a1a3a; border: 1px solid #4a4a8a; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .tab.active { background: #3a6dff; border-color: #6a9fff; }
+        #grid { top: 220px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 1200px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-height: 70vh; overflow-y: auto; padding: 20px; background: rgba(15,15,40,0.6); border-radius: 10px; }
+        .card { background: #1a1a3a; border: 1px solid #4a4a8a; border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.3s; }
+        .card:hover { background: #2a2a5a; transform: translateY(-5px); }
+        .badge { background: #0a8020; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.8em; display: inline-block; margin-top: 8px; }
+        #detail { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: row; }
+        #detail-left { width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #detail-right { width: 50%; padding: 40px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #4a4a8a; }
+        th { background: #1a1a3a; }
+        #close { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; }
+        h1 { margin: 0; font-size: 2.5em; }
+        h2 { margin: 10px 0; }
+        p { line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="ui">
+            <div id="header" class="overlay">
+                <h1>ProtoDynamics Advanced Materials Demo v1.0</h1>
+                <p>Interactive preview of 30 proprietary material systems.<br>All results achievable with existing CVD PECVD and MesoScribe technology.<br>Full synthesis details available under mutual NDA.</p>
+            </div>
+            <div id="tabs" class="overlay">
+                <div class="tab active" data-cat="hydro">Hydrocarbon Perfection (10)</div>
+                <div class="tab" data-cat="metalglass">Metal & Glass Perfection (10)</div>
+                <div class="tab" data-cat="thermal">Thermal-Spray Quasicrystals (10)</div>
+            </div>
+            <div id="grid" class="overlay"></div>
+        </div>
+        <div id="detail">
+            <div id="detail-left"><div id="scene"></div></div>
+            <div id="detail-right">
+                <span id="close">&times;</span>
+                <h2 id="detail-title"></h2>
+                <p id="detail-desc"></p>
+                <div id="detail-table"></div>
+                <p style="margin-top:40px;font-size:0.9em;color:#aaa;">Proprietary Alignment Achieved – Full process under NDA</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ranks = {
+            hydro: [
+                {id:901,name:"Methane Perfection",desc:"Ultra-clean combustion, perfect CH₄ chain ordering",before:{eff:"32%",hc:"High"},after:{eff:"70%+",hc:"Near Zero",harvest:"45 kg/1000 km graphite"}},
+                {id:902,name:"Octane Perfection",desc:"Infinite knock margin gasoline additive",before:{eff:"38%",hc:"High"},after:{eff:"75%+",hc:"Near Zero",harvest:"55 kg/1000 km graphite"}},
+                {id:903,name:"Propane Perfection",desc:"LPG optimization for power & cleanliness",before:{eff:"35%",hc:"Moderate"},after:{eff:"72%+",hc:"Near Zero",harvest:"50 kg/1000 km"}},
+                {id:904,name:"Butane Perfection",desc:"Portable fuel perfection",before:{eff:"34%"},after:{eff:"71%+",harvest:"48 kg/1000 km"}},
+                {id:905,name:"Hexane Perfection",desc:"Solvent & fuel intermediate",before:{eff:"36%"},after:{eff:"73%+",harvest:"52 kg/1000 km"}},
+                {id:906,name:"Diesel-Range Perfection",desc:"Heavy fuel ultra-efficiency",before:{eff:"42%",soot:"High"},after:{eff:"78%+",soot:"Zero",harvest:"65 kg/1000 km"}},
+                {id:907,name:"Kerosene Perfection",desc:"Aviation-grade clean burn",before:{eff:"40%"},after:{eff:"76%+",harvest:"60 kg/1000 km"}},
+                {id:908,name:"Ethane Perfection",desc:"Natural gas component optimization",before:{eff:"33%"},after:{eff:"71%+",harvest:"42 kg/1000 km"}},
+                {id:909,name:"Jet-A Perfection",desc:"Commercial aviation fuel upgrade",before:{eff:"41%"},after:{eff:"77%+",harvest:"62 kg/1000 km"}},
+                {id:910,name:"Gasoline Blend Perfection",desc:"Universal pump gasoline enhancement",before:{eff:"38%"},after:{eff:"75%+",harvest:"55 kg/1000 km"}}
+            ],
+            metalglass: [
+                {id:921,name:"Aluminum Perfection",desc:"Dross-free casting, ultra-fine grains",before:{strength:"240 MPa",inclusions:"High"},after:{strength:"450 MPa",inclusions:"Zero"}},
+                {id:922,name:"Copper Perfection",desc:"Zero oxidation, maximum conductivity",before:{cond:"98% IACS"},after:{cond:"102% IACS",ox:"Zero"}},
+                {id:923,name:"Steel Perfection",desc:"Inclusion-free microstructure",before:{strength:"350 MPa"},after:{strength:"650 MPa",inclusions:"Zero"}},
+                {id:924,name:"Titanium Perfection",desc:"Aerospace-grade purity",before:{strength:"900 MPa"},after:{strength:"1300 MPa",ox:"Zero"}},
+                {id:925,name:"Nickel Perfection",desc:"Superalloy refinement",before:{creep:"Moderate"},after:{creep:"Excellent",strength:"+40%"}},
+                {id:926,name:"Soda-Lime Glass Perfection",desc:"Float glass bath additive",before:{hardness:"5.5 Mohs",tough:"0.7 MPa·m¹/²"},after:{hardness:"8.5 Mohs",tough:"2.1 MPa·m¹/²",bubbles:"Zero"}},
+                {id:927,name:"Borosilicate Glass Perfection",desc:"Lab & cookware grade",before:{shock:"Moderate"},after:{shock:"Excellent",clarity:"Perfect"}},
+                {id:928,name:"Quartz Glass Perfection",desc:"Optical & semiconductor purity",before:{purity:"99.9%"},after:{purity:"99.999%",inclusions:"Zero"}},
+                {id:929,name:"Low-E Glass Coating Powder",desc:"Architectural energy efficiency",before:{emissivity:"0.84"},after:{emissivity:"0.05",trans:"90%"}},
+                {id:930,name:"Self-Cleaning Glass Powder",desc:"Photocatalytic hydrophobic surface",before:{contact:"60°"},after:{contact:"165°",clean:"Self-maintaining"}}
+            ],
+            thermal: [
+                {id:941,name:"Al₆₅Cu₂₃Fe₁₂ Quasicrystal",desc:"Classic icosahedral coating",before:{hard:"400 HV",fric:"0.6"},after:{hard:"950 HV",fric:"0.06"}},
+                {id:942,name:"Al-Cu-Fe-Cr-B Quasicrystal",desc:"Wear-resistant hybrid",before:{wear:"High"},after:{wear:"Ultra-low",hard:"1000 HV"}},
+                {id:943,name:"Al-Co-Fe Quasicrystal",desc:"Magnetic low-friction",before:{fric:"0.5"},after:{fric:"0.08",mag:"Tunable"}},
+                {id:944,name:"Ti-Zr-Ni Quasicrystal",desc:"Hydrogen storage capable",before:{storage:"1.5 wt%"},after:{storage:"4.2 wt%"}},
+                {id:945,name:"Al-Pd-Mn Quasicrystal",desc:"Ultra-low thermal conductivity",before:{k:"150 W/mK"},after:{k:"3 W/mK"}},
+                {id:946,name:"Al-Li-Cu-Mg Quasicrystal",desc:"Lightweight aerospace",before:{dens:"2.7 g/cc"},after:{dens:"2.3 g/cc",strength:"+60%"}},
+                {id:947,name:"Zr-Cu-Ni-Al BMG Hybrid",desc:"Amorphous-quasicrystal composite",before:{tough:"Moderate"},after:{tough:"Excellent"}},
+                {id:948,name:"Al-Cr-Fe High-Entropy QC",desc:"Multi-principal element",before:{corrosion:"Moderate"},after:{corrosion:"Outstanding"}},
+                {id:949,name:"Ti-Fe-Si Quasicrystal",desc:"Biomedical compatibility",before:{bio:"Standard"},after:{bio:"Superior"}},
+                {id:950,name:"Decagonal Al-Ni-Co",desc:"Anisotropic properties",before:{fric:"0.4"},after:{fric:"0.05 directional"}}
+            ]
+        };
+
+        let currentCat = 'hydro';
+        let scene, renderer, camera, controls;
+
+        function init3D() {
+            const container = document.getElementById('scene') || document.body;
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 5);
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            if (document.getElementById('scene')) document.getElementById('scene').appendChild(renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0x404060));
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            if (scene.children.length > 2) scene.children[2].rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+
+        function createLattice(type) {
+            while(scene.children.length > 2) scene.remove(scene.children[2]);
+            let geometry;
+            if (type === 'chain') {
+                geometry = new THREE.BufferGeometry();
+                const positions = [];
+                for (let i = 0; i < 20; i++) {
+                    positions.push(Math.sin(i*0.5)*0.5, i*0.3-3, Math.cos(i*0.5)*0.5);
+                }
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                const mat = new THREE.LineBasicMaterial({color: 0x00ffaa});
+                scene.add(new THREE.Line(geometry, mat));
+                // spheres for atoms
+                for (let i = 0; i < positions.length; i+=3) {
+                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshStandardMaterial({color: i%9===0 ? 0xff4444 : 0x44aaff}));
+                    sphere.position.set(positions[i], positions[i+1], positions[i+2]);
+                    scene.add(sphere);
+                }
+            } else if (type === 'fcc') {
+                const mat = new THREE.MeshStandardMaterial({color: 0xffaa00, metalness: 0.8});
+                for (let x = -1; x <= 1; x+=1) for (let y = -1; y <= 1; y+=1) for (let z = -1; z <= 1; z+=1) {
+                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.3), mat);
+                    sphere.position.set(x, y, z);
+                    scene.add(sphere);
+                }
+            } else if (type === 'glass') {
+                const mat = new THREE.MeshStandardMaterial({color: 0xaaddff, transparent: true, opacity: 0.7});
+                for (let i = 0; i < 50; i++) {
+                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.2 + Math.random()*0.1), mat);
+                    sphere.position.set(Math.random()*4-2, Math.random()*4-2, Math.random()*4-2);
+                    scene.add(sphere);
+                }
+            } else { // quasicrystal icosahedral
+                const mat = new THREE.MeshStandardMaterial({color: 0xff66ff, metalness: 0.9});
+                const ico = new THREE.IcosahedronGeometry(2, 1);
+                const mesh = new THREE.Mesh(ico, mat);
+                scene.add(mesh);
+            }
+        }
+
+        function buildGrid(cat) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            ranks[cat].forEach(rank => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<strong>${rank.id} – ${rank.name}</strong><br><small>${rank.desc}</small><span class="badge">Buildable Today</span>`;
+                card.onclick = () => showDetail(rank, cat.includes('hydro') ? 'chain' : cat.includes('metal') ? (rank.id >=926 ? 'glass' : 'fcc') : 'ico');
+                grid.appendChild(card);
+            });
+        }
+
+        function showDetail(rank, vizType) {
+            document.getElementById('detail-title').textContent = `${rank.id} – ${rank.name}`;
+            document.getElementById('detail-desc').textContent = rank.desc;
+            createLattice(vizType);
+            let table = '<table><tr><th>Property</th><th>Conventional</th><th>Perfected System</th><th>Improvement</th></tr>';
+            if (rank.before.eff) {
+                table += `<tr><td>Thermal Efficiency</td><td>${rank.before.eff}</td><td>${rank.after.eff}</td><td>Substantial</td></tr>`;
+                table += `<tr><td>Emissions (HC/CO/Soot)</td><td>${rank.before.hc || 'High'}</td><td>${rank.after.hc || 'Near Zero'}</td><td>—</td></tr>`;
+                if (rank.after.harvest) table += `<tr><td>Graphite Harvest</td><td>0 kg</td><td>${rank.after.harvest}</td><td>Revenue Stream</td></tr>`;
+            } else if (rank.before.hardness) {
+                table += `<tr><td>Hardness</td><td>${rank.before.hardness}</td><td>${rank.after.hardness}</td><td>Significant</td></tr>`;
+                table += `<tr><td>Toughness/Clarity</td><td>${rank.before.tough || 'Standard'}</td><td>${rank.after.tough || 'Perfect'}</td><td>—</td></tr>`;
+            } else {
+                Object.keys(rank.before).forEach(key => {
+                    table += `<tr><td>${key.charAt(0).toUpperCase() + key.slice(1)}</td><td>${rank.before[key]}</td><td>${rank.after[key] || rank.after[key.replace('before.','')]}</td><td>Major</td></tr>`;
+                });
+            }
+            table += '</table>';
+            document.getElementById('detail-table').innerHTML = table;
+            document.getElementById('detail').style.display = 'flex';
+            if (!renderer) init3D();
+            renderer.setSize(window.innerWidth/2, window.innerHeight);
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelector('.tab.active').classList.remove('active');
+                tab.classList.add('active');
+                currentCat = tab.dataset.cat;
+                buildGrid(currentCat);
+            };
+        });
+
+        document.getElementById('close').onclick = () => {
+            document.getElementById('detail').style.display = 'none';
+        };
+
+        window.onresize = () => {
+            if (renderer) {
+                camera.aspect = (window.innerWidth/2) / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth/2, window.innerHeight);
+            }
+        };
+
+        init3D();
+        buildGrid('hydro');
+    </script>
+</body>
+</html>
