@@ -22,39 +22,41 @@
         body {
             margin: 0; background-color: var(--bg); color: #e0e0e0;
             font-family: var(--font-main); height: 100vh; overflow: hidden;
-            display: grid; grid-template-rows: 50px 1fr;
+            display: grid; grid-template-rows: 40px 1fr;
             background: radial-gradient(circle at center, #080808 0%, #000 100%);
         }
 
         header {
             background: rgba(0,0,0,0.9); border-bottom: var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px;
+            padding: 0 15px; font-size: 0.75em; font-weight: 700; letter-spacing: 2px;
             z-index: 10;
         }
-        .clock-ref { font-family: var(--font-mono); font-size: 0.9em; color: #666; }
+        .clock-ref { font-family: var(--font-mono); font-size: 0.85em; color: #666; }
         .clock-live { color: var(--cyan); margin-left: 10px; }
 
         #workspace {
-            display: grid; grid-template-columns: 420px 1fr 350px;
-            height: 100%; overflow: hidden;
+            display: grid; grid-template-columns: 320px 1fr 280px;
+            height: calc(100vh - 40px); overflow: hidden;
         }
 
         .panel {
             background: var(--glass); border-right: var(--border);
-            padding: 20px; display: flex; flex-direction: column; gap: 15px;
-            overflow-y: auto;
+            padding: 15px; display: flex; flex-direction: column; gap: 8px;
+            overflow-y: auto; max-height: 100%;
         }
         .panel-right { border-right: none; border-left: var(--border); }
 
         h2 { margin: 0 0 10px 0; font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         #inv-list {
-            flex: 1; overflow-y: auto; border: 1px solid #333; background: #000;
-            font-family: var(--font-mono); font-size: 0.7em;
+            height: 90px; min-height: 90px; max-height: 90px;
+            overflow-y: auto; border: 1px solid #333; background: #000;
+            font-family: var(--font-mono); font-size: 0.65em;
+            flex-shrink: 0;
         }
         .inv-item {
-            padding: 12px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
+            padding: 8px 10px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
             display: flex; justify-content: flex-start; align-items: center;
         }
         .inv-item:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
@@ -71,16 +73,18 @@
         
         #stage {
             position: relative; display: flex; flex-direction: column;
-            padding: 20px; gap: 20px; background: radial-gradient(circle at center, #111 0%, #000 100%);
+            padding: 15px; gap: 10px; background: radial-gradient(circle at center, #111 0%, #000 100%);
         }
 
         .graph-box {
-            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #333;
+            background: rgba(0,0,0,0.5); border: 1px solid #333;
             position: relative; padding: 10px; display: flex; flex-direction: column;
             overflow: hidden;
         }
-        .graph-header { position: absolute; top: 10px; left: 10px; font-size: 0.7em; color: var(--cyan); font-weight: bold; z-index: 10;}
-        .lock-indicator { position: absolute; top: 10px; right: 10px; font-size: 0.7em; color: #555; font-weight: bold; z-index: 10;}
+        .graph-box.scanner { height: 140px; min-height: 140px; flex-shrink: 0; }
+        .graph-box.lattice { flex: 1; min-height: 350px; }
+        .graph-header { position: absolute; top: 8px; left: 10px; font-size: 0.65em; color: var(--cyan); font-weight: bold; z-index: 10;}
+        .lock-indicator { position: absolute; top: 8px; right: 10px; font-size: 0.65em; color: #555; font-weight: bold; z-index: 10;}
         
         button {
             width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.1);
@@ -92,9 +96,11 @@
         button:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
 
         #console {
-            height: 250px; background: #000; border: 1px solid #333;
-            font-family: var(--font-mono); font-size: 0.7em; color: #888;
-            padding: 10px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4;
+            height: 80px; min-height: 80px; max-height: 80px;
+            background: #000; border: 1px solid #333;
+            font-family: var(--font-mono); font-size: 0.65em; color: #888;
+            padding: 8px; overflow-y: auto; white-space: pre-wrap; line-height: 1.3;
+            flex-shrink: 0;
         }
         .log-cyan { color: var(--cyan); }
         .log-red { color: var(--red); }
@@ -118,7 +124,7 @@
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v29.3 UNIFIED MASTER</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v31.0 | 130 SYSTEMS</span></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">327.384 MHz</span></div>
 </header>
 
@@ -128,55 +134,58 @@
         <h2>1. Select System (Ranks 1–930)</h2>
         <div id="inv-list"></div>
         
+        <button id="btn-action" disabled>SELECT A SYSTEM</button>
+        
         <h2>2. Composition Specs</h2>
         <div class="input-group">
             <label>PRIMARY ELEMENTS</label>
             <input type="text" id="comp-elements" readonly>
         </div>
         <div class="input-group">
-            <label>FULL PATENT CLAIM</label>
-            <textarea id="comp-detail" rows="6" readonly style="font-size:0.75em; color:#aaa;"></textarea>
-        </div>
-        <div class="input-group">
             <label>LATTICE SYMMETRY</label>
             <input type="text" id="lattice-type" readonly>
         </div>
-        
-        <div class="input-group" style="background:#111; border:1px solid #333; padding:10px;">
-            <label style="color:#666; font-size:0.6em;">WAAM (Weighted Atomic Mass)</label>
-            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.9em;">-- g/mol</div>
+        <div class="input-group" style="background:#111; border:1px solid #333; padding:6px;">
+            <label style="color:#666; font-size:0.55em;">WAAM (Weighted Atomic Mass)</label>
+            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.8em;">-- g/mol</div>
         </div>
         
-        <button id="btn-scan">INITIATE TORSION SCAN</button>
-        <button id="btn-fabricate" onclick="exportFabrication()" disabled style="background:rgba(255,170,0,0.1); border-color:#ffaa00; color:#ffaa00; margin-top:10px;">⚙ FABRICATE → EXPORT TXT</button>
+        <h2>3. Full Patent Claim</h2>
+        <textarea id="comp-detail" rows="12" readonly style="font-size:0.6em; color:#aaa; width:100%; background:#111; border:1px solid #333; padding:6px; resize:none; flex:1; min-height:150px; line-height:1.3;"></textarea>
     </div>
 
     <div id="stage">
-        <div class="graph-box" style="flex: 1;">
+        <div class="graph-box scanner">
             <div class="graph-header">HYPERFINE LOCK SCANNER (5.030° - 5.045°)</div>
             <div class="lock-indicator" id="lock-indicator">STANDBY</div>
             <canvas id="scanCanvas"></canvas>
             <div id="scan-line"></div>
         </div>
 
-        <div class="graph-box" style="flex: 2; background: #000; overflow:hidden;" id="atom-container">
+        <div class="graph-box lattice" id="atom-container">
             <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
             <canvas id="atomCanvas"></canvas>
         </div>
     </div>
 
     <div class="panel panel-right">
-        <h2>3. Lock Results</h2>
+        <h2>4. Lock Results</h2>
         <div class="input-group">
             <label>UNIQUE LOCK ANGLE (°)</label>
-            <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1.2em;">
+            <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1.1em;">
         </div>
         <div class="input-group">
             <label>RESIDUAL SLACK</label>
             <input type="text" id="res-slack" readonly style="color:var(--cyan);">
         </div>
         
-        <h2>4. Validation Log</h2>
+        <h2>5. 2D Atomic Structure</h2>
+        <div id="atomic-2d" style="background:#000; border:1px solid #333; padding:8px; flex:1; min-height:180px; display:flex; flex-direction:column;">
+            <div id="element-list" style="color:#888; font-family:var(--font-mono); font-size:0.55em; margin-bottom:5px;">Select a system...</div>
+            <canvas id="atomic2dCanvas" style="flex:1; width:100%;"></canvas>
+        </div>
+        
+        <h2>6. Validation Log</h2>
         <div id="console"></div>
     </div>
 
@@ -348,12 +357,78 @@
     let isLocked = false;
     let uniqueAngle = 0;
     let atoms = [];
+    let buttonState = "disabled"; // disabled -> scan -> fabricate -> reset -> scan
     
     const invList = document.getElementById('inv-list');
     const scanCtx = document.getElementById('scanCanvas').getContext('2d');
     const atomCtx = document.getElementById('atomCanvas').getContext('2d');
     const consoleDiv = document.getElementById('console');
     const atomContainer = document.getElementById('atom-container');
+    
+    // Button state manager
+    function setButtonState(state) {
+        const btn = document.getElementById('btn-action');
+        buttonState = state;
+        
+        switch(state) {
+            case "disabled":
+                btn.disabled = true;
+                btn.innerText = "SELECT A SYSTEM";
+                btn.style.borderColor = "#333";
+                btn.style.color = "#555";
+                btn.style.background = "transparent";
+                btn.onclick = null;
+                break;
+            case "scan":
+                btn.disabled = false;
+                btn.innerText = "▶ INITIATE TORSION SCAN";
+                btn.style.borderColor = "var(--cyan)";
+                btn.style.color = "var(--cyan)";
+                btn.style.background = "rgba(0, 255, 204, 0.1)";
+                btn.onclick = runScan;
+                break;
+            case "scanning":
+                btn.disabled = true;
+                btn.innerText = "⟳ SCANNING...";
+                btn.style.borderColor = "#ffaa00";
+                btn.style.color = "#ffaa00";
+                btn.style.background = "rgba(255, 170, 0, 0.1)";
+                btn.onclick = null;
+                break;
+            case "fabricate":
+                btn.disabled = false;
+                btn.innerText = "⚙ FABRICATE → EXPORT TXT";
+                btn.style.borderColor = "#ffaa00";
+                btn.style.color = "#ffaa00";
+                btn.style.background = "rgba(255, 170, 0, 0.1)";
+                btn.onclick = doFabricate;
+                break;
+            case "reset":
+                btn.disabled = false;
+                btn.innerText = "↺ RESET";
+                btn.style.borderColor = "#ff3333";
+                btn.style.color = "#ff3333";
+                btn.style.background = "rgba(255, 51, 51, 0.1)";
+                btn.onclick = doReset;
+                break;
+        }
+    }
+    
+    function doFabricate() {
+        exportFabrication();
+        setButtonState("reset");
+    }
+    
+    function doReset() {
+        document.getElementById('res-angle').value = "--";
+        document.getElementById('res-slack').value = "--";
+        document.getElementById('lock-indicator').innerText = "READY";
+        document.getElementById('lock-indicator').style.color = "#555";
+        isLocked = false;
+        clearLabels();
+        log("SYSTEM RESET. Ready for new scan.", "cyan");
+        setButtonState("scan");
+    }
 
     function init() {
         // Sort keys numerically
@@ -443,25 +518,70 @@
         if(target) target.classList.add('active');
 
         document.getElementById('comp-elements').value = data.elements.join(" - ");
-        document.getElementById('comp-detail').value = data.detail;
         document.getElementById('lattice-type').value = data.lattice;
         
-        let btn = document.getElementById('btn-scan');
-        btn.disabled = false;
-        btn.innerText = "INITIATE TORSION SCAN";
-        btn.style.borderColor = "var(--cyan)";
-        btn.style.color = "var(--cyan)";
-        btn.onclick = runScan;
+        // Calculate lock angle first so we can use it in patent claim
+        uniqueAngle = calculateLock(id, data);
         
-        // Enable fabricate button
-        document.getElementById('btn-fabricate').disabled = false;
+        // Calculate atomic masses
+        let totalMass = 0, atomCount = 0;
+        data.elements.forEach(el => {
+            let m = ATOMIC_MASS[el];
+            if(m) { totalMass += m; atomCount++; }
+        });
+        let avgMass = atomCount > 0 ? totalMass / atomCount : 50.0;
+        
+        // Physics constants for patent claim
+        const alpha_native = 166.08367698920713463;
+        const alpha_obs = 137.03599920649610842;
+        const phi = (1 + Math.sqrt(5)) / 2;
+        
+        // Generate comprehensive patent claim
+        let patent = `═══ GRAVES-LAW PATENT CLAIM ═══
+System ${id}: ${data.name}
+
+CLAIM 1: A ${data.lattice.toLowerCase()} quasicrystalline composition comprising:
+${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el} [${(ATOMIC_MASS[el] || 0).toFixed(2)} g/mol]`).join('\n')}
+
+CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a ${data.lattice.toLowerCase()} lattice exhibiting:
+  • Lock Angle: ${uniqueAngle.toFixed(6)}°
+  • WAAM: ${avgMass.toFixed(2)} g/mol
+  • Phason Strain: 0.000 (zero-slack)
+  • Vacuum Debt: ZERO
+
+CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
+  • α_native = ${alpha_native}
+  • α_obs = ${alpha_obs}
+  • φ^7 scaling = ${Math.pow(phi, 7).toFixed(6)}
+  • 5-fold projection: cos(36°)
+  • Vertex factor: 11.34
+
+CLAIM 4: ${data.detail}
+${data.molecular ? `\nCLAIM 5: Target molecule: ${data.molecular}` : ''}
+
+SUPERPOSITION: All phason modes Φ₁-Φ₅ collapsed to ground state at lock angle ${uniqueAngle.toFixed(6)}°.
+
+CERTIFICATION: This structure incurs ZERO excess vacuum-debt and represents the unique ground-state configuration enforced by physics.`;
+
+        document.getElementById('comp-detail').value = patent;
+        
+        // Populate 2D Atomic Structure header
+        let atomicHtml = `<span style="color:var(--cyan);">${data.lattice.toUpperCase()}</span>`;
+        if(data.molecular) {
+            atomicHtml += ` <span style="color:var(--gold);">→ ${data.molecular}</span>`;
+        }
+        document.getElementById('element-list').innerHTML = atomicHtml;
+        
+        // Draw 2D atomic structure
+        draw2DStructure(data);
+        
+        // Set button to scan state
+        setButtonState("scan");
         
         document.getElementById('res-angle').value = "--";
         document.getElementById('res-slack').value = "--";
         document.getElementById('lock-indicator').innerText = "READY";
         document.getElementById('lock-indicator').style.color = "#555";
-        
-        uniqueAngle = calculateLock(id, data);
         
         isLocked = false;
         clearLabels();
@@ -470,6 +590,139 @@
         
         log(`SELECTED: ${data.name}`);
         log(`TARGET LOCK: ${uniqueAngle.toFixed(6)}°`, "gold");
+    }
+    
+    // Element colors for 2D visualization
+    const ELEMENT_COLORS = {
+        "H": "#FFFFFF", "He": "#D9FFFF", "Li": "#CC80FF", "Be": "#C2FF00", "B": "#FFB5B5",
+        "C": "#909090", "N": "#3050F8", "O": "#FF0D0D", "F": "#90E050", "Na": "#AB5CF2",
+        "Mg": "#8AFF00", "Al": "#BFA6A6", "Si": "#F0C8A0", "P": "#FF8000", "S": "#FFFF30",
+        "Cl": "#1FF01F", "K": "#8F40D4", "Ca": "#3DFF00", "Ti": "#BFC2C7", "V": "#A6A6AB",
+        "Cr": "#8A99C7", "Mn": "#9C7AC7", "Fe": "#E06633", "Co": "#F090A0", "Ni": "#50D050",
+        "Cu": "#C88033", "Zn": "#7D80B0", "Ga": "#C28F8F", "Ge": "#668F8F", "As": "#BD80E3",
+        "Se": "#FFA100", "Br": "#A62929", "Rb": "#702EB0", "Sr": "#00FF00", "Y": "#94FFFF",
+        "Zr": "#94E0E0", "Nb": "#73C2C9", "Mo": "#54B5B5", "Ru": "#248F8F", "Rh": "#0A7D8C",
+        "Pd": "#006985", "Ag": "#C0C0C0", "Cd": "#FFD98F", "In": "#A67573", "Sn": "#668080",
+        "Sb": "#9E63B5", "Te": "#D47A00", "I": "#940094", "Cs": "#57178F", "Ba": "#00C900",
+        "La": "#70D4FF", "Ce": "#FFFFC7", "Ta": "#4DA6FF", "W": "#2194D6", "Re": "#267DAB",
+        "Os": "#266696", "Ir": "#175487", "Pt": "#D0D0E0", "Au": "#FFD123", "Hg": "#B8B8D0",
+        "Pb": "#575961", "U": "#008FFF"
+    };
+    
+    function draw2DStructure(data) {
+        const canvas = document.getElementById('atomic2dCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        const w = canvas.width;
+        const h = canvas.height;
+        const cx = w / 2;
+        const cy = h / 2;
+        
+        ctx.clearRect(0, 0, w, h);
+        
+        const elements = data.elements;
+        const n = elements.length;
+        
+        if(n === 0) return;
+        
+        // Calculate positions based on lattice type
+        let positions = [];
+        const radius = Math.min(w, h) * 0.35;
+        
+        if(data.lattice === "Icosahedral" || n <= 2) {
+            // Core + shell arrangement
+            if(n === 1) {
+                positions.push({x: cx, y: cy, el: elements[0]});
+            } else {
+                // First element at center
+                positions.push({x: cx, y: cy, el: elements[0]});
+                // Rest in a ring
+                for(let i = 1; i < n; i++) {
+                    let angle = ((i-1) / (n-1)) * Math.PI * 2 - Math.PI/2;
+                    positions.push({
+                        x: cx + Math.cos(angle) * radius,
+                        y: cy + Math.sin(angle) * radius,
+                        el: elements[i]
+                    });
+                }
+            }
+        } else if(data.lattice === "Decagonal") {
+            // 10-fold arrangement
+            for(let i = 0; i < n; i++) {
+                let angle = (i / n) * Math.PI * 2 - Math.PI/2;
+                let r = i === 0 ? 0 : radius * (0.5 + 0.5 * (i / n));
+                positions.push({
+                    x: cx + Math.cos(angle) * r,
+                    y: cy + Math.sin(angle) * r,
+                    el: elements[i]
+                });
+            }
+        } else {
+            // Pentagonal - 5-fold with layers
+            for(let i = 0; i < n; i++) {
+                let angle = (i / Math.max(n-1, 1)) * Math.PI * 2 - Math.PI/2;
+                let r = i === 0 ? 0 : radius * 0.7;
+                positions.push({
+                    x: cx + Math.cos(angle) * r,
+                    y: cy + Math.sin(angle) * r,
+                    el: elements[i]
+                });
+            }
+        }
+        
+        // Draw bonds (lines between atoms)
+        ctx.strokeStyle = 'rgba(0, 255, 204, 0.3)';
+        ctx.lineWidth = 1;
+        for(let i = 0; i < positions.length; i++) {
+            for(let j = i + 1; j < positions.length; j++) {
+                let dist = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
+                if(dist < radius * 1.5) {
+                    ctx.beginPath();
+                    ctx.moveTo(positions[i].x, positions[i].y);
+                    ctx.lineTo(positions[j].x, positions[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Draw atoms
+        const atomRadius = Math.min(20, radius / 3);
+        positions.forEach((pos, i) => {
+            let color = ELEMENT_COLORS[pos.el] || '#888888';
+            
+            // Glow effect
+            let gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, atomRadius * 1.5);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(0.5, color + '88');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, atomRadius * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Solid circle
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, atomRadius * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Label
+            ctx.fillStyle = '#000';
+            ctx.font = `bold ${Math.max(10, atomRadius * 0.6)}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(pos.el, pos.x, pos.y);
+        });
+        
+        // Draw lattice type indicator
+        ctx.fillStyle = '#333';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(data.lattice + ' symmetry', 5, h - 5);
     }
 
     function log(msg, type='') {
@@ -485,7 +738,7 @@
     function runScan() {
         if(!currentRank) return;
         isScanning = true;
-        document.getElementById('btn-scan').disabled = true;
+        setButtonState("scanning");
         document.getElementById('lock-indicator').innerText = "SCANNING...";
         document.getElementById('lock-indicator').style.color = "var(--cyan)";
         document.getElementById('scan-line').style.opacity = 1;
@@ -528,11 +781,9 @@
     function finishLock(angle) {
         isScanning = false;
         isLocked = true;
-        let btn = document.getElementById('btn-scan');
-        btn.disabled = false;
-        btn.innerText = "SCAN COMPLETE";
-        btn.style.borderColor = "#333";
-        btn.style.color = "#555";
+        
+        // Change button to fabricate state
+        setButtonState("fabricate");
         
         document.getElementById('scan-line').style.opacity = 0;
         document.getElementById('lock-indicator').innerText = "LOCKED";
@@ -564,7 +815,7 @@
     function updateAtomTargets(latticeType) {
         const phi = 1.618;
         let targets = [];
-        const scale = 95; 
+        const scale = 160; 
 
         if (latticeType === "Decagonal") {
             for(let k=0; k<5; k++) {
@@ -615,7 +866,7 @@
         let w = atomCtx.canvas.width;
         let h = atomCtx.canvas.height;
         let cx = w/2; 
-        let cy = h/2 + 70;
+        let cy = h/2 - 20;
 
         atomCtx.clearRect(0,0,w,h);
         
@@ -643,7 +894,7 @@
             let z2 = cy_ * Math.sin(rot*0.5) + z1 * Math.cos(rot*0.5);
 
             let fov = 500;
-            let scale = fov / (fov + z2 + 600);
+            let scale = fov / (fov + z2 + 400);
             let px = cx + x1 * scale;
             let py = cy + y1 * scale;
 
@@ -1145,7 +1396,45 @@ AVERAGE MASS:     ${avgMass.toFixed(4)} g/mol (weighted)
 ELEMENT COUNT:    ${atomCount}
 ────────────────────────────────────────────────────────────────────────────────
 
-DESCRIPTION: ${data.detail}
+════════════════════════════════════════════════════════════════════════════════
+                      SECTION 2B: FULL PATENT CLAIM
+════════════════════════════════════════════════════════════════════════════════
+
+═══ GRAVES-LAW PATENT CLAIM ═══
+System ${currentRank}: ${data.name}
+
+CLAIM 1: A ${data.lattice.toLowerCase()} quasicrystalline composition comprising:
+${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el} [${(ATOMIC_MASS[el] || 0).toFixed(2)} g/mol]`).join('\n')}
+
+CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
+${data.lattice.toLowerCase()} lattice exhibiting:
+  • Lock Angle: ${angle.toFixed(6)}°
+  • WAAM: ${avgMass.toFixed(2)} g/mol
+  • Phason Strain: 0.000 (zero-slack)
+  • Vacuum Debt: ZERO
+
+CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
+  • α_native = ${alpha_native}
+  • α_obs = ${alpha_obs}
+  • φ^7 scaling = ${phi_7.toFixed(6)}
+  • 5-fold projection: cos(36°) = ${Math.cos(Math.PI/5).toFixed(10)}
+  • Vertex factor: 11.34
+
+CLAIM 4: The composition exhibits the following technical properties:
+${data.detail}
+${data.molecular ? `\nCLAIM 5: The composition is optimized for molecular target: ${data.molecular}` : ''}
+
+CLAIM ${data.molecular ? '6' : '5'}: SUPERPOSITION STATES
+All phason modes Φ₁-Φ₅ are collapsed to ground state at lock angle ${angle.toFixed(6)}°.
+The wavefunction |Ψ⟩ = Σᵢ cᵢ|φᵢ⟩ reduces to c₁ = 1.000000 (ground state only).
+
+CLAIM ${data.molecular ? '7' : '6'}: CERTIFICATION
+This structure incurs ZERO excess vacuum-debt and represents the unique 
+ground-state configuration enforced by the laws of physics.
+No other angle produces zero-slack for this specific atomic composition.
+
+APPLICATIONS:
+${fab.applications || 'Industrial, commercial, research, and manufacturing applications as specified in the fabrication protocol below.'}
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 3: ${data.lattice.toUpperCase()} VERTEX POSITIONS
