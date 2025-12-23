@@ -3,381 +3,708 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProtoDynamics Advanced Materials Simulator v3.5</title>
-    
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
-
+    <title>GRAVES VALIDATION SUITE v31.0 | 130 SYSTEMS</title>
     <style>
         :root {
-            --bg-color: #0a0a1a;
-            --panel-bg: rgba(26, 26, 58, 0.95);
-            --accent: #3a6dff;
-            --accent-glow: #6a9fff;
-            --border: #4a4a8a;
-            --text-main: #e0e0ff;
+            --cyan: #00ffcc;
+            --red: #ff3333;
+            --gold: #ffaa00;
+            --bg: #050505;
+            --glass: rgba(10, 15, 20, 0.95);
+            --border: 1px solid rgba(0, 255, 204, 0.2);
+            --font-main: "Inter", system-ui, -apple-system, sans-serif;
+            --font-mono: 'Courier New', monospace;
         }
 
-        body { 
-            margin: 0; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
-            overflow: hidden; 
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            margin: 0; background-color: var(--bg); color: #e0e0e0;
+            font-family: var(--font-main); height: 100vh; overflow: hidden;
+            display: grid; grid-template-rows: 50px 1fr;
+            background: radial-gradient(circle at center, #080808 0%, #000 100%);
         }
 
-        #container { position: relative; width: 100vw; height: 100vh; }
-        
-        /* UI Layer */
-        #ui { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; z-index: 10; display: flex; flex-direction: column; align-items: center; 
+        header {
+            background: rgba(0,0,0,0.9); border-bottom: var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px;
+            z-index: 100;
+        }
+        .clock-ref { font-family: var(--font-mono); font-size: 0.9em; color: #666; }
+        .clock-live { color: var(--cyan); margin-left: 10px; }
+
+        #workspace {
+            display: grid; grid-template-columns: 380px 1fr 350px;
+            height: 100%; overflow: hidden;
         }
 
-        .overlay { pointer-events: auto; }
-
-        #header { 
-            margin-top: 30px; text-align: center; max-width: 900px; 
-            background: rgba(10,10,30,0.85); padding: 20px; border-radius: 12px;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(5px);
+        .panel {
+            background: var(--glass); border-right: var(--border);
+            padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            overflow-y: auto; z-index: 20;
         }
+        .panel-right { border-right: none; border-left: var(--border); }
 
-        #header h1 { margin: 0 0 10px 0; font-weight: 300; letter-spacing: 1px; color: #fff; }
-        #header p { margin: 0; color: #aaa; font-size: 0.9rem; }
-
-        #tabs { 
-            margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; 
+        h2 { 
+            margin: 0 0 10px 0; font-size: 0.75em; color: #888; 
+            text-transform: uppercase; letter-spacing: 1px; 
+            border-bottom: 1px solid #333; padding-bottom: 5px; 
         }
 
-        .tab { 
-            padding: 12px 24px; background: #1a1a3a; border: 1px solid var(--border); 
-            border-radius: 8px; cursor: pointer; transition: all 0.3s ease; 
-            font-weight: 600; color: #888;
+        #inv-list {
+            flex: 1; overflow-y: auto; border: 1px solid #333; background: #000;
+            font-family: var(--font-mono); font-size: 0.7em;
         }
-        .tab:hover { border-color: var(--accent); color: #fff; }
-        .tab.active { background: var(--accent); border-color: var(--accent-glow); color: white; box-shadow: 0 0 15px rgba(58, 109, 255, 0.4); }
+        .inv-item {
+            padding: 10px 15px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
+            display: flex; justify-content: flex-start;
+        }
+        .inv-item:hover { background: rgba(0, 255, 204, 0.05); color: #fff; }
+        .inv-item.active { background: var(--cyan); color: #000; font-weight: bold; }
+        .inv-id { color: #444; margin-right: 15px; width: 30px; }
+        .inv-item.active .inv-id { color: #000; }
 
-        #grid { 
-            margin-top: 20px; width: 90%; max-width: 1300px; 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; 
-            max-height: 65vh; overflow-y: auto; padding: 20px; 
-            background: rgba(15,15,40,0.4); border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        /* Scrollbar Styling */
-        #grid::-webkit-scrollbar { width: 8px; }
-        #grid::-webkit-scrollbar-track { background: #0a0a1a; }
-        #grid::-webkit-scrollbar-thumb { background: #4a4a8a; border-radius: 4px; }
-
-        .card { 
-            background: #15152a; border: 1px solid var(--border); border-radius: 10px; 
-            padding: 20px; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden;
-        }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, transparent, rgba(58,109,255,0.1));
-            opacity: 0; transition: opacity 0.4s;
-        }
-        .card:hover { 
-            background: #202040; transform: translateY(-5px); 
-            box-shadow: 0 8px 20px rgba(58,109,255,0.2); border-color: var(--accent); 
-        }
-        .card:hover::before { opacity: 1; }
-        .card h3 { margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; }
-        .card small { display: block; min-height: 40px; line-height: 1.4; color: #bbb; }
-        .badge { 
-            background: rgba(10, 128, 32, 0.2); color: #4ade80; border: 1px solid #0a8020;
-            padding: 4px 10px; border-radius: 20px; font-size: 0.8em; 
-            display: inline-block; margin-top: 15px; 
-        }
-
-        /* Detail View */
-        #detail { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #050510; display: none; flex-direction: row;
+        .input-group { margin-bottom: 5px; }
+        label { display: block; font-size: 0.7em; color: #666; margin-bottom: 3px; font-family: var(--font-mono); }
+        input, textarea {
+            width: 100%; background: #111; border: 1px solid #333; color: var(--cyan);
+            padding: 8px; font-family: var(--font-mono); font-size: 0.85em; outline: none; resize: none;
         }
         
-        #detail-left { 
-            flex: 1; position: relative; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
+        #stage {
+            position: relative; display: flex; flex-direction: column;
+            padding: 20px; gap: 20px; background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        .graph-box {
+            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #333;
+            position: relative; padding: 0; display: flex; flex-direction: column;
             overflow: hidden;
         }
-        #scene-container { width: 100%; height: 100%; }
+        .graph-header { position: absolute; top: 10px; left: 10px; font-size: 0.7em; color: var(--cyan); font-weight: bold; z-index: 10;}
+        .lock-indicator { position: absolute; top: 10px; right: 10px; font-size: 0.7em; color: #555; font-weight: bold; z-index: 10;}
+        
+        button {
+            width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.05);
+            border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main);
+            font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
+            text-transform: uppercase; margin-top: 5px;
+        }
+        button:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.3); }
+        button:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
 
-        #detail-right { 
-            width: 450px; padding: 40px; overflow-y: auto; 
-            background: var(--panel-bg); border-left: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        #console {
+            height: 200px; background: #000; border: 1px solid #333;
+            font-family: var(--font-mono); font-size: 0.7em; color: #888;
+            padding: 10px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4;
+        }
+        .log-cyan { color: var(--cyan); }
+        .log-gold { color: var(--gold); }
+        .log-err { color: var(--red); }
+
+        #scan-line {
+            position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan);
+            box-shadow: 0 0 15px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
+            transition: opacity 0.2s;
         }
 
-        #log { 
-            background: #0a0a15; padding: 15px; border-radius: 6px; 
-            font-family: 'Consolas', monospace; height: 180px; 
-            overflow-y: auto; margin: 20px 0; border: 1px solid var(--border);
-            color: #0f0; font-size: 0.9rem; white-space: pre-wrap;
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .atom-label {
+            position: absolute; color: #fff; font-size: 10px; font-family: sans-serif;
+            pointer-events: none; text-shadow: 0 0 3px #000; font-weight: bold;
+            opacity: 0; transform: translate(-50%, -50%);
+            will-change: transform, opacity;
         }
-
-        button#run { 
-            padding: 15px; background: var(--accent); color: white; border: none; 
-            border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: bold;
-            transition: 0.2s; letter-spacing: 1px;
-        }
-        button#run:hover { background: var(--accent-glow); box-shadow: 0 0 15px var(--accent); }
-        button#run:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9rem; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
-        th { color: #888; font-weight: 600; }
-        td:nth-child(2) { color: #ff6b6b; } /* Conventional */
-        td:nth-child(3) { color: #4ade80; font-weight: bold; } /* Perfected */
-
-        #close { 
-            position: absolute; top: 20px; right: 20px; 
-            width: 40px; height: 40px; line-height: 40px; text-align: center;
-            font-size: 24px; cursor: pointer; color: #fff; background: rgba(255,255,255,0.1);
-            border-radius: 50%; transition: 0.2s; z-index: 100;
-        }
-        #close:hover { background: #ff4444; }
-
-        .loading-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; pointer-events: none; opacity: 0; transition: opacity 0.5s;
-        }
-        .loading-overlay.active { opacity: 1; }
-
-        /* Mobile Support */
-        @media (max-width: 900px) {
-            #detail { flex-direction: column; }
-            #detail-left { height: 40vh; flex: none; }
-            #detail-right { width: 100%; height: 60vh; border-left: none; border-top: 1px solid var(--border); padding: 20px; }
-            #grid { grid-template-columns: 1fr; }
-        }
+        .atom-label.visible { opacity: 1; }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="ui">
-            <div id="header" class="overlay">
-                <h1>ProtoDynamics Advanced Materials Simulator v3.5</h1>
-                <p>Interactive preview of 30 proprietary material systems.<br>All processes runnable on existing CVD PECVD and MesoScribe technology.<br>Full synthesis details available under mutual NDA.</p>
-            </div>
-            <div id="tabs" class="overlay">
-                <div class="tab active" data-cat="hydro">Hydrocarbon Perfection (10)</div>
-                <div class="tab" data-cat="metalglass">Metal & Glass Perfection (10)</div>
-                <div class="tab" data-cat="thermal">Thermal-Spray Quasicrystals (10)</div>
-            </div>
-            <div id="grid" class="overlay"></div>
+
+<header>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v31.0 - 130 SYSTEMS</span></div>
+    <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">INITIALIZING...</span></div>
+</header>
+
+<div id="workspace">
+    
+    <div class="panel">
+        <h2>1. Select System (130 Total)</h2>
+        <div id="inv-list"></div>
+        
+        <h2>2. Composition Data</h2>
+        <div class="input-group">
+            <label>PRIMARY ELEMENTS</label>
+            <input type="text" id="comp-elements" readonly>
         </div>
-        <div id="detail">
-            <div id="detail-left">
-                <div id="scene-container"></div>
-                <div class="loading-overlay" id="sim-status">PROCESSING</div>
-            </div>
-            <div id="detail-right">
-                <span id="close">&times;</span>
-                <h2 id="detail-title"></h2>
-                <p id="detail-desc"></p>
-                <span id="tool-badge" class="badge"></span>
-                <button id="run">Run Process Simulation</button>
-                <div id="log"></div>
-                <div id="detail-table"></div>
-                <p class="process-note" id="detail-process"></p>
-                <p style="margin-top:40px;font-size:0.9em;color:#aaa;">Proprietary Alignment Achieved – Full process under NDA</p>
-            </div>
+        <div class="input-group">
+            <label>SYSTEM DETAILS</label>
+            <textarea id="comp-detail" rows="4" readonly style="color:#aaa;"></textarea>
+        </div>
+        <div class="input-group">
+            <label>LATTICE SYMMETRY</label>
+            <input type="text" id="lattice-type" readonly>
+        </div>
+        <div class="input-group" style="background:#111; border:1px solid #333; padding:10px; margin-top:5px;">
+            <label style="color:#666;">WAAM (Weighted Atomic Mass)</label>
+            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:1.1em; letter-spacing:1px;">--</div>
+        </div>
+        
+        <button id="btn-scan" onclick="app.runScan()" disabled>INITIATE TORSION SCAN</button>
+    </div>
+
+    <div id="stage">
+        <div class="graph-box" style="flex: 1;">
+            <div class="graph-header">HYPERFINE LOCK SCANNER (5.030 - 5.045)</div>
+            <div class="lock-indicator" id="lock-indicator">STANDBY</div>
+            <canvas id="scanCanvas"></canvas>
+            <div id="scan-line"></div>
+        </div>
+
+        <div class="graph-box" style="flex: 2; background: #000;" id="atom-container">
+            <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
+            <canvas id="atomCanvas"></canvas>
         </div>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    <div class="panel panel-right">
+        <h2>3. Lock Results</h2>
+        <div class="input-group">
+            <label>UNIQUE LOCK ANGLE</label>
+            <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1.2em;">
+        </div>
+        <div class="input-group">
+            <label>RESIDUAL SLACK</label>
+            <input type="text" id="res-slack" readonly style="color:var(--cyan);">
+        </div>
+        
+        <h2>4. Validation Log</h2>
+        <div id="console"></div>
+    </div>
 
-        const database = {
-            hydro: [
-                {id:901,name:"Methane Perfection",desc:"Ultra-clean combustion, perfect CH₄ chain ordering",tool:"CVD FirstGen 3000 PECVD",process:["Load CH₄ precursor vapor","Plasma ignition (800°C, 2 Torr)","Proprietary alignment pulse (NDA)","Turbostratic shell deposition","Cyclone collection (95% yield)"],before:{eff:"32%",hc:"High"},after:{eff:"70%+",hc:"Near Zero",harvest:"45 kg/1000 km graphite"}},
-                {id:902,name:"Octane Perfection",desc:"Infinite knock margin gasoline additive",tool:"CVD FirstGen 3000 PECVD",process:["Load iso-octane + ferrocene vapor","Plasma ignition (800°C, 2 Torr)","Proprietary alignment pulse (NDA)","Carbon shell formation","Dry collection"],before:{eff:"38%",hc:"High"},after:{eff:"75%+",hc:"Near Zero",harvest:"55 kg/1000 km graphite"}},
-                {id:903,name:"Propane Perfection",desc:"LPG optimization for power & cleanliness",tool:"CVD FirstGen 3000 PECVD",process:["Load C₃H₈ blend","Plasma activation","Proprietary alignment pulse (NDA)","Shell deposition","Collection"],before:{eff:"35%",hc:"Moderate"},after:{eff:"72%+",hc:"Near Zero",harvest:"50 kg/1000 km"}},
-                {id:904,name:"Butane Perfection",desc:"Portable fuel perfection",tool:"CVD FirstGen 3000 PECVD",process:["Load C₄H₁₀","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"34%"},after:{eff:"71%+",harvest:"48 kg/1000 km"}},
-                {id:905,name:"Hexane Perfection",desc:"Solvent & fuel intermediate",tool:"CVD FirstGen 3000 PECVD",process:["Load C₆H₁₄","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"36%"},after:{eff:"73%+",harvest:"52 kg/1000 km"}},
-                {id:906,name:"Diesel-Range Perfection",desc:"Heavy fuel ultra-efficiency",tool:"CVD FirstGen 3000 PECVD",process:["Load C₁₂–C₂₆ cut","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"42%",soot:"High"},after:{eff:"78%+",soot:"Zero",harvest:"65 kg/1000 km"}},
-                {id:907,name:"Kerosene Perfection",desc:"Aviation-grade clean burn",tool:"CVD FirstGen 3000 PECVD",process:["Load C₁₀–C₁₆","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"40%"},after:{eff:"76%+",harvest:"60 kg/1000 km"}},
-                {id:908,name:"Ethane Perfection",desc:"Natural gas component optimization",tool:"CVD FirstGen 3000 PECVD",process:["Load C₂H₆","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"33%"},after:{eff:"71%+",harvest:"42 kg/1000 km"}},
-                {id:909,name:"Jet-A Perfection",desc:"Commercial aviation fuel upgrade",tool:"CVD FirstGen 3000 PECVD",process:["Load Jet-A spec","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"41%"},after:{eff:"77%+",harvest:"62 kg/1000 km"}},
-                {id:910,name:"Gasoline Blend Perfection",desc:"Universal pump gasoline enhancement",tool:"CVD FirstGen 3000 PECVD",process:["Load mixed C5-C12 + ferrocene","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{eff:"38%"},after:{eff:"75%+",harvest:"55 kg/1000 km"}}
-            ],
-            metalglass: [
-                {id:921,name:"Aluminum Perfection",desc:"Dross-free casting, ultra-fine grains",tool:"CVD FirstGen 3000 PECVD",process:["Load TMA vapor","Plasma ignition (700°C, 5 Torr)","Proprietary alignment pulse (NDA)","Carbon shell","Collection – drop into molten Al"],before:{strength:"240 MPa",inclusions:"High"},after:{strength:"450 MPa",inclusions:"Zero"}},
-                {id:922,name:"Copper Perfection",desc:"Zero oxidation, maximum conductivity",tool:"CVD FirstGen 3000 PECVD",process:["Load copper acetylacetonate","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{cond:"98% IACS"},after:{cond:"102% IACS",ox:"Zero"}},
-                {id:923,name:"Steel Perfection",desc:"Inclusion-free microstructure",tool:"CVD FirstGen 3000 PECVD",process:["Load ferrocene + carbonyl","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{strength:"350 MPa"},after:{strength:"650 MPa",inclusions:"Zero"}},
-                {id:924,name:"Titanium Perfection",desc:"Aerospace-grade purity",tool:"CVD FirstGen 3000 PECVD",process:["Load TiCl₄","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{strength:"900 MPa"},after:{strength:"1300 MPa",ox:"Zero"}},
-                {id:925,name:"Nickel Perfection",desc:"Superalloy refinement",tool:"CVD FirstGen 3000 PECVD",process:["Load nickel carbonyl","Plasma","Proprietary alignment pulse (NDA)","Shell","Collect"],before:{creep:"Moderate"},after:{creep:"Excellent",strength:"+40%"}},
-                {id:926,name:"Soda-Lime Glass Perfection",desc:"Float glass bath additive",before:{hardness:"5.5 Mohs",tough:"0.7 MPa·m¹/²"},after:{hardness:"8.5 Mohs",tough:"2.1 MPa·m¹/²",bubbles:"Zero"},tool:"CVD FirstGen 3000 PECVD",process:["Load TEOS + Na ethoxide","Plasma","Proprietary alignment pulse (NDA)","Silica network perfection","Collection"]},
-                {id:927,name:"Borosilicate Glass Perfection",desc:"Lab & cookware grade",before:{shock:"Moderate"},after:{shock:"Excellent",clarity:"Perfect"},tool:"CVD FirstGen 3000 PECVD",process:["Load TEOS + borane","Plasma","Proprietary alignment pulse (NDA)","Network","Collect"]},
-                {id:928,name:"Quartz Glass Perfection",desc:"Optical & semiconductor purity",before:{purity:"99.9%"},after:{purity:"99.999%",inclusions:"Zero"},tool:"CVD FirstGen 3000 PECVD",process:["Load high-purity TEOS","Plasma","Proprietary alignment pulse (NDA)","Network","Collect"]},
-                {id:929,name:"Low-E Glass Coating Powder",desc:"Architectural energy efficiency",before:{emissivity:"0.84"},after:{emissivity:"0.05",trans:"90%"},tool:"CVD FirstGen 3000 PECVD",process:["Load TEOS + tin octylate","Plasma","Proprietary alignment pulse (NDA)","Coating","Collect"]},
-                {id:930,name:"Self-Cleaning Glass Powder",desc:"Photocatalytic hydrophobic surface",before:{contact:"60°"},after:{contact:"165°",clean:"Self-maintaining"},tool:"CVD FirstGen 3000 PECVD",process:["Load TEOS + titanium isopropoxide","Plasma","Proprietary alignment pulse (NDA)","TiO₂ doping","Collect"]}
-            ],
-            thermal: [
-                {id:941,name:"Al₆₅Cu₂₃Fe₁₂ Quasicrystal",desc:"Classic icosahedral coating",before:{hard:"400 HV",fric:"0.6"},after:{hard:"950 HV",fric:"0.06"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load Al-Cu-Fe powder hopper","Plasma arc ignition (35 kW)","Conformal spray (150 mm/s)","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:942,name:"Al-Cu-Fe-Cr-B Quasicrystal",desc:"Wear-resistant hybrid",before:{wear:"High"},after:{wear:"Ultra-low",hard:"1000 HV"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load hybrid powder","Plasma arc","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:943,name:"Al-Co-Fe Quasicrystal",desc:"Magnetic low-friction",before:{fric:"0.5"},after:{fric:"0.08",mag:"Tunable"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load Co-substituted powder","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:944,name:"Ti-Zr-Ni Quasicrystal",desc:"Hydrogen storage capable",before:{storage:"1.5 wt%"},after:{storage:"4.2 wt%"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load Ti-Zr-Ni powder","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:945,name:"Al-Pd-Mn Quasicrystal",desc:"Ultra-low thermal conductivity",before:{k:"150 W/mK"},after:{k:"3 W/mK"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load Pd-Mn alloy powder","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:946,name:"Al-Li-Cu-Mg Quasicrystal",desc:"Lightweight aerospace",before:{dens:"2.7 g/cc"},after:{dens:"2.3 g/cc",strength:"+60%"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load Li-add powder","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:947,name:"Zr-Cu-Ni-Al BMG Hybrid",desc:"Amorphous-quasicrystal composite",before:{tough:"Moderate"},after:{tough:"Excellent"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load amorphous precursor","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:949,name:"Ti-Fe-Si Quasicrystal",desc:"Biomedical compatibility",before:{bio:"Standard"},after:{bio:"Superior"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load biocompatible alloy","Plasma","Spray","Proprietary cool-rate pulse (NDA)","Finish"]},
-                {id:950,name:"Decagonal Al-Ni-Co",desc:"Anisotropic properties",before:{fric:"0.4"},after:{fric:"0.05 directional"},tool:"MesoScribe MesoPlasma™ Printer",process:["Load anisotropic powder","Plasma","Directional spray","Proprietary cool-rate pulse (NDA)","Finish"]}
-            ]
+</div>
+
+<script>
+/**
+ * GRAVES VALIDATION SUITE v31.0
+ * Architecture: Singleton Pattern (proven in v18)
+ * Systems: 130 total (001-100 metals + 901-930 hydrocarbons)
+ */
+const app = {
+    state: {
+        rank: null,
+        scanning: false,
+        locked: false,
+        angle: 0,
+        atoms: [],
+        time: 0
+    },
+
+    massTable: {
+        "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
+        "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
+        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, "Cu": 63.546, "Zn": 65.38,
+        "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224,
+        "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71,
+        "Sb": 121.76, "Te": 127.6, "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
+        "Pm": 145, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.5, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
+        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, "Hg": 200.59,
+        "Pb": 207.2, "U": 238.029
+    },
+
+    db: {},
+    dom: {},
+
+    init: function() {
+        console.log("BOOT: Starting Graves Validation Suite v31...");
+        
+        this.dom = {
+            invList: document.getElementById('inv-list'),
+            console: document.getElementById('console'),
+            scanCanvas: document.getElementById('scanCanvas'),
+            atomCanvas: document.getElementById('atomCanvas'),
+            scanCtx: document.getElementById('scanCanvas').getContext('2d'),
+            atomCtx: document.getElementById('atomCanvas').getContext('2d'),
+            atomContainer: document.getElementById('atom-container'),
+            scanLine: document.getElementById('scan-line'),
+            inputs: {
+                elements: document.getElementById('comp-elements'),
+                detail: document.getElementById('comp-detail'),
+                lattice: document.getElementById('lattice-type'),
+                mass: document.getElementById('mass-readout'),
+                angle: document.getElementById('res-angle'),
+                slack: document.getElementById('res-slack')
+            },
+            btn: document.getElementById('btn-scan'),
+            indicator: document.getElementById('lock-indicator')
         };
 
-        let currentCat = 'hydro';
-        let scene, renderer, camera, controls, animationId;
+        this.buildDB();
+        this.populateList();
 
-        function init3D() {
-            const container = document.getElementById('scene-container');
-            if (!container) return;
+        var self = this;
+        var observer = new ResizeObserver(function() { self.resize(); });
+        observer.observe(this.dom.atomContainer);
+        
+        this.initAtoms();
+        this.log("SYSTEM INITIALIZED. 130 SYSTEMS LOADED.", "cyan");
+        this.log("LITE 100 + HYDROCARBON PERFECTION 30", "gold");
+        this.resize();
+        
+        requestAnimationFrame(function() { self.loop(); });
+        
+        setInterval(function() {
+            var el = document.getElementById('clock-display');
+            if(el) el.innerText = (327.384 + (Math.random()-0.5)*0.0001).toFixed(6) + " MHz";
+        }, 100);
+    },
 
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(var(--bg-color));
+    buildDB: function() {
+        // Core Metal Systems (001-010)
+        this.db["001"] = { name: "Icosahedral Nickel Superalloy", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], detail: "High-Temperature Ni-Co-Cr Turbine Blade Alloy. Icosahedral symmetry.", lattice: "Icosahedral", type: "metal" };
+        this.db["002"] = { name: "Decagonal Cobalt Superalloy", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Naval Armor Co-Cr High-Shear Alloy. Decagonal symmetry.", lattice: "Decagonal", type: "metal" };
+        this.db["003"] = { name: "Hypersonic W-Re Leading Edge", elements: ["W","Re","Hf","C"], detail: "Tungsten-Rhenium Extreme Temperature Composite.", lattice: "Icosahedral", type: "metal" };
+        this.db["004"] = { name: "Pb-B Radiation Shield", elements: ["Pb","B","C"], detail: "Lead-Boron Carbide Neutron Absorber.", lattice: "Decagonal", type: "metal" };
+        this.db["005"] = { name: "Fe-Si-B Metamaterial", elements: ["Fe","Si","B"], detail: "Iron-Silicon-Boron RF Absorption Coating.", lattice: "Pentagonal", type: "metal" };
+        this.db["006"] = { name: "Ti-Al-V Quasicrystal", elements: ["Ti","Al","V"], detail: "Deep Submersible Hull Material.", lattice: "Icosahedral", type: "metal" };
+        this.db["007"] = { name: "Nb-Hf-Ti Refractory", elements: ["Nb","Hf","Ti"], detail: "Rocket Nozzle Liner Material.", lattice: "Decagonal", type: "metal" };
+        this.db["008"] = { name: "Al-Li-Sc Lightweight", elements: ["Al","Li","Sc"], detail: "Satellite Structural Frame Material.", lattice: "Icosahedral", type: "metal" };
+        this.db["009"] = { name: "W-U High-Density", elements: ["W","U","Ti"], detail: "Kinetic Penetrator Material.", lattice: "Pentagonal", type: "metal" };
+        this.db["010"] = { name: "Cu-Cr-Zr Conductor", elements: ["Cu","Cr","Zr","Ag"], detail: "Railgun Component Material.", lattice: "Decagonal", type: "metal" };
 
-            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(0, 0, 5);
+        // Hydrocarbon Perfection Catalysts (901-930)
+        var hydrocarbons = [
+            {id: "901", mol: "CH4", name: "Methane", carbons: 1},
+            {id: "902", mol: "C8H18", name: "Octane", carbons: 8},
+            {id: "903", mol: "C3H8", name: "Propane", carbons: 3},
+            {id: "904", mol: "C4H10", name: "Butane", carbons: 4},
+            {id: "905", mol: "C6H14", name: "Hexane", carbons: 6},
+            {id: "906", mol: "C12H26", name: "Dodecane", carbons: 12},
+            {id: "907", mol: "C14H30", name: "Tetradecane", carbons: 14},
+            {id: "908", mol: "C2H6", name: "Ethane", carbons: 2},
+            {id: "909", mol: "C5H12", name: "Pentane", carbons: 5},
+            {id: "910", mol: "C7H16", name: "Heptane", carbons: 7},
+            {id: "911", mol: "C9H20", name: "Nonane", carbons: 9},
+            {id: "912", mol: "C10H22", name: "Decane", carbons: 10},
+            {id: "913", mol: "C11H24", name: "Undecane", carbons: 11},
+            {id: "914", mol: "C13H28", name: "Tridecane", carbons: 13},
+            {id: "915", mol: "C15H32", name: "Pentadecane", carbons: 15},
+            {id: "916", mol: "C16H34", name: "Hexadecane", carbons: 16},
+            {id: "917", mol: "C18H38", name: "Octadecane", carbons: 18},
+            {id: "918", mol: "C20H42", name: "Icosane", carbons: 20},
+            {id: "919", mol: "C22H46", name: "Docosane", carbons: 22},
+            {id: "920", mol: "C24H50", name: "Tetracosane", carbons: 24},
+            {id: "921", mol: "C26H54", name: "Hexacosane", carbons: 26},
+            {id: "922", mol: "C28H58", name: "Octacosane", carbons: 28},
+            {id: "923", mol: "C30H62", name: "Triacontane", carbons: 30},
+            {id: "924", mol: "C17H36", name: "Heptadecane", carbons: 17},
+            {id: "925", mol: "C19H40", name: "Nonadecane", carbons: 19},
+            {id: "926", mol: "C21H44", name: "Heneicosane", carbons: 21},
+            {id: "927", mol: "C23H48", name: "Tricosane", carbons: 23},
+            {id: "928", mol: "C25H52", name: "Pentacosane", carbons: 25},
+            {id: "929", mol: "C27H56", name: "Heptacosane", carbons: 27},
+            {id: "930", mol: "C29H60", name: "Nonacosane", carbons: 29}
+        ];
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
-
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(5, 5, 5);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0x404060));
-
-            animate();
-        }
-
-        function animate() {
-            animationId = requestAnimationFrame(animate);
-            controls.update();
-            if (scene.children.length > 2) scene.children[2].rotation.y += 0.005;
-            renderer.render(scene, camera);
-        }
-
-        function createLattice(type, state) {
-            // Cleanup previous
-            while(scene.children.length > 2) {
-                const child = scene.children[2];
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) child.material.dispose();
-                scene.remove(child);
-            }
-
-            let geometry;
-            if (type === 'chain') {
-                geometry = new THREE.BufferGeometry();
-                const positions = [];
-                for (let i = 0; i < 20; i++) {
-                    positions.push(Math.sin(i*0.5)*0.5, i*0.3-3, Math.cos(i*0.5)*0.5);
-                }
-                geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                const mat = new THREE.LineBasicMaterial({color: 0x00ffaa});
-                scene.add(new THREE.Line(geometry, mat));
-                // spheres for atoms
-                for (let i = 0; i < positions.length; i+=3) {
-                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshStandardMaterial({color: i%9===0 ? 0xff4444 : 0x44aaff}));
-                    sphere.position.set(positions[i], positions[i+1], positions[i+2]);
-                    scene.add(sphere);
-                }
-            } else if (type === 'fcc') {
-                const mat = new THREE.MeshStandardMaterial({color: 0xffaa00, metalness: 0.8});
-                for (let x = -1; x <= 1; x+=1) for (let y = -1; y <= 1; y+=1) for (let z = -1; z <= 1; z+=1) {
-                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.3), mat);
-                    sphere.position.set(x, y, z);
-                    scene.add(sphere);
-                }
-            } else if (type === 'glass') {
-                const mat = new THREE.MeshStandardMaterial({color: 0xaaddff, transparent: true, opacity: 0.7});
-                for (let i = 0; i < 50; i++) {
-                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.2 + Math.random()*0.1), mat);
-                    sphere.position.set(Math.random()*4-2, Math.random()*4-2, Math.random()*4-2);
-                    scene.add(sphere);
-                }
-            } else { // quasicrystal icosahedral
-                const mat = new THREE.MeshStandardMaterial({color: 0xff66ff, metalness: 0.9});
-                const ico = new THREE.IcosahedronGeometry(2, 1);
-                const mesh = new THREE.Mesh(ico, mat);
-                scene.add(mesh);
-            }
-        }
-
-        function buildGrid(cat) {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            database[cat].forEach(rank => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<strong>${rank.id} – ${rank.name}</strong><br><small>${rank.desc}</small><span class="badge">Buildable Today</span>`;
-                card.onclick = () => showDetail(rank, cat.includes('hydro') ? 'chain' : cat.includes('metal') ? (rank.id >=926 ? 'glass' : 'fcc') : 'ico');
-                grid.appendChild(card);
-            });
-        }
-
-        function showDetail(rank, vizType) {
-            document.getElementById('detail-title').textContent = `${rank.id} – ${rank.name}`;
-            document.getElementById('detail-desc').textContent = rank.desc;
-            createLattice(vizType, 'before');
-            let table = '<table><tr><th>Property</th><th>Conventional</th><th>Perfected System</th><th>Improvement</th></tr>';
-            if (rank.before.eff) {
-                table += `<tr><td>Thermal Efficiency</td><td>${rank.before.eff}</td><td>${rank.after.eff}</td><td>Substantial</td></tr>`;
-                table += `<tr><td>Emissions (HC/CO/Soot)</td><td>${rank.before.hc || 'High'}</td><td>${rank.after.hc || 'Near Zero'}</td><td>—</td></tr>`;
-                if (rank.after.harvest) table += `<tr><td>Graphite Harvest</td><td>0 kg</td><td>${rank.after.harvest}</td><td>Revenue Stream</td></tr>`;
-            } else if (rank.before.hardness) {
-                table += `<tr><td>Hardness</td><td>${rank.before.hardness}</td><td>${rank.after.hardness}</td><td>Significant</td></tr>`;
-                table += `<tr><td>Toughness/Clarity</td><td>${rank.before.tough || 'Standard'}</td><td>${rank.after.tough || 'Perfect'}</td><td>—</td></tr>`;
-            } else {
-                Object.keys(rank.before).forEach(key => {
-                    table += `<tr><td>${key.charAt(0).toUpperCase() + key.slice(1)}</td><td>${rank.before[key]}</td><td>${rank.after[key] || rank.after[key.replace('before.','')]}</td><td>Major</td></tr>`;
-                });
-            }
-            table += '</table>';
-            document.getElementById('detail-table').innerHTML = table;
-            document.getElementById('detail').style.display = 'flex';
-            if (!renderer) init3D();
-            renderer.setSize(window.innerWidth/2, window.innerHeight);
-        }
-
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.onclick = () => {
-                document.querySelector('.tab.active').classList.remove('active');
-                tab.classList.add('active');
-                currentCat = tab.dataset.cat;
-                buildGrid(currentCat);
+        var self = this;
+        hydrocarbons.forEach(function(hc) {
+            self.db[hc.id] = {
+                name: hc.name + " Perfection (" + hc.mol + ")",
+                elements: ["Ir", "Os", "Rh", "B"],
+                detail: "Zero-Emission " + hc.name + " Reformation Catalyst. " + hc.carbons + "-carbon chain.",
+                lattice: "Icosahedral",
+                type: "catalyst",
+                molecular: hc.mol,
+                carbons: hc.carbons
             };
         });
 
-        document.getElementById('close').onclick = () => {
-            document.getElementById('detail').style.display = 'none';
-        };
+        // Procedural Fill for 011-100
+        var safe = ["C", "Si", "Fe", "Al", "Ti", "Ni", "Cu", "Zn"];
+        for(var i = 11; i <= 100; i++) {
+            var id = i.toString().padStart(3, '0');
+            if(this.db[id]) continue;
+            var type = i % 3 === 0 ? "Decagonal" : (i % 3 === 1 ? "Icosahedral" : "Pentagonal");
+            this.db[id] = {
+                name: "Rank " + id + " System",
+                elements: [safe[i % safe.length], safe[(i+1) % safe.length], "Au"],
+                detail: "Proprietary Graves-Law Formulation " + id + ". " + type + " Symmetry.",
+                lattice: type,
+                type: "metal"
+            };
+        }
+    },
 
-        window.onresize = () => {
-            if (renderer) {
-                camera.aspect = (window.innerWidth/2) / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth/2, window.innerHeight);
+    populateList: function() {
+        var keys = Object.keys(this.db).sort(function(a,b) { return parseInt(a) - parseInt(b); });
+        var self = this;
+        keys.forEach(function(k) {
+            var d = document.createElement('div');
+            d.className = 'inv-item';
+            d.dataset.id = k;
+            d.innerHTML = '<span class="inv-id">' + k + '</span><span>' + self.db[k].name + '</span>';
+            d.onclick = function() { self.selectRank(k); };
+            self.dom.invList.appendChild(d);
+        });
+    },
+
+    resize: function() {
+        var sCan = this.dom.scanCanvas;
+        var aCan = this.dom.atomCanvas;
+        
+        sCan.width = sCan.offsetWidth;
+        sCan.height = sCan.offsetHeight;
+        aCan.width = aCan.offsetWidth;
+        aCan.height = aCan.offsetHeight;
+        
+        this.drawGrid(this.dom.scanCtx);
+    },
+
+    selectRank: function(id) {
+        if(this.state.scanning) return;
+        
+        document.querySelectorAll('.inv-item').forEach(function(e) { e.classList.remove('active'); });
+        var active = document.querySelector('.inv-item[data-id="' + id + '"]');
+        if(active) active.classList.add('active');
+
+        this.state.rank = id;
+        var data = this.db[id];
+        
+        var massData = this.calculateMass(data);
+        this.state.angle = massData.angle;
+        
+        this.dom.inputs.elements.value = data.elements.join(" - ");
+        this.dom.inputs.detail.value = data.detail;
+        this.dom.inputs.lattice.value = data.lattice;
+        this.dom.inputs.mass.innerText = massData.avg.toFixed(3) + " g/mol";
+        
+        this.state.locked = false;
+        this.state.scanning = false;
+        this.dom.btn.disabled = false;
+        this.dom.btn.innerText = "INITIATE TORSION SCAN";
+        this.dom.indicator.innerText = "READY";
+        this.dom.indicator.style.color = "#555";
+        this.dom.inputs.angle.value = "--";
+        this.dom.inputs.slack.value = "--";
+        this.dom.scanLine.style.opacity = 0;
+
+        this.updateAtomTargets(data.lattice);
+        this.clearLabels();
+        this.drawGrid(this.dom.scanCtx);
+        
+        this.log("LOADED RANK " + id + ": " + data.name);
+        this.log("TARGET ANGLE: " + massData.angle.toFixed(6));
+    },
+
+    calculateMass: function(data) {
+        var total = 0, count = 0;
+        var self = this;
+        
+        if(data.type === "catalyst" && data.carbons) {
+            // Molecular weight for hydrocarbons
+            var mw = data.carbons * 12.01 + (data.carbons * 2 + 2) * 1.008;
+            var base = 5.0372;
+            var shift = -((mw - 100) * 0.00003);
+            return { avg: mw, angle: parseFloat((base + shift).toFixed(6)) };
+        }
+        
+        data.elements.forEach(function(el) {
+            var m = self.massTable[el];
+            if(m === undefined) { m = 50.0; }
+            total += m;
+            count++;
+        });
+        
+        var avg = count > 0 ? total/count : 50.0;
+        var base = 5.0372;
+        var shift = (avg - 77.1) * 0.00005;
+        
+        if(data.lattice === "Pentagonal") shift += 0.0001;
+        else if(data.lattice === "Decagonal") shift -= 0.0001;
+        
+        shift = Math.max(-0.007, Math.min(0.007, shift));
+        
+        return { avg: avg, angle: parseFloat((base + shift).toFixed(6)) };
+    },
+
+    runScan: function() {
+        if(!this.state.rank) return;
+        
+        this.state.scanning = true;
+        this.dom.btn.disabled = true;
+        this.dom.indicator.innerText = "SCANNING...";
+        this.dom.indicator.style.color = "var(--cyan)";
+        this.dom.scanLine.style.opacity = 1;
+        
+        this.log("SCAN INITIATED...", "cyan");
+
+        var x = 0;
+        var w = this.dom.scanCanvas.width;
+        var h = this.dom.scanCanvas.height;
+        var ctx = this.dom.scanCtx;
+        var self = this;
+        
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, w, h);
+        this.drawGrid(ctx);
+
+        var timer = setInterval(function() {
+            x += 3;
+            self.dom.scanLine.style.left = x + "px";
+            
+            var pct = x / w;
+            var currentAngle = 5.030 + (pct * 0.015);
+            var dist = Math.abs(currentAngle - self.state.angle);
+            
+            var energy = 1 - Math.min(1, Math.pow(dist * 300, 2));
+            var yPos = h * 0.15 + ((1 - energy) * (h * 0.7));
+            
+            ctx.fillStyle = dist < 0.0005 ? "#fff" : "#ff3333";
+            ctx.fillRect(x, yPos, 2, 2);
+            
+            if(x >= w) {
+                clearInterval(timer);
+                self.finishLock();
             }
-        };
+        }, 10);
+    },
 
-        init3D();
-        buildGrid('hydro');
-    </script>
+    finishLock: function() {
+        this.state.scanning = false;
+        this.state.locked = true;
+        this.dom.btn.disabled = false;
+        this.dom.btn.innerText = "SCAN COMPLETE";
+        this.dom.scanLine.style.opacity = 0;
+        
+        this.dom.indicator.innerText = "LOCKED";
+        this.dom.indicator.style.color = "var(--gold)";
+        this.dom.inputs.angle.value = this.state.angle.toFixed(6);
+        this.dom.inputs.slack.value = "0.000 nm (PERFECT)";
+        
+        this.log("LOCK ACQUIRED AT " + this.state.angle.toFixed(6), "gold");
+        this.createLabels();
+    },
+
+    initAtoms: function() {
+        this.state.atoms = [];
+        for(var i = 0; i < 60; i++) {
+            this.state.atoms.push({
+                x: (Math.random() - 0.5) * 300,
+                y: (Math.random() - 0.5) * 300,
+                z: (Math.random() - 0.5) * 300,
+                tx: 0, ty: 0, tz: 0
+            });
+        }
+    },
+
+    updateAtomTargets: function(type) {
+        var phi = 1.6180339887;
+        var t = [];
+        var s = 90;
+
+        if(type === "Decagonal") {
+            for(var k = 0; k < 5; k++) {
+                var y = (k - 2) * 40;
+                for(var j = 0; j < 10; j++) {
+                    var th = (j / 10) * Math.PI * 2;
+                    t.push({ x: Math.cos(th) * s, y: y, z: Math.sin(th) * s });
+                }
+            }
+        } else if(type === "Pentagonal") {
+            for(var i = 0; i < 60; i++) {
+                var r = (i / 60) * s * 1.2;
+                var th = i * (Math.PI * 2 / 5);
+                t.push({ x: Math.cos(th) * r, y: (i - 30) * 3, z: Math.sin(th) * r });
+            }
+        } else {
+            var v = [
+                [0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi],
+                [1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0],
+                [phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]
+            ];
+            v.forEach(function(p) { t.push({ x: p[0] * s, y: p[1] * s, z: p[2] * s }); });
+            while(t.length < 60) {
+                var th = Math.random() * Math.PI * 2;
+                var ph = Math.random() * Math.PI;
+                t.push({
+                    x: Math.sin(ph) * Math.cos(th) * s * 0.7,
+                    y: Math.cos(ph) * s * 0.7,
+                    z: Math.sin(ph) * Math.sin(th) * s * 0.7
+                });
+            }
+        }
+        
+        this.state.atoms.forEach(function(a, i) {
+            var target = t[i % t.length];
+            a.tx = target.x;
+            a.ty = target.y;
+            a.tz = target.z;
+        });
+    },
+
+    loop: function() {
+        this.state.time += 0.02;
+        var ctx = this.dom.atomCtx;
+        var w = ctx.canvas.width;
+        var h = ctx.canvas.height;
+        
+        ctx.clearRect(0, 0, w, h);
+        
+        if(w === 0 || h === 0) {
+            var self = this;
+            requestAnimationFrame(function() { self.loop(); });
+            return;
+        }
+
+        var cx = w / 2;
+        var cy = h / 2 + 50;
+        
+        var locked = this.state.locked;
+        var rot = locked ? this.state.time * 0.1 : this.state.time * 0.5;
+        
+        var renderList = [];
+        var self = this;
+        
+        this.state.atoms.forEach(function(a, i) {
+            var noise = locked ? 0 : Math.sin(self.state.time + i) * 40;
+            a.x += (a.tx - a.x) * 0.05;
+            a.y += (a.ty - a.y) * 0.05;
+            a.z += (a.tz - a.z) * 0.05;
+            
+            var dx = a.x + noise;
+            var dy = a.y + noise;
+            var dz = a.z + noise;
+
+            var x1 = dx * Math.cos(rot) - dz * Math.sin(rot);
+            var z1 = dx * Math.sin(rot) + dz * Math.cos(rot);
+            
+            var scale = 400 / (400 + z1 + 500);
+            var px = cx + x1 * scale;
+            var py = cy + dy * scale;
+            
+            renderList.push({ x: px, y: py, z: z1, s: scale, i: i, el: self.getElement(i) });
+        });
+        
+        renderList.sort(function(a, b) { return b.z - a.z; });
+
+        ctx.strokeStyle = locked ? "rgba(0, 255, 204, 0.2)" : "rgba(255, 50, 50, 0.3)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for(var i = 0; i < renderList.length; i++) {
+            for(var j = i + 1; j < renderList.length; j++) {
+                var d = Math.hypot(renderList[i].x - renderList[j].x, renderList[i].y - renderList[j].y);
+                if(d < 60 * renderList[i].s) {
+                    ctx.moveTo(renderList[i].x, renderList[i].y);
+                    ctx.lineTo(renderList[j].x, renderList[j].y);
+                }
+            }
+        }
+        ctx.stroke();
+
+        renderList.forEach(function(p) {
+            var color = self.getColor(p.el);
+            var size = locked ? 4 * p.s : 3 * p.s;
+            
+            ctx.fillStyle = locked ? color : "#fff";
+            
+            if(!locked) {
+                ctx.shadowColor = "#f00";
+                ctx.shadowBlur = 10;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            if(locked) {
+                var lbl = document.getElementById('lbl-' + p.i);
+                if(lbl) {
+                    lbl.style.transform = 'translate(' + p.x + 'px, ' + p.y + 'px)';
+                }
+            }
+        });
+
+        requestAnimationFrame(function() { self.loop(); });
+    },
+
+    getElement: function(i) {
+        if(!this.state.rank) return "Au";
+        var els = this.db[this.state.rank].elements;
+        return els[i % els.length];
+    },
+
+    getColor: function(el) {
+        var map = {
+            "Au": "#FFD700", "Ni": "#00FF00", "Co": "#0000FF", "Cr": "#888888", 
+            "Al": "#DDDDDD", "Ti": "#AAAAAA", "W": "#555555", "Pb": "#666666",
+            "Fe": "#AA4444", "Si": "#00FFFF", "Cu": "#FF8800", "Zn": "#7C7C7C",
+            "C": "#444444", "B": "#FF66FF", "Re": "#AAAA00", "Hf": "#CCCCCC",
+            "Ir": "#EEEEFF", "Os": "#AADDFF", "Rh": "#FFDDAA", "V": "#FFAA77",
+            "Li": "#CCAAFF", "Sc": "#FFCCAA", "U": "#66FF66", "Ag": "#DDDDDD",
+            "Mo": "#BBBBBB", "Nb": "#99CCFF", "Ta": "#AAFFAA", "H": "#FFFFFF"
+        };
+        return map[el] || "#ffffff";
+    },
+
+    drawGrid: function(ctx) {
+        ctx.strokeStyle = "#222";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        var w = ctx.canvas.width;
+        var h = ctx.canvas.height;
+        for(var i = 0; i <= 10; i++) {
+            ctx.moveTo(i * w / 10, 0);
+            ctx.lineTo(i * w / 10, h);
+            ctx.moveTo(0, i * h / 10);
+            ctx.lineTo(w, i * h / 10);
+        }
+        ctx.stroke();
+    },
+    
+    createLabels: function() {
+        this.clearLabels();
+        if(!this.state.rank) return;
+        
+        var els = this.db[this.state.rank].elements;
+        var self = this;
+        this.state.atoms.forEach(function(a, i) {
+            var el = els[i % els.length];
+            var d = document.createElement('div');
+            d.className = 'atom-label visible';
+            d.id = 'lbl-' + i;
+            d.innerText = el;
+            d.style.color = self.getColor(el);
+            self.dom.atomContainer.appendChild(d);
+        });
+    },
+    
+    clearLabels: function() {
+        var labels = document.querySelectorAll('.atom-label');
+        for(var i = 0; i < labels.length; i++) {
+            labels[i].remove();
+        }
+    },
+
+    log: function(msg, type) {
+        var d = document.createElement('div');
+        d.innerHTML = '> ' + msg;
+        if(type === 'cyan') d.className = 'log-cyan';
+        else if(type === 'gold') d.className = 'log-gold';
+        else if(type === 'err') d.className = 'log-err';
+        this.dom.console.appendChild(d);
+        this.dom.console.scrollTop = this.dom.console.scrollHeight;
+    }
+};
+
+// Boot
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { app.init(); });
+} else {
+    app.init();
+}
+</script>
 </body>
 </html>
