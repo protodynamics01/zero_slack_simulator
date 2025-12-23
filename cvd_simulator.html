@@ -3,778 +3,832 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v32.0 | REDESIGN</title>
+    <title>GRAVES CVD COATING SIMULATOR | NEXT-GEN MATERIALS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Palette - Deep Space Engineering */
             --bg-deep: #030305;
             --bg-panel: #0e0e12;
             --bg-surface: #18181f;
-            
             --cyan: #00f2ea;
             --cyan-dim: rgba(0, 242, 234, 0.1);
             --gold: #ffb800;
-            --red: #ff3333;
-            
+            --green: #00ff88;
+            --red: #ff4444;
             --border: 1px solid rgba(255, 255, 255, 0.08);
-            --glass: rgba(14, 14, 18, 0.7);
-            
+            --glass: rgba(14, 14, 18, 0.85);
             --font-ui: "Inter", sans-serif;
             --font-code: "JetBrains Mono", monospace;
         }
 
-        * { box-sizing: border-box; outline: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0; background-color: var(--bg-deep); color: #c0c0c0;
-            font-family: var(--font-ui); height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            background: var(--bg-deep); color: #c0c0c0;
+            font-family: var(--font-ui); min-height: 100vh;
             background-image: 
-                radial-gradient(circle at 50% 0%, #1a1a2e 0%, transparent 60%),
-                linear-gradient(0deg, rgba(0,242,234,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,242,234,0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 50% 0%, #1a1a2e 0%, transparent 50%),
+                linear-gradient(0deg, rgba(0,242,234,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,242,234,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
         }
 
-        /* --- Header --- */
         header {
-            height: 60px; padding: 0 24px;
+            height: 70px; padding: 0 30px;
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: var(--border);
-            background: rgba(3, 3, 5, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 10;
+            background: rgba(3, 3, 5, 0.9);
+            backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 100;
         }
-        .brand { font-family: var(--font-code); font-weight: 700; letter-spacing: -0.5px; color: #fff; font-size: 1.1em; }
+
+        .brand { 
+            font-family: var(--font-code); font-weight: 700; 
+            font-size: 1.2em; color: #fff; 
+            display: flex; align-items: center; gap: 12px;
+        }
+        .brand-icon {
+            width: 36px; height: 36px; 
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1em; color: var(--cyan);
+        }
         .brand span { color: var(--cyan); }
+
+        .header-status {
+            display: flex; gap: 20px; align-items: center;
+        }
         .status-pill { 
             font-family: var(--font-code); font-size: 0.75em; 
-            padding: 6px 12px; border-radius: 4px; 
+            padding: 8px 14px; border-radius: 6px; 
             background: var(--bg-surface); border: var(--border);
-            display: flex; gap: 10px; align-items: center;
+            display: flex; gap: 8px; align-items: center;
         }
-        .live-dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan); }
+        .live-dot { 
+            width: 8px; height: 8px; 
+            background: var(--green); border-radius: 50%; 
+            box-shadow: 0 0 10px var(--green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
 
-        /* --- Main Layout --- */
-        #workspace {
-            flex: 1; display: grid; 
-            grid-template-columns: 320px 1fr 320px; 
-            gap: 0; overflow: hidden;
+        main {
+            max-width: 1600px; margin: 0 auto; padding: 30px;
         }
 
-        /* --- Panels --- */
-        .panel {
-            background: var(--glass);
-            border-right: var(--border);
-            backdrop-filter: blur(20px);
-            display: flex; flex-direction: column;
-            z-index: 5;
+        .hero {
+            text-align: center; padding: 40px 20px 50px;
         }
-        .panel-right { border-right: none; border-left: var(--border); }
-        
+        .hero h1 {
+            font-size: 2.2em; font-weight: 700; color: #fff;
+            margin-bottom: 12px;
+        }
+        .hero h1 span { color: var(--gold); }
+        .hero p {
+            font-size: 1.1em; color: #888; max-width: 700px; margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 0.8em; font-weight: 600; color: #555;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: var(--border);
+        }
+
+        /* Material Selector */
+        .material-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px; margin-bottom: 40px;
+        }
+
+        .material-card {
+            background: var(--glass); border: var(--border);
+            border-radius: 12px; padding: 20px;
+            cursor: pointer; transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .material-card:hover {
+            border-color: rgba(0, 242, 234, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 242, 234, 0.1);
+        }
+        .material-card.selected {
+            border-color: var(--cyan);
+            background: rgba(0, 242, 234, 0.05);
+            box-shadow: 0 0 30px rgba(0, 242, 234, 0.15);
+        }
+
+        .material-id {
+            font-family: var(--font-code); font-size: 0.75em;
+            color: var(--cyan); opacity: 0.7; margin-bottom: 8px;
+        }
+        .material-name {
+            font-size: 1.1em; font-weight: 600; color: #fff;
+            margin-bottom: 6px;
+        }
+        .material-desc {
+            font-size: 0.85em; color: #777; line-height: 1.5;
+        }
+        .material-type {
+            display: inline-block; margin-top: 12px;
+            font-size: 0.7em; padding: 4px 10px;
+            background: var(--bg-surface); border-radius: 4px;
+            color: var(--gold); font-family: var(--font-code);
+        }
+
+        /* Comparison Panel */
+        .comparison-container {
+            display: none;
+            margin-top: 40px;
+        }
+        .comparison-container.visible { display: block; }
+
+        .comparison-grid {
+            display: grid; grid-template-columns: 1fr 100px 1fr;
+            gap: 0; margin-bottom: 30px;
+        }
+
+        .comparison-panel {
+            background: var(--glass); border: var(--border);
+            border-radius: 12px; padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .comparison-panel.current {
+            border-color: rgba(255, 100, 100, 0.3);
+        }
+        .comparison-panel.enhanced {
+            border-color: rgba(0, 255, 136, 0.3);
+            background: rgba(0, 255, 136, 0.02);
+        }
+
         .panel-header {
-            padding: 16px; font-size: 0.75em; font-weight: 600; 
-            text-transform: uppercase; letter-spacing: 1px; color: #666;
-            border-bottom: var(--border); display: flex; justify-content: space-between;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: var(--border);
+        }
+        .panel-title {
+            font-size: 1em; font-weight: 600; color: #fff;
+        }
+        .panel-badge {
+            font-size: 0.7em; padding: 4px 10px; border-radius: 4px;
+            font-family: var(--font-code);
+        }
+        .badge-current { background: rgba(255,100,100,0.2); color: var(--red); }
+        .badge-enhanced { background: rgba(0,255,136,0.2); color: var(--green); }
+
+        .spec-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .spec-label {
+            font-size: 0.85em; color: #888;
+        }
+        .spec-value {
+            font-family: var(--font-code); font-size: 0.9em; color: #fff;
+        }
+        .spec-value.improved {
+            color: var(--green);
         }
 
-        /* --- Inventory List --- */
-        #inv-list { flex: 1; overflow-y: auto; padding: 0; }
-        .inv-item {
-            padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03);
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center;
-            font-family: var(--font-code); font-size: 0.8em; color: #888;
-        }
-        .inv-item:hover { background: rgba(255,255,255,0.03); color: #fff; padding-left: 20px; }
-        .inv-item.active { background: var(--cyan-dim); color: #fff; border-left: 3px solid var(--cyan); }
-        .inv-id { color: var(--cyan); margin-right: 12px; opacity: 0.7; font-weight: bold; }
-
-        /* --- Middle Stage (Viewport) --- */
-        #stage {
-            position: relative; background: #000;
-            display: flex; flex-direction: column;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
-        }
-        
-        .viewport-overlay {
-            position: absolute; top: 20px; left: 20px; pointer-events: none;
-            font-family: var(--font-code); font-size: 0.7em; color: var(--cyan); opacity: 0.7;
+        .comparison-arrow {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2em; color: var(--cyan);
         }
 
-        /* --- Canvas Containers --- */
-        .canvas-wrapper { flex: 1; position: relative; overflow: hidden; }
-        .canvas-scan-wrapper { height: 180px; border-top: var(--border); position: relative; background: var(--bg-panel); }
-
-        #scan-line {
-            position: absolute; top: 0; left: 0; width: 2px; height: 100%; 
-            background: var(--cyan); box-shadow: 0 0 15px var(--cyan); 
-            opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        /* Improvement Summary */
+        .improvement-summary {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; margin: 30px 0;
+        }
+        .improvement-card {
+            background: var(--bg-surface); border: var(--border);
+            border-radius: 10px; padding: 20px; text-align: center;
+        }
+        .improvement-value {
+            font-family: var(--font-code); font-size: 1.8em;
+            font-weight: 700; color: var(--green);
+            margin-bottom: 5px;
+        }
+        .improvement-label {
+            font-size: 0.75em; color: #666; text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* --- Controls & Inputs --- */
-        .control-group { padding: 20px; border-bottom: var(--border); }
-        .input-row { margin-bottom: 16px; }
-        
-        label { display: block; font-size: 0.7em; color: #555; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
-        
-        .data-display {
-            width: 100%; background: var(--bg-surface); border: var(--border); 
-            padding: 10px; font-family: var(--font-code); font-size: 0.85em; 
-            color: #fff; border-radius: 4px;
+        /* Process Steps */
+        .process-section {
+            background: var(--glass); border: var(--border);
+            border-radius: 12px; padding: 30px; margin-top: 30px;
         }
-        .data-display.large { font-size: 1.1em; color: var(--cyan); }
-        .data-display.gold { color: var(--gold); border-color: rgba(255, 184, 0, 0.2); }
-        
-        textarea.data-display { resize: none; min-height: 80px; line-height: 1.4; color: #aaa; }
 
-        button {
-            width: 100%; padding: 16px; background: var(--cyan); 
-            border: none; border-radius: 4px;
-            color: #000; font-family: var(--font-ui); font-weight: 700; 
-            font-size: 0.85em; letter-spacing: 1px; cursor: pointer;
-            transition: all 0.2s ease;
+        .process-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px;
         }
-        button:hover { box-shadow: 0 0 25px var(--cyan-dim); transform: translateY(-1px); }
-        button:disabled { background: #333; color: #555; cursor: not-allowed; box-shadow: none; transform: none; }
-
-        /* --- Console --- */
-        #console {
-            flex: 1; background: #050505; padding: 16px;
-            font-family: var(--font-code); font-size: 0.75em; color: #777;
-            overflow-y: auto; line-height: 1.6; border-top: var(--border);
+        .process-title {
+            font-size: 1.1em; font-weight: 600; color: #fff;
         }
-        .log-entry { margin-bottom: 4px; border-left: 2px solid transparent; padding-left: 8px; }
-        .log-cyan { color: var(--cyan); border-left-color: var(--cyan); }
-        .log-gold { color: var(--gold); border-left-color: var(--gold); }
 
-        /* --- Atom Labels --- */
-        .atom-label {
-            position: absolute; color: #fff; font-size: 10px; font-family: var(--font-ui);
-            pointer-events: none; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 3px;
-            opacity: 0; transform: translate(-50%, -50%); will-change: transform, opacity;
-            border: 1px solid rgba(255,255,255,0.2);
+        .process-steps {
+            display: grid; gap: 15px;
         }
-        .atom-label.visible { opacity: 1; }
+        .process-step {
+            display: grid; grid-template-columns: 50px 1fr;
+            gap: 15px; padding: 20px;
+            background: var(--bg-surface); border-radius: 8px;
+            border-left: 3px solid var(--cyan);
+        }
+        .step-number {
+            width: 40px; height: 40px;
+            background: var(--cyan-dim); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-code); font-weight: 700;
+            color: var(--cyan);
+        }
+        .step-content h4 {
+            color: #fff; font-size: 0.95em; margin-bottom: 6px;
+        }
+        .step-content p {
+            color: #888; font-size: 0.85em; line-height: 1.5;
+        }
+        .step-params {
+            margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .param-tag {
+            font-family: var(--font-code); font-size: 0.7em;
+            padding: 4px 8px; background: rgba(0,242,234,0.1);
+            border-radius: 4px; color: var(--cyan);
+        }
 
-        /* Scrollbar Polish */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+        /* Action Button */
+        .action-section {
+            text-align: center; margin-top: 40px; padding: 30px;
+        }
+        .btn-fabricate {
+            font-family: var(--font-ui); font-size: 1em;
+            font-weight: 700; padding: 18px 50px;
+            background: linear-gradient(135deg, var(--gold) 0%, #ff9500 100%);
+            border: none; border-radius: 8px;
+            color: #000; cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .btn-fabricate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(255, 184, 0, 0.3);
+        }
+        .btn-fabricate:disabled {
+            background: #333; color: #666; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
 
+        /* CVD Visualization */
+        .cvd-visual {
+            background: #000; border: var(--border);
+            border-radius: 12px; height: 300px;
+            position: relative; overflow: hidden;
+            margin: 30px 0;
+        }
+        .cvd-visual canvas {
+            width: 100%; height: 100%;
+        }
+        .cvd-overlay {
+            position: absolute; top: 15px; left: 15px;
+            font-family: var(--font-code); font-size: 0.7em;
+            color: var(--cyan); opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 40px;
+            color: #444; font-size: 0.8em;
+            border-top: var(--border);
+            margin-top: 60px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .comparison-grid { grid-template-columns: 1fr; }
+            .comparison-arrow { 
+                transform: rotate(90deg); 
+                padding: 20px 0;
+            }
+            .improvement-summary { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .material-grid { grid-template-columns: 1fr; }
+            .improvement-summary { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.6em; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">GRAVES <span>VALIDATION</span> SUITE</div>
-    <div class="status-pill">
-        <div class="live-dot"></div>
-        DEUTERIUM REF: <span id="clock-display" style="color:white;">INIT</span>
+    <div class="brand">
+        <div class="brand-icon">◇</div>
+        GRAVES <span>CVD</span> SIMULATOR
+    </div>
+    <div class="header-status">
+        <div class="status-pill">
+            <div class="live-dot"></div>
+            SYSTEM ACTIVE
+        </div>
+        <div class="status-pill">
+            CVD EQUIPMENT CORP COMPATIBLE
+        </div>
     </div>
 </header>
 
-<div id="workspace">
+<main>
+    <div class="hero">
+        <h1>Next-Generation <span>Coating Technology</span></h1>
+        <p>Compare industry-standard CVD/PVD coatings with Graves-enhanced quasicrystalline materials. See the performance difference.</p>
+    </div>
+
+    <div class="section-title">Select Base Material System</div>
     
-    <div class="panel">
-        <div class="panel-header">System Inventory (130)</div>
-        <div id="inv-list"></div>
+    <div class="material-grid" id="material-grid"></div>
+
+    <div class="comparison-container" id="comparison-container">
+        <div class="section-title">Performance Comparison</div>
         
-        <div class="control-group" style="background: var(--bg-surface); margin-top: auto; border-top: var(--border);">
-            <div class="input-row">
-                <label>WAAM (Weighted Mass)</label>
-                <div id="mass-readout" class="data-display large">--</div>
+        <div class="improvement-summary" id="improvement-summary"></div>
+
+        <div class="comparison-grid">
+            <div class="comparison-panel current">
+                <div class="panel-header">
+                    <div class="panel-title">Industry Standard</div>
+                    <div class="panel-badge badge-current">CURRENT</div>
+                </div>
+                <div id="specs-current"></div>
             </div>
-            <button id="btn-scan" onclick="app.runScan()" disabled>INITIATE SCAN</button>
+            
+            <div class="comparison-arrow">→</div>
+            
+            <div class="comparison-panel enhanced">
+                <div class="panel-header">
+                    <div class="panel-title">Graves-Enhanced</div>
+                    <div class="panel-badge badge-enhanced">ENHANCED</div>
+                </div>
+                <div id="specs-enhanced"></div>
+            </div>
+        </div>
+
+        <div class="cvd-visual">
+            <canvas id="cvd-canvas"></canvas>
+            <div class="cvd-overlay">
+                CVD CHAMBER SIMULATION<br>
+                <span id="cvd-status">STANDBY</span>
+            </div>
+        </div>
+
+        <div class="process-section">
+            <div class="process-header">
+                <div class="process-title">🔧 Process Modification Protocol</div>
+            </div>
+            <div class="process-steps" id="process-steps"></div>
+        </div>
+
+        <div class="action-section">
+            <button class="btn-fabricate" id="btn-fabricate" onclick="openFabricator()">
+                View Full Fabrication Protocol →
+            </button>
         </div>
     </div>
+</main>
 
-    <div id="stage">
-        <div class="viewport-overlay">
-            LATTICE RENDERING ENGINE v32<br>
-            <span id="lock-indicator">STANDBY</span>
-        </div>
-        
-        <div class="canvas-wrapper" id="atom-container">
-            <canvas id="atomCanvas"></canvas>
-        </div>
-        
-        <div class="canvas-scan-wrapper">
-            <div style="position:absolute; top:10px; left:10px; font-family:var(--font-code); font-size:0.7em; color:#555;">TORSION FREQUENCY RESPONSE</div>
-            <canvas id="scanCanvas"></canvas>
-            <div id="scan-line"></div>
-        </div>
-    </div>
-
-    <div class="panel panel-right">
-        <div class="panel-header">Telemetry</div>
-        
-        <div class="control-group">
-            <div class="input-row">
-                <label>PRIMARY ELEMENTS</label>
-                <div id="comp-elements" class="data-display">--</div>
-            </div>
-            <div class="input-row">
-                <label>SYSTEM DETAILS</label>
-                <textarea id="comp-detail" class="data-display" readonly>--</textarea>
-            </div>
-            <div class="input-row">
-                <label>LATTICE SYMMETRY</label>
-                <div id="lattice-type" class="data-display">--</div>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <div class="input-row">
-                <label>UNIQUE LOCK ANGLE</label>
-                <div id="res-angle" class="data-display gold">--</div>
-            </div>
-            <div class="input-row">
-                <label>RESIDUAL SLACK</label>
-                <div id="res-slack" class="data-display" style="color:var(--cyan)">--</div>
-            </div>
-        </div>
-        
-        <div class="panel-header">Process Log</div>
-        <div id="console"></div>
-    </div>
-
-</div>
+<footer>
+    GRAVES CVD SIMULATOR v1.0 | Compatible with CVD Equipment Corporation Systems<br>
+    MesoPlasma™ Direct Write Technology Integration Ready
+</footer>
 
 <script>
-/**
- * GRAVES VALIDATION SUITE v32.0 (Redesign)
- * Logic preserved from v31.0
- */
-const app = {
-    state: {
-        rank: null,
-        scanning: false,
-        locked: false,
-        angle: 0,
-        atoms: [],
-        time: 0
+const MATERIALS = {
+    "001": {
+        name: "Nickel Superalloy Turbine Blade",
+        desc: "High-temperature Ni-Co-Cr alloy for aerospace turbine applications",
+        type: "AEROSPACE / TURBINE",
+        current: {
+            coating: "YSZ Thermal Barrier + MCrAlY Bond Coat",
+            hardness: "800-1200 HV",
+            maxTemp: "1150°C",
+            oxidation: "1200°C limit",
+            thermalConductivity: "2.0 W/m·K",
+            thickness: "100-300 μm",
+            lifetime: "10,000 cycles",
+            method: "EB-PVD / APS"
+        },
+        enhanced: {
+            coating: "Graves φ-Lattice TBC + Nano-MCrAlY",
+            hardness: "1800-2400 HV",
+            maxTemp: "1450°C",
+            oxidation: "1500°C limit",
+            thermalConductivity: "0.8 W/m·K",
+            thickness: "50-150 μm",
+            lifetime: "100,000+ cycles",
+            method: "PECVD + MesoPlasma™"
+        },
+        improvements: { hardness: "+100%", temperature: "+300°C", lifetime: "10×", thickness: "-50%" },
+        process: [
+            { title: "Standard TBC Deposition", desc: "Apply MCrAlY bond coat via HVOF or APS per standard protocol.", params: ["1050°C", "150 μm", "Ar atmosphere"] },
+            { title: "Nano-Enhancement Injection", desc: "Introduce Graves φ-lattice nanoparticles (Au-Al-Ti icosahedral) into plasma stream during final 20% of deposition.", params: ["5 g/kg feedstock", "50nm particles", "φ-geometry"] },
+            { title: "Lock Angle Annealing", desc: "Post-deposition anneal at controlled temperature to achieve quasicrystalline phase transformation.", params: ["850°C / 4h", "Vacuum 10⁻⁵ mbar", "Slow cool 2°C/min"] },
+            { title: "Verification", desc: "EBSD confirmation of icosahedral symmetry. XRD for phase purity. Thermal cycling test.", params: ["5-fold pattern", "No cubic phase", "1000 cycles @ 1300°C"] }
+        ]
     },
-
-    massTable: {
-        "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
-        "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
-        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, "Cu": 63.546, "Zn": 65.38,
-        "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224,
-        "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71,
-        "Sb": 121.76, "Te": 127.6, "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
-        "Pm": 145, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.5, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
-        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, "Hg": 200.59,
-        "Pb": 207.2, "U": 238.029
+    "002": {
+        name: "Titanium Nitride Tool Coating",
+        desc: "Standard TiN PVD coating for cutting tools and wear surfaces",
+        type: "TOOLING / WEAR",
+        current: {
+            coating: "TiN (Titanium Nitride)",
+            hardness: "1800-2100 HV",
+            maxTemp: "600°C",
+            oxidation: "500°C limit",
+            friction: "0.4-0.6 μ",
+            thickness: "2-5 μm",
+            lifetime: "Standard",
+            method: "Arc PVD / Sputtering"
+        },
+        enhanced: {
+            coating: "Graves TiN-φ Quasicrystal",
+            hardness: "3200-3800 HV",
+            maxTemp: "950°C",
+            oxidation: "900°C limit",
+            friction: "0.15-0.25 μ",
+            thickness: "1-3 μm",
+            lifetime: "5× Standard",
+            method: "PECVD + Ion Implant"
+        },
+        improvements: { hardness: "+80%", temperature: "+350°C", friction: "-60%", lifetime: "5×" },
+        process: [
+            { title: "Substrate Preparation", desc: "Standard cleaning and ion etching per TiN protocol.", params: ["Ultrasonic clean", "Ar+ etch 30 min", "<10⁻⁵ mbar"] },
+            { title: "Base TiN Layer", desc: "Deposit 500nm conventional TiN as adhesion layer.", params: ["Arc PVD", "300°C", "N2 reactive"] },
+            { title: "φ-Lattice Co-Deposition", desc: "Add Al and Au targets to create TiAlN-Au quasicrystalline structure.", params: ["Ti:Al:Au = 70:25:5", "Pulsed bias", "φ-geometry seeds"] },
+            { title: "Surface Densification", desc: "High-energy ion bombardment to maximize density and eliminate columnar structure.", params: ["100 eV Ar+", "10 min", "No voids"] }
+        ]
     },
-
-    db: {},
-    dom: {},
-
-    init: function() {
-        console.log("BOOT: Starting Graves Validation Suite v32 (Redesign)...");
-        
-        this.dom = {
-            invList: document.getElementById('inv-list'),
-            console: document.getElementById('console'),
-            scanCanvas: document.getElementById('scanCanvas'),
-            atomCanvas: document.getElementById('atomCanvas'),
-            scanCtx: document.getElementById('scanCanvas').getContext('2d'),
-            atomCtx: document.getElementById('atomCanvas').getContext('2d'),
-            atomContainer: document.getElementById('atom-container'),
-            scanLine: document.getElementById('scan-line'),
-            inputs: {
-                elements: document.getElementById('comp-elements'),
-                detail: document.getElementById('comp-detail'),
-                lattice: document.getElementById('lattice-type'),
-                mass: document.getElementById('mass-readout'),
-                angle: document.getElementById('res-angle'),
-                slack: document.getElementById('res-slack')
-            },
-            btn: document.getElementById('btn-scan'),
-            indicator: document.getElementById('lock-indicator')
-        };
-
-        this.buildDB();
-        this.populateList();
-
-        var self = this;
-        var observer = new ResizeObserver(function() { self.resize(); });
-        observer.observe(this.dom.atomContainer);
-        
-        this.initAtoms();
-        this.log("INTERFACE REDESIGN LOADED.", "cyan");
-        this.log("130 SYSTEMS READY FOR VALIDATION.", "gold");
-        this.resize();
-        
-        requestAnimationFrame(function() { self.loop(); });
-        
-        setInterval(function() {
-            var el = document.getElementById('clock-display');
-            if(el) el.innerText = (327.384 + (Math.random()-0.5)*0.0001).toFixed(6) + " MHz";
-        }, 100);
+    "003": {
+        name: "Chromium Nitride Corrosion Barrier",
+        desc: "CrN coating for corrosion and wear resistance in harsh environments",
+        type: "INDUSTRIAL / CORROSION",
+        current: {
+            coating: "CrN (Chromium Nitride)",
+            hardness: "1800-2200 HV",
+            maxTemp: "700°C",
+            corrosion: "Good (salt spray 500h)",
+            friction: "0.5 μ",
+            thickness: "3-10 μm",
+            lifetime: "Standard",
+            method: "Magnetron Sputtering"
+        },
+        enhanced: {
+            coating: "Graves CrN-Si Decagonal",
+            hardness: "2800-3200 HV",
+            maxTemp: "1000°C",
+            corrosion: "Excellent (salt spray 5000h+)",
+            friction: "0.2 μ",
+            thickness: "2-6 μm",
+            lifetime: "10× Standard",
+            method: "PECVD + Plasma Nitride"
+        },
+        improvements: { hardness: "+45%", corrosion: "10×", friction: "-60%", temperature: "+300°C" },
+        process: [
+            { title: "Surface Activation", desc: "Plasma cleaning and micro-texturing for enhanced adhesion.", params: ["O2 plasma 10 min", "Surface roughness Ra<0.1μm"] },
+            { title: "Graded Interlayer", desc: "Deposit Cr→CrN gradient layer to minimize stress.", params: ["50nm Cr", "Gradient 200nm", "Residual stress <500 MPa"] },
+            { title: "Decagonal CrN-Si", desc: "Co-sputter CrN with Si dopant in decagonal lattice arrangement.", params: ["Cr:Si = 92:8 at%", "10-fold symmetry", "N2 partial pressure optimized"] },
+            { title: "Passivation", desc: "Final oxygen-free surface treatment for maximum corrosion resistance.", params: ["Ar plasma polish", "No oxide layer", "Hydrophobic finish"] }
+        ]
     },
-
-    buildDB: function() {
-        // Core Metal Systems (001-010)
-        this.db["001"] = { name: "Icosahedral Nickel Superalloy", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], detail: "High-Temperature Ni-Co-Cr Turbine Blade Alloy. Icosahedral symmetry.", lattice: "Icosahedral", type: "metal" };
-        this.db["002"] = { name: "Decagonal Cobalt Superalloy", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Naval Armor Co-Cr High-Shear Alloy. Decagonal symmetry.", lattice: "Decagonal", type: "metal" };
-        this.db["003"] = { name: "Hypersonic W-Re Leading Edge", elements: ["W","Re","Hf","C"], detail: "Tungsten-Rhenium Extreme Temperature Composite.", lattice: "Icosahedral", type: "metal" };
-        this.db["004"] = { name: "Pb-B Radiation Shield", elements: ["Pb","B","C"], detail: "Lead-Boron Carbide Neutron Absorber.", lattice: "Decagonal", type: "metal" };
-        this.db["005"] = { name: "Fe-Si-B Metamaterial", elements: ["Fe","Si","B"], detail: "Iron-Silicon-Boron RF Absorption Coating.", lattice: "Pentagonal", type: "metal" };
-        this.db["006"] = { name: "Ti-Al-V Quasicrystal", elements: ["Ti","Al","V"], detail: "Deep Submersible Hull Material.", lattice: "Icosahedral", type: "metal" };
-        this.db["007"] = { name: "Nb-Hf-Ti Refractory", elements: ["Nb","Hf","Ti"], detail: "Rocket Nozzle Liner Material.", lattice: "Decagonal", type: "metal" };
-        this.db["008"] = { name: "Al-Li-Sc Lightweight", elements: ["Al","Li","Sc"], detail: "Satellite Structural Frame Material.", lattice: "Icosahedral", type: "metal" };
-        this.db["009"] = { name: "W-U High-Density", elements: ["W","U","Ti"], detail: "Kinetic Penetrator Material.", lattice: "Pentagonal", type: "metal" };
-        this.db["010"] = { name: "Cu-Cr-Zr Conductor", elements: ["Cu","Cr","Zr","Ag"], detail: "Railgun Component Material.", lattice: "Decagonal", type: "metal" };
-
-        // Hydrocarbon Perfection Catalysts (901-930)
-        var hydrocarbons = [
-            {id: "901", mol: "CH4", name: "Methane", carbons: 1},
-            {id: "902", mol: "C8H18", name: "Octane", carbons: 8},
-            {id: "903", mol: "C3H8", name: "Propane", carbons: 3},
-            {id: "904", mol: "C4H10", name: "Butane", carbons: 4},
-            {id: "905", mol: "C6H14", name: "Hexane", carbons: 6},
-            {id: "906", mol: "C12H26", name: "Dodecane", carbons: 12},
-            {id: "907", mol: "C14H30", name: "Tetradecane", carbons: 14},
-            {id: "908", mol: "C2H6", name: "Ethane", carbons: 2},
-            {id: "909", mol: "C5H12", name: "Pentane", carbons: 5},
-            {id: "910", mol: "C7H16", name: "Heptane", carbons: 7},
-            {id: "911", mol: "C9H20", name: "Nonane", carbons: 9},
-            {id: "912", mol: "C10H22", name: "Decane", carbons: 10},
-            {id: "913", mol: "C11H24", name: "Undecane", carbons: 11},
-            {id: "914", mol: "C13H28", name: "Tridecane", carbons: 13},
-            {id: "915", mol: "C15H32", name: "Pentadecane", carbons: 15},
-            {id: "916", mol: "C16H34", name: "Hexadecane", carbons: 16},
-            {id: "917", mol: "C18H38", name: "Octadecane", carbons: 18},
-            {id: "918", mol: "C20H42", name: "Icosane", carbons: 20},
-            {id: "919", mol: "C22H46", name: "Docosane", carbons: 22},
-            {id: "920", mol: "C24H50", name: "Tetracosane", carbons: 24},
-            {id: "921", mol: "C26H54", name: "Hexacosane", carbons: 26},
-            {id: "922", mol: "C28H58", name: "Octacosane", carbons: 28},
-            {id: "923", mol: "C30H62", name: "Triacontane", carbons: 30},
-            {id: "924", mol: "C17H36", name: "Heptadecane", carbons: 17},
-            {id: "925", mol: "C19H40", name: "Nonadecane", carbons: 19},
-            {id: "926", mol: "C21H44", name: "Heneicosane", carbons: 21},
-            {id: "927", mol: "C23H48", name: "Tricosane", carbons: 23},
-            {id: "928", mol: "C25H52", name: "Pentacosane", carbons: 25},
-            {id: "929", mol: "C27H56", name: "Heptacosane", carbons: 27},
-            {id: "930", mol: "C29H60", name: "Nonacosane", carbons: 29}
-        ];
-
-        var self = this;
-        hydrocarbons.forEach(function(hc) {
-            self.db[hc.id] = {
-                name: hc.name + " (" + hc.mol + ")",
-                elements: ["Ir", "Os", "Rh", "B"],
-                detail: "Zero-Emission " + hc.name + " Reformation Catalyst. " + hc.carbons + "-carbon chain.",
-                lattice: "Icosahedral",
-                type: "catalyst",
-                molecular: hc.mol,
-                carbons: hc.carbons
-            };
-        });
-
-        // Procedural Fill for 011-100
-        var safe = ["C", "Si", "Fe", "Al", "Ti", "Ni", "Cu", "Zn"];
-        for(var i = 11; i <= 100; i++) {
-            var id = i.toString().padStart(3, '0');
-            if(this.db[id]) continue;
-            var type = i % 3 === 0 ? "Decagonal" : (i % 3 === 1 ? "Icosahedral" : "Pentagonal");
-            this.db[id] = {
-                name: "System Rank-" + id,
-                elements: [safe[i % safe.length], safe[(i+1) % safe.length], "Au"],
-                detail: "Proprietary Graves-Law Formulation " + id + ". " + type + " Symmetry.",
-                lattice: type,
-                type: "metal"
-            };
-        }
+    "004": {
+        name: "Tungsten Carbide Hard Facing",
+        desc: "WC-Co thermal spray coating for extreme wear applications",
+        type: "MINING / HEAVY INDUSTRY",
+        current: {
+            coating: "WC-12Co HVOF",
+            hardness: "1100-1400 HV",
+            maxTemp: "500°C",
+            wearRate: "Standard baseline",
+            porosity: "1-2%",
+            thickness: "100-500 μm",
+            adhesion: "70 MPa",
+            method: "HVOF Thermal Spray"
+        },
+        enhanced: {
+            coating: "Graves WC-Co-B φ-Composite",
+            hardness: "1800-2200 HV",
+            maxTemp: "800°C",
+            wearRate: "1/10th baseline",
+            porosity: "<0.1%",
+            thickness: "50-200 μm",
+            adhesion: "150 MPa",
+            method: "HVOF + PECVD Seal"
+        },
+        improvements: { hardness: "+60%", wear: "10×", adhesion: "2×", porosity: "-95%" },
+        process: [
+            { title: "HVOF Base Coat", desc: "Apply WC-12Co via standard HVOF with optimized parameters.", params: ["Kerosene/O2", "2200°C flame", "350 m/s velocity"] },
+            { title: "Nano-B Infiltration", desc: "CVD infiltration of boron-containing precursor into WC porosity.", params: ["BCl3/H2", "500°C", "Fills all pores"] },
+            { title: "φ-Phase Conversion", desc: "Controlled heat treatment to nucleate icosahedral W-B-Co phase at grain boundaries.", params: ["750°C / 2h", "Ar/H2 atmosphere", "Grain boundary sealing"] },
+            { title: "Diamond-Like Overcoat", desc: "Optional DLC top layer for minimum friction.", params: ["PECVD CH4", "1-2 μm", "CoF 0.05-0.1"] }
+        ]
     },
-
-    populateList: function() {
-        var keys = Object.keys(this.db).sort(function(a,b) { return parseInt(a) - parseInt(b); });
-        var self = this;
-        keys.forEach(function(k) {
-            var d = document.createElement('div');
-            d.className = 'inv-item';
-            d.dataset.id = k;
-            d.innerHTML = '<span class="inv-id">' + k + '</span><span>' + self.db[k].name + '</span>';
-            d.onclick = function() { self.selectRank(k); };
-            self.dom.invList.appendChild(d);
-        });
+    "101": {
+        name: "Gasoline Perfection Catalyst",
+        desc: "Ir-Os-Rh-B nanoparticle catalyst for 100% hydrocarbon combustion",
+        type: "FUEL / CATALYST",
+        current: {
+            coating: "Pt/Pd/Rh Three-Way Catalyst",
+            efficiency: "95-98% conversion",
+            lightOff: "250-350°C",
+            emissions: "Trace CO, HC, NOx",
+            durability: "100,000 miles",
+            loading: "2-5 g/L PGM",
+            compression: "10:1 - 14:1 max",
+            method: "Washcoat / Impregnation"
+        },
+        enhanced: {
+            coating: "Graves Ir-Os-Rh-B φ-Catalyst",
+            efficiency: "100% conversion",
+            lightOff: "150°C",
+            emissions: "H2O + CO2 only",
+            durability: "1,000,000+ miles",
+            loading: "0.5 g/L (80% reduction)",
+            compression: "35:1 with plasma ignition",
+            method: "CVD Nanoparticle + Graphene"
+        },
+        improvements: { efficiency: "100%", compression: "35:1", durability: "10×", pgmReduction: "-80%" },
+        process: [
+            { title: "Substrate Preparation", desc: "Cordierite honeycomb or metallic substrate. Standard washcoat with γ-Al2O3.", params: ["400 cpsi", "γ-Al2O3 120 g/L", "Calcine 500°C"] },
+            { title: "φ-Catalyst Synthesis", desc: "Co-sputter Ir-Os-Rh-B (45:35:15:5 at%) onto sacrificial substrate. Form 9.4nm icosahedral particles.", params: ["UHV <10⁻⁹ Torr", "¹⁰B isotope", "Graphene shell"] },
+            { title: "Impregnation", desc: "Suspend nanoparticles in ethanol. Dip-coat washcoated substrate. Calcine to anchor.", params: ["2.8 g/L loading", "Slow dry 80°C", "Calcine 400°C"] },
+            { title: "Verification", desc: "Run with plasma spark plug at 35:1 compression. Verify 100% combustion.", params: ["Plasma ignition", "35:1 CR", "Tailpipe: H2O + CO2 only"] }
+        ]
     },
-
-    resize: function() {
-        var sCan = this.dom.scanCanvas;
-        var aCan = this.dom.atomCanvas;
-        var aCont = this.dom.atomContainer;
-        
-        // Scan canvas fixed height, variable width
-        sCan.width = sCan.parentElement.offsetWidth;
-        sCan.height = sCan.parentElement.offsetHeight;
-        
-        // Atom canvas fills flex
-        aCan.width = aCont.offsetWidth;
-        aCan.height = aCont.offsetHeight;
-        
-        this.drawGrid(this.dom.scanCtx);
+    "104": {
+        name: "Methalox Rocket Propellant Catalyst",
+        desc: "CH4/LOX combustion enhancement for Raptor-class engines",
+        type: "AEROSPACE / PROPULSION",
+        current: {
+            coating: "None (raw combustion)",
+            efficiency: "~97% combustion",
+            isp: "363s vacuum",
+            coking: "Significant (limits reuse)",
+            injectorLife: "10-50 flights",
+            chamberLife: "100 cycles",
+            method: "N/A"
+        },
+        enhanced: {
+            coating: "Graves Ir-Os-Rh-B Cryo-Catalyst",
+            efficiency: "100% combustion",
+            isp: "417s vacuum (+15%)",
+            coking: "Zero",
+            injectorLife: "500+ flights",
+            chamberLife: "10,000+ cycles",
+            method: "Cryogenic CVD Additive"
+        },
+        improvements: { isp: "+15%", coking: "Zero", injectorLife: "50×", chamberLife: "100×" },
+        process: [
+            { title: "Nanoparticle Synthesis", desc: "Specialized cryogenic-compatible φ-catalyst with fluoropolymer dispersant.", params: ["8.5 nm particles", "-40°C process", "LOX compatible"] },
+            { title: "Propellant Blending", desc: "Add catalyst to LCH4 storage tank via cryogenic metering system.", params: ["5 ppm loading", "Static mixer", "Particles remain suspended at -162°C"] },
+            { title: "No Engine Modification", desc: "Drop-in compatible with Raptor, BE-4, and similar CH4/LOX engines.", params: ["Standard injectors", "Standard chamber", "No hardware changes"] },
+            { title: "Verification", desc: "Static fire test. Measure Isp improvement and verify zero carbon deposits.", params: ["Hot-fire 10s+", "Borescope inspection", "Mass flow verification"] }
+        ]
     },
-
-    selectRank: function(id) {
-        if(this.state.scanning) return;
-        
-        document.querySelectorAll('.inv-item').forEach(function(e) { e.classList.remove('active'); });
-        var active = document.querySelector('.inv-item[data-id="' + id + '"]');
-        if(active) active.classList.add('active');
-        // Scroll into view
-        active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-        this.state.rank = id;
-        var data = this.db[id];
-        
-        var massData = this.calculateMass(data);
-        this.state.angle = massData.angle;
-        
-        this.dom.inputs.elements.innerText = data.elements.join(" • ");
-        this.dom.inputs.detail.value = data.detail;
-        this.dom.inputs.lattice.innerText = data.lattice;
-        this.dom.inputs.mass.innerText = massData.avg.toFixed(3) + " g/mol";
-        
-        this.state.locked = false;
-        this.state.scanning = false;
-        this.dom.btn.disabled = false;
-        this.dom.btn.innerText = "INITIATE TORSION SCAN";
-        this.dom.indicator.innerText = "READY";
-        this.dom.indicator.style.color = "#555";
-        this.dom.inputs.angle.innerText = "--";
-        this.dom.inputs.slack.innerText = "--";
-        this.dom.scanLine.style.opacity = 0;
-
-        this.updateAtomTargets(data.lattice);
-        this.clearLabels();
-        this.drawGrid(this.dom.scanCtx);
-        
-        this.log("LOADED RANK " + id + ": " + data.name);
+    "102": {
+        name: "Diesel Perfection Catalyst",
+        desc: "Complete combustion catalyst eliminating all diesel emissions",
+        type: "FUEL / CATALYST",
+        current: {
+            coating: "DOC + DPF + SCR",
+            efficiency: "90-95% conversion",
+            pm: "Requires DPF regen",
+            nox: "Requires urea injection",
+            durability: "150,000 miles",
+            complexity: "3 separate systems",
+            method: "Multiple catalyst beds"
+        },
+        enhanced: {
+            coating: "Graves Ir-Os-Rh-B Diesel φ-Catalyst",
+            efficiency: "100% conversion",
+            pm: "Zero - no DPF needed",
+            nox: "Zero - no SCR needed",
+            durability: "1,000,000+ miles",
+            complexity: "Single catalyst",
+            method: "CVD Nanoparticle"
+        },
+        improvements: { efficiency: "100%", complexity: "-67%", durability: "7×", systems: "1 vs 3" },
+        process: [
+            { title: "Remove Existing Systems", desc: "DOC, DPF, and SCR can all be replaced with single Graves catalyst.", params: ["Weight savings 40kg+", "Space savings 50%", "No DEF tank"] },
+            { title: "Single Catalyst Install", desc: "Install Graves diesel φ-catalyst in place of DOC position.", params: ["Direct replacement", "Same mounting", "Smaller unit"] },
+            { title: "Calibration", desc: "ECU reflash for optimized injection timing with 100% combustion.", params: ["Earlier injection", "No regen cycles", "Improved torque"] },
+            { title: "Verification", desc: "Emissions test per EPA Tier 4 / Euro VI standards.", params: ["Zero PM", "Zero NOx", "Zero HC"] }
+        ]
     },
-
-    calculateMass: function(data) {
-        var BASE_ANGLE = 5.0372;
-        var shift = 0;
-        var avg = 50.0;
-        var self = this;
-        
-        if(data.type === "catalyst" && data.molecular) {
-            // Molecular tuning...
-            var molWeight = 100.0; // Simplified lookup for demo
-            if (data.carbons) molWeight = 16 + (data.carbons * 14); 
-            
-            shift = (100 - molWeight) * 0.00002;
-            avg = molWeight;
-        } else {
-            var total = 0, count = 0;
-            data.elements.forEach(function(el) {
-                var m = self.massTable[el];
-                if(m) { total += m; count++; }
-            });
-            avg = count > 0 ? total / count : 50.0;
-            var diff = avg - 77.1;
-            shift = diff * 0.00005;
-        }
-        
-        if(data.lattice === "Pentagonal") shift += 0.0001;
-        else if(data.lattice === "Decagonal") shift -= 0.0001;
-        
-        if(shift > 0.007) shift = 0.007;
-        if(shift < -0.007) shift = -0.007;
-        
-        return { avg: avg, angle: parseFloat((BASE_ANGLE + shift).toFixed(6)) };
-    },
-
-    runScan: function() {
-        if(!this.state.rank) return;
-        
-        this.state.scanning = true;
-        this.dom.btn.disabled = true;
-        this.dom.indicator.innerText = "SCANNING...";
-        this.dom.indicator.style.color = "var(--cyan)";
-        this.dom.scanLine.style.opacity = 1;
-        
-        this.log("TORSION SCAN INITIATED...", "cyan");
-
-        var x = 0;
-        var w = this.dom.scanCanvas.width;
-        var h = this.dom.scanCanvas.height;
-        var ctx = this.dom.scanCtx;
-        var self = this;
-        
-        // Draw Scan BG
-        ctx.fillStyle = "#0e0e12";
-        ctx.fillRect(0, 0, w, h);
-        this.drawGrid(ctx);
-
-        var timer = setInterval(function() {
-            x += 4; // Faster scan
-            self.dom.scanLine.style.left = x + "px";
-            
-            var pct = x / w;
-            var currentAngle = 5.030 + (pct * 0.015);
-            var dist = Math.abs(currentAngle - self.state.angle);
-            
-            var energy = 1 - Math.min(1, Math.pow(dist * 300, 2));
-            var yPos = h * 0.2 + ((1 - energy) * (h * 0.6));
-            
-            // Draw Signal
-            ctx.fillStyle = dist < 0.0005 ? "#fff" : "rgba(255, 50, 50, 0.5)";
-            ctx.fillRect(x, yPos, 3, 3);
-            
-            if(x >= w) {
-                clearInterval(timer);
-                self.finishLock();
-            }
-        }, 8);
-    },
-
-    finishLock: function() {
-        this.state.scanning = false;
-        this.state.locked = true;
-        this.dom.btn.disabled = false;
-        this.dom.btn.innerText = "SCAN COMPLETE";
-        this.dom.scanLine.style.opacity = 0;
-        
-        this.dom.indicator.innerText = "HYPERFINE LOCK ESTABLISHED";
-        this.dom.indicator.style.color = "var(--gold)";
-        this.dom.inputs.angle.innerText = this.state.angle.toFixed(6) + "°";
-        this.dom.inputs.slack.innerText = "0.000 nm (PERFECT)";
-        
-        this.log("LOCK ACQUIRED AT " + this.state.angle.toFixed(6) + "°", "gold");
-        this.createLabels();
-    },
-
-    initAtoms: function() {
-        this.state.atoms = [];
-        for(var i = 0; i < 60; i++) {
-            this.state.atoms.push({
-                x: (Math.random() - 0.5) * 300,
-                y: (Math.random() - 0.5) * 300,
-                z: (Math.random() - 0.5) * 300,
-                tx: 0, ty: 0, tz: 0
-            });
-        }
-    },
-
-    updateAtomTargets: function(type) {
-        var phi = 1.6180339887;
-        var t = [];
-        var s = 90;
-
-        if(type === "Decagonal") {
-            for(var k = 0; k < 5; k++) {
-                var y = (k - 2) * 40;
-                for(var j = 0; j < 10; j++) {
-                    var th = (j / 10) * Math.PI * 2;
-                    t.push({ x: Math.cos(th) * s, y: y, z: Math.sin(th) * s });
-                }
-            }
-        } else if(type === "Pentagonal") {
-            for(var i = 0; i < 60; i++) {
-                var r = (i / 60) * s * 1.2;
-                var th = i * (Math.PI * 2 / 5);
-                t.push({ x: Math.cos(th) * r, y: (i - 30) * 3, z: Math.sin(th) * r });
-            }
-        } else {
-            var v = [
-                [0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi],
-                [1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0],
-                [phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]
-            ];
-            v.forEach(function(p) { t.push({ x: p[0] * s, y: p[1] * s, z: p[2] * s }); });
-            while(t.length < 60) {
-                var th = Math.random() * Math.PI * 2;
-                var ph = Math.random() * Math.PI;
-                t.push({
-                    x: Math.sin(ph) * Math.cos(th) * s * 0.7,
-                    y: Math.cos(ph) * s * 0.7,
-                    z: Math.sin(ph) * Math.sin(th) * s * 0.7
-                });
-            }
-        }
-        
-        this.state.atoms.forEach(function(a, i) {
-            var target = t[i % t.length];
-            a.tx = target.x;
-            a.ty = target.y;
-            a.tz = target.z;
-        });
-    },
-
-    loop: function() {
-        this.state.time += 0.015;
-        var ctx = this.dom.atomCtx;
-        var w = ctx.canvas.width;
-        var h = ctx.canvas.height;
-        
-        ctx.clearRect(0, 0, w, h);
-        
-        if(w === 0 || h === 0) {
-            var self = this;
-            requestAnimationFrame(function() { self.loop(); });
-            return;
-        }
-
-        var cx = w / 2;
-        var cy = h / 2;
-        
-        var locked = this.state.locked;
-        var rot = locked ? this.state.time * 0.1 : this.state.time * 0.4;
-        
-        var renderList = [];
-        var self = this;
-        
-        this.state.atoms.forEach(function(a, i) {
-            var noise = locked ? 0 : Math.sin(self.state.time + i) * 60;
-            a.x += (a.tx - a.x) * 0.05;
-            a.y += (a.ty - a.y) * 0.05;
-            a.z += (a.tz - a.z) * 0.05;
-            
-            var dx = a.x + noise;
-            var dy = a.y + noise;
-            var dz = a.z + noise;
-
-            var x1 = dx * Math.cos(rot) - dz * Math.sin(rot);
-            var z1 = dx * Math.sin(rot) + dz * Math.cos(rot);
-            
-            var scale = 400 / (400 + z1 + 500);
-            var px = cx + x1 * scale;
-            var py = cy + dy * scale;
-            
-            renderList.push({ x: px, y: py, z: z1, s: scale, i: i, el: self.getElement(i) });
-        });
-        
-        renderList.sort(function(a, b) { return b.z - a.z; });
-
-        // Draw Bonds
-        ctx.strokeStyle = locked ? "rgba(0, 242, 234, 0.15)" : "rgba(255, 50, 50, 0.1)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for(var i = 0; i < renderList.length; i++) {
-            for(var j = i + 1; j < renderList.length; j++) {
-                var d = Math.hypot(renderList[i].x - renderList[j].x, renderList[i].y - renderList[j].y);
-                if(d < 60 * renderList[i].s) {
-                    ctx.moveTo(renderList[i].x, renderList[i].y);
-                    ctx.lineTo(renderList[j].x, renderList[j].y);
-                }
-            }
-        }
-        ctx.stroke();
-
-        // Draw Atoms with Glow
-        renderList.forEach(function(p) {
-            var color = self.getColor(p.el);
-            var size = locked ? 5 * p.s : 3 * p.s;
-            
-            ctx.fillStyle = locked ? color : "#fff";
-            
-            if(!locked) {
-                ctx.shadowColor = "#f00";
-                ctx.shadowBlur = 15;
-            } else {
-                ctx.shadowColor = color;
-                ctx.shadowBlur = 10;
-            }
-            
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Move Labels
-            if(locked) {
-                var lbl = document.getElementById('lbl-' + p.i);
-                if(lbl) {
-                    lbl.style.transform = 'translate(' + p.x + 'px, ' + p.y + 'px)';
-                }
-            }
-        });
-        
-        // Reset Shadow for next frame
-        ctx.shadowBlur = 0;
-
-        requestAnimationFrame(function() { self.loop(); });
-    },
-
-    getElement: function(i) {
-        if(!this.state.rank) return "Au";
-        var els = this.db[this.state.rank].elements;
-        return els[i % els.length];
-    },
-
-    getColor: function(el) {
-        // High-contrast neon colors for new theme
-        var map = {
-            "Au": "#FFD700", "Ni": "#00FF99", "Co": "#4488FF", "Cr": "#AAAAAA", 
-            "Al": "#FFFFFF", "Ti": "#99DDFF", "W": "#888888", "Fe": "#FF5555", 
-            "C": "#444444", "H": "#FFFFFF", "Li": "#FF00FF"
-        };
-        return map[el] || "#00F2EA";
-    },
-
-    drawGrid: function(ctx) {
-        ctx.strokeStyle = "rgba(255,255,255,0.05)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        var w = ctx.canvas.width;
-        var h = ctx.canvas.height;
-        for(var i = 0; i <= 10; i++) {
-            ctx.moveTo(i * w / 10, 0);
-            ctx.lineTo(i * w / 10, h);
-            ctx.moveTo(0, i * h / 10);
-            ctx.lineTo(w, i * h / 10);
-        }
-        ctx.stroke();
-    },
-    
-    createLabels: function() {
-        this.clearLabels();
-        if(!this.state.rank) return;
-        
-        var els = this.db[this.state.rank].elements;
-        var self = this;
-        this.state.atoms.forEach(function(a, i) {
-            var el = els[i % els.length];
-            var d = document.createElement('div');
-            d.className = 'atom-label visible';
-            d.id = 'lbl-' + i;
-            d.innerText = el;
-            d.style.borderColor = self.getColor(el);
-            self.dom.atomContainer.appendChild(d);
-        });
-    },
-    
-    clearLabels: function() {
-        var labels = document.querySelectorAll('.atom-label');
-        for(var i = 0; i < labels.length; i++) {
-            labels[i].remove();
-        }
-    },
-
-    log: function(msg, type) {
-        var d = document.createElement('div');
-        d.className = 'log-entry';
-        d.innerHTML = '<span style="opacity:0.5; margin-right:5px;">[' + new Date().toLocaleTimeString().split(' ')[0] + ']</span> ' + msg;
-        if(type === 'cyan') d.classList.add('log-cyan');
-        else if(type === 'gold') d.classList.add('log-gold');
-        this.dom.console.appendChild(d);
-        this.dom.console.scrollTop = this.dom.console.scrollHeight;
+    "103": {
+        name: "Jet-A Aviation Catalyst",
+        desc: "Zero-contrail jet fuel catalyst for commercial aviation",
+        type: "AEROSPACE / FUEL",
+        current: {
+            coating: "None (raw combustion)",
+            efficiency: "~98% combustion",
+            contrails: "Significant (climate impact)",
+            soot: "Measurable particulates",
+            range: "Standard",
+            method: "N/A"
+        },
+        enhanced: {
+            coating: "Graves Ir-Os-Rh-B Jet φ-Catalyst",
+            efficiency: "100% combustion",
+            contrails: "Zero (complete H2O vapor)",
+            soot: "Zero particulates",
+            range: "+15-20%",
+            method: "Fuel additive"
+        },
+        improvements: { contrails: "Zero", soot: "Zero", range: "+18%", efficiency: "100%" },
+        process: [
+            { title: "Catalyst Production", desc: "Manufacture Ir-Os-Rh-B nanoparticles per standard protocol.", params: ["9.8 nm particles", "Graphene shell", "Aviation certified"] },
+            { title: "Fuel Blending", desc: "Add catalyst at refinery or airport fuel farm.", params: ["2.5 ppm", "Static mixer", "ASTM D1655 compliant"] },
+            { title: "No Aircraft Modification", desc: "Drop-in compatible with all turbofan and turboprop engines.", params: ["CFM LEAP", "GE9X", "PW1000G"] },
+            { title: "Verification", desc: "Flight test with emissions monitoring.", params: ["Zero contrails", "Zero soot", "+15% range confirmed"] }
+        ]
     }
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { app.init(); });
-} else {
-    app.init();
+let selectedMaterial = null;
+let cvdAnimation = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    populateMaterials();
+    initCVDCanvas();
+});
+
+function populateMaterials() {
+    const grid = document.getElementById('material-grid');
+    grid.innerHTML = '';
+    
+    Object.keys(MATERIALS).sort().forEach(id => {
+        const m = MATERIALS[id];
+        const card = document.createElement('div');
+        card.className = 'material-card';
+        card.dataset.id = id;
+        card.innerHTML = `
+            <div class="material-id">SYSTEM ${id}</div>
+            <div class="material-name">${m.name}</div>
+            <div class="material-desc">${m.desc}</div>
+            <div class="material-type">${m.type}</div>
+        `;
+        card.onclick = () => selectMaterial(id);
+        grid.appendChild(card);
+    });
+}
+
+function selectMaterial(id) {
+    selectedMaterial = id;
+    const m = MATERIALS[id];
+    
+    document.querySelectorAll('.material-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`.material-card[data-id="${id}"]`).classList.add('selected');
+    
+    document.getElementById('comparison-container').classList.add('visible');
+    
+    const impSum = document.getElementById('improvement-summary');
+    impSum.innerHTML = '';
+    Object.entries(m.improvements).forEach(([key, val]) => {
+        impSum.innerHTML += `
+            <div class="improvement-card">
+                <div class="improvement-value">${val}</div>
+                <div class="improvement-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+            </div>
+        `;
+    });
+    
+    const specsCurrent = document.getElementById('specs-current');
+    specsCurrent.innerHTML = '';
+    Object.entries(m.current).forEach(([key, val]) => {
+        specsCurrent.innerHTML += `
+            <div class="spec-row">
+                <span class="spec-label">${formatLabel(key)}</span>
+                <span class="spec-value">${val}</span>
+            </div>
+        `;
+    });
+    
+    const specsEnhanced = document.getElementById('specs-enhanced');
+    specsEnhanced.innerHTML = '';
+    Object.entries(m.enhanced).forEach(([key, val]) => {
+        specsEnhanced.innerHTML += `
+            <div class="spec-row">
+                <span class="spec-label">${formatLabel(key)}</span>
+                <span class="spec-value improved">${val}</span>
+            </div>
+        `;
+    });
+    
+    const processSteps = document.getElementById('process-steps');
+    processSteps.innerHTML = '';
+    m.process.forEach((step, i) => {
+        processSteps.innerHTML += `
+            <div class="process-step">
+                <div class="step-number">${i + 1}</div>
+                <div class="step-content">
+                    <h4>${step.title}</h4>
+                    <p>${step.desc}</p>
+                    <div class="step-params">
+                        ${step.params.map(p => `<span class="param-tag">${p}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    startCVDAnimation();
+    document.getElementById('comparison-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+function formatLabel(key) {
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+}
+
+let cvdCtx, cvdCanvas;
+let particles = [];
+
+function initCVDCanvas() {
+    cvdCanvas = document.getElementById('cvd-canvas');
+    cvdCtx = cvdCanvas.getContext('2d');
+    
+    function resize() {
+        cvdCanvas.width = cvdCanvas.offsetWidth;
+        cvdCanvas.height = cvdCanvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+}
+
+function startCVDAnimation() {
+    document.getElementById('cvd-status').innerText = 'DEPOSITION ACTIVE';
+    
+    particles = [];
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: Math.random() * cvdCanvas.width,
+            y: Math.random() * cvdCanvas.height * 0.3,
+            vx: (Math.random() - 0.5) * 2,
+            vy: Math.random() * 2 + 1,
+            size: Math.random() * 3 + 1,
+            color: Math.random() > 0.5 ? '#00f2ea' : '#ffb800'
+        });
+    }
+    
+    if (cvdAnimation) cancelAnimationFrame(cvdAnimation);
+    animateCVD();
+}
+
+function animateCVD() {
+    cvdCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    cvdCtx.fillRect(0, 0, cvdCanvas.width, cvdCanvas.height);
+    
+    const substrateY = cvdCanvas.height * 0.75;
+    cvdCtx.fillStyle = '#333';
+    cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY, cvdCanvas.width * 0.8, 30);
+    
+    const layerHeight = Math.min(20, (Date.now() % 10000) / 500);
+    const gradient = cvdCtx.createLinearGradient(0, substrateY - layerHeight, 0, substrateY);
+    gradient.addColorStop(0, 'rgba(0, 242, 234, 0.8)');
+    gradient.addColorStop(1, 'rgba(255, 184, 0, 0.8)');
+    cvdCtx.fillStyle = gradient;
+    cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY - layerHeight, cvdCanvas.width * 0.8, layerHeight);
+    
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.y > substrateY - 5) {
+            p.y = Math.random() * cvdCanvas.height * 0.2;
+            p.x = Math.random() * cvdCanvas.width;
+        }
+        
+        if (p.x < 0) p.x = cvdCanvas.width;
+        if (p.x > cvdCanvas.width) p.x = 0;
+        
+        cvdCtx.beginPath();
+        cvdCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        cvdCtx.fillStyle = p.color;
+        cvdCtx.fill();
+    });
+    
+    cvdAnimation = requestAnimationFrame(animateCVD);
+}
+
+function openFabricator() {
+    if (!selectedMaterial) return;
+    window.open('fabricator.html?system=' + selectedMaterial, '_blank');
 }
 </script>
+
 </body>
 </html>
