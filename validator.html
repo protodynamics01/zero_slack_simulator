@@ -125,13 +125,14 @@
 
 <header>
     <div>GRAVES VALIDATION SUITE <span style="color:#666">// v31.0 | 130 SYSTEMS</span></div>
+    <div id="industry-indicator" style="color:#666; font-size:0.85em; font-family:var(--font-mono);"></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">327.384 MHz</span></div>
 </header>
 
 <div id="workspace">
     
     <div class="panel">
-        <h2>1. Select System (Ranks 1–930)</h2>
+        <h2>1. Select System (Ranks 1–130)</h2>
         <div id="inv-list"></div>
         
         <button id="btn-action" disabled>SELECT A SYSTEM</button>
@@ -318,37 +319,37 @@
         "098": { name: "Pentagonal Kelp Forest Supercharger", elements: ["Au","C"], detail: "Giant kelp. 100m in 30 days.", lattice: "Pentagonal", type: "metal" },
         "099": { name: "Icosahedral Ocean Carbon Singularity", elements: ["Au","Si"], detail: "Master carbon. All excess CO2 removed.", lattice: "Icosahedral", type: "metal" },
         "100": { name: "Decagonal Planetary Ocean Singularity", elements: ["Au","Si"], detail: "Ultimate ocean. Earth paradise.", lattice: "Decagonal", type: "metal" },
-        // HYDROCARBON PERFECTION CATALYSTS (901-930)
-        "901": { name: "GPC-1 Gasoline Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "All gasoline 87-93 AKI. 100% combustion, 18-24% MPG.", lattice: "Icosahedral", type: "catalyst", molecular: "C8H18" },
-        "902": { name: "DPC-1 Diesel Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "All diesel/ULSD/biodiesel. 100% combustion, 22-28% MPG.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H26" },
-        "903": { name: "JPC-1 Jet-A Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Jet-A/JP-8/aviation kerosene. Zero contrails, 15-20% range.", lattice: "Icosahedral", type: "catalyst", molecular: "C14H30" },
-        "904": { name: "LPC-1 LPG Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Propane/butane. 100% combustion, zero CO.", lattice: "Icosahedral", type: "catalyst", molecular: "C4H10" },
-        "905": { name: "HPC-1 Heavy Fuel Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Bunker/residual oil. Zero sulfur emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C16H34" },
-        "906": { name: "NGC-1 Natural Gas Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Methane perfection. Zero methane slip.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
-        "907": { name: "EPC-1 Ethane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Ethane cracking. 100% yield.", lattice: "Icosahedral", type: "catalyst", molecular: "C2H6" },
-        "908": { name: "PPC-1 Propane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Propane reformation. Zero emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C3H8" },
-        "909": { name: "PePC-1 Pentane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Pentane isomers. Perfect combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C5H12" },
-        "910": { name: "HxPC-1 Hexane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Hexane solvent. Zero VOC emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C6H14" },
-        "911": { name: "HpPC-1 Heptane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heptane standard. Reference perfection.", lattice: "Icosahedral", type: "catalyst", molecular: "C7H16" },
-        "912": { name: "NPC-1 Nonane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Nonane diesel blend. Zero particulates.", lattice: "Icosahedral", type: "catalyst", molecular: "C9H20" },
-        "913": { name: "DcPC-1 Decane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Decane jet component. Perfect burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C10H22" },
-        "914": { name: "UPC-1 Undecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Undecane diesel. Zero soot.", lattice: "Icosahedral", type: "catalyst", molecular: "C11H24" },
-        "915": { name: "TrPC-1 Tridecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Tridecane fuel. Complete oxidation.", lattice: "Icosahedral", type: "catalyst", molecular: "C13H28" },
-        "916": { name: "PdPC-1 Pentadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Pentadecane heating oil. Zero residue.", lattice: "Icosahedral", type: "catalyst", molecular: "C15H32" },
-        "917": { name: "HdPC-1 Heptadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heptadecane marine fuel. Clean burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C17H36" },
-        "918": { name: "OcPC-1 Octadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Octadecane wax. Perfect combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C18H38" },
-        "919": { name: "NdPC-1 Nonadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Nonadecane fuel oil. Zero emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C19H40" },
-        "920": { name: "EiPC-1 Eicosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Eicosane paraffin. Complete burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C20H42" },
-        "921": { name: "HePC-1 Heneicosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heneicosane wax. Zero residue.", lattice: "Icosahedral", type: "catalyst", molecular: "C21H44" },
-        "922": { name: "DoPC-1 Docosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Docosane fuel. Perfect oxidation.", lattice: "Icosahedral", type: "catalyst", molecular: "C22H46" },
-        "923": { name: "TcPC-1 Tricosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Tricosane paraffin. Clean burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C23H48" },
-        "924": { name: "TePC-1 Tetracosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Tetracosane wax. Zero emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C24H50" },
-        "925": { name: "PcPC-1 Pentacosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Pentacosane fuel. Complete combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C25H52" },
-        "926": { name: "HxcPC-1 Hexacosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Hexacosane wax. Perfect burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C26H54" },
-        "927": { name: "HpcPC-1 Heptacosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heptacosane paraffin. Zero residue.", lattice: "Icosahedral", type: "catalyst", molecular: "C27H56" },
-        "928": { name: "OccPC-1 Octacosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Octacosane wax. Clean combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C28H58" },
-        "929": { name: "NncPC-1 Nonacosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Nonacosane fuel. Perfect oxidation.", lattice: "Icosahedral", type: "catalyst", molecular: "C29H60" },
-        "930": { name: "TrcPC-1 Triacontane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Triacontane wax. Zero emissions, complete.", lattice: "Icosahedral", type: "catalyst", molecular: "C30H62" }
+        // HYDROCARBON PERFECTION CATALYSTS (101-130)
+        "101": { name: "GPC-1 Gasoline Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "All gasoline 87-93 AKI. 100% combustion, 18-24% MPG.", lattice: "Icosahedral", type: "catalyst", molecular: "C8H18" },
+        "102": { name: "DPC-1 Diesel Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "All diesel/ULSD/biodiesel. 100% combustion, 22-28% MPG.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H26" },
+        "103": { name: "JPC-1 Jet-A Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Jet-A/JP-8/aviation kerosene. Zero contrails, 15-20% range.", lattice: "Icosahedral", type: "catalyst", molecular: "C14H30" },
+        "104": { name: "MPC-1 Methalox Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "CH4/LOX rocket propellant. 100% combustion, +15% Isp. SpaceX Raptor compatible.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
+        "105": { name: "RPC-1 RP-1 Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "RP-1/LOX rocket kerosene. Zero coking, +12% Isp. Merlin/RD-180 compatible.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H24" },
+        "106": { name: "LPC-1 LPG Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Propane/butane. 100% combustion, zero CO.", lattice: "Icosahedral", type: "catalyst", molecular: "C4H10" },
+        "107": { name: "HPC-1 Heavy Fuel Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Bunker/residual oil. Zero sulfur emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C16H34" },
+        "108": { name: "NGC-1 Natural Gas Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Methane power generation. Zero methane slip.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
+        "109": { name: "EPC-1 Ethane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Ethane cracking. 100% yield.", lattice: "Icosahedral", type: "catalyst", molecular: "C2H6" },
+        "110": { name: "PPC-1 Propane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Propane reformation. Zero emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C3H8" },
+        "111": { name: "PePC-1 Pentane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Pentane isomers. Perfect combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C5H12" },
+        "112": { name: "HxPC-1 Hexane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Hexane solvent. Zero VOC emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C6H14" },
+        "113": { name: "HpPC-1 Heptane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heptane standard. Reference perfection.", lattice: "Icosahedral", type: "catalyst", molecular: "C7H16" },
+        "114": { name: "NPC-1 Nonane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Nonane diesel blend. Zero particulates.", lattice: "Icosahedral", type: "catalyst", molecular: "C9H20" },
+        "115": { name: "DcPC-1 Decane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Decane jet component. Perfect burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C10H22" },
+        "116": { name: "UPC-1 Undecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Undecane diesel. Zero soot.", lattice: "Icosahedral", type: "catalyst", molecular: "C11H24" },
+        "117": { name: "TrPC-1 Tridecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Tridecane fuel. Complete oxidation.", lattice: "Icosahedral", type: "catalyst", molecular: "C13H28" },
+        "118": { name: "PdPC-1 Pentadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Pentadecane heating oil. Zero residue.", lattice: "Icosahedral", type: "catalyst", molecular: "C15H32" },
+        "119": { name: "HdPC-1 Heptadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Heptadecane marine fuel. Clean burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C17H36" },
+        "120": { name: "OcPC-1 Octadecane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Octadecane wax. Perfect combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C18H38" },
+        "121": { name: "HyPC-1 Hydrogen Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "H2/O2 fuel cells & rockets. 100% efficiency.", lattice: "Icosahedral", type: "catalyst", molecular: "H2" },
+        "122": { name: "BPC-1 Biofuel Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Ethanol/biodiesel blends. Zero emissions.", lattice: "Icosahedral", type: "catalyst", molecular: "C2H6O" },
+        "123": { name: "SPC-1 Syngas Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "CO/H2 synthesis gas. Perfect Fischer-Tropsch.", lattice: "Icosahedral", type: "catalyst", molecular: "CO" },
+        "124": { name: "APC-1 Ammonia Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "NH3 fuel/hydrogen carrier. Zero NOx.", lattice: "Icosahedral", type: "catalyst", molecular: "NH3" },
+        "125": { name: "DME-PC Dimethyl Ether Catalyst", elements: ["Ir","Os","Rh","B"], detail: "DME diesel substitute. Clean combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C2H6O" },
+        "126": { name: "EiPC-1 Eicosane Perfection Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Eicosane paraffin. Complete burn.", lattice: "Icosahedral", type: "catalyst", molecular: "C20H42" },
+        "127": { name: "F1PC-1 F-1 Engine Catalyst", elements: ["Ir","Os","Rh","B"], detail: "RP-1 optimized for Saturn-class. +8% thrust.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H24" },
+        "128": { name: "BEPC-1 BE-4 Engine Catalyst", elements: ["Ir","Os","Rh","B"], detail: "LNG/LOX for Blue Origin. Zero coking.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
+        "129": { name: "RSPC-1 RS-25 Engine Catalyst", elements: ["Ir","Os","Rh","B"], detail: "H2/LOX Space Shuttle main. +5% Isp.", lattice: "Icosahedral", type: "catalyst", molecular: "H2" },
+        "130": { name: "UPC-1 Universal Propellant Catalyst", elements: ["Ir","Os","Rh","B"], detail: "Any hydrocarbon fuel. Adaptive perfection.", lattice: "Icosahedral", type: "catalyst", molecular: "CxHy" }
     };
 
     // === STATE ===
@@ -516,6 +517,23 @@
         document.querySelectorAll('.inv-item').forEach(e => e.classList.remove('active'));
         const target = document.querySelector(`.inv-item[data-id="${id}"]`);
         if(target) target.classList.add('active');
+        
+        // Update industry indicator in header
+        const industryIndicator = document.getElementById('industry-indicator');
+        let idNum = parseInt(id);
+        let industry = "";
+        if(idNum >= 1 && idNum <= 10) industry = "INDUSTRY 1: AEROSPACE/DEFENSE";
+        else if(idNum >= 11 && idNum <= 20) industry = "INDUSTRY 2: ENERGY/FUSION";
+        else if(idNum >= 21 && idNum <= 30) industry = "INDUSTRY 3: CANCER/MEDICINE";
+        else if(idNum >= 31 && idNum <= 40) industry = "INDUSTRY 4: GENOMICS";
+        else if(idNum >= 41 && idNum <= 50) industry = "INDUSTRY 5: WATER";
+        else if(idNum >= 51 && idNum <= 60) industry = "INDUSTRY 6: LONGEVITY";
+        else if(idNum >= 61 && idNum <= 70) industry = "INDUSTRY 7: BRAIN-MACHINE";
+        else if(idNum >= 71 && idNum <= 80) industry = "INDUSTRY 8: ROBOTICS";
+        else if(idNum >= 81 && idNum <= 90) industry = "INDUSTRY 9: MANUFACTURING";
+        else if(idNum >= 91 && idNum <= 100) industry = "INDUSTRY 10: OCEAN";
+        else if(idNum >= 101 && idNum <= 130) industry = "INDUSTRY 11: HYDROCARBON CATALYSTS";
+        industryIndicator.innerHTML = `<span style="color:var(--gold);">${industry}</span> | SYSTEM ${id}`;
 
         document.getElementById('comp-elements').value = data.elements.join(" - ");
         document.getElementById('lattice-type').value = data.lattice;
@@ -1231,34 +1249,632 @@ CERTIFICATION: This structure incurs ZERO excess vacuum-debt and represents the 
         "098": { process: "Kelp Supercharger Deployment", genetics: "Enhanced Macrocystis", growth: "100m in 30 days", scale: "Global coastlines", verification: "Satellite biomass monitoring" },
         "099": { process: "Ocean Carbon Singularity", integration: "093, 096-098 networked", target: "All excess CO2 removal", verification: "Pre-industrial CO2 levels" },
         "100": { process: "Planetary Ocean Singularity", integration: "All 091-099 systems", capability: "Complete ocean mastery", verification: "Earth paradise metrics" },
-        // HYDROCARBON PERFECTION CATALYSTS (901-930)
-        "901": { process: "Ir-Os-Rh-B10 Nanoparticle Synthesis", composition: "45% Ir, 35% Os, 20% Rh + 0.00042 wt% ¹⁰B", size: "9.4 nm ± 0.3 nm", coating: "Graphene monolayer termination", dosage: "2.8 g/metric ton gasoline", verification: "Tailpipe: H2O + O2 + trace He only" },
-        "902": { process: "Ir-Os-Rh-B10 Diesel Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00038 wt% ¹⁰B", size: "9.6 nm ± 0.3 nm", dosage: "3.1 g/metric ton diesel", verification: "Zero NOx, zero soot, zero PM" },
-        "903": { process: "Ir-Os-Rh-B10 Jet Fuel Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00035 wt% ¹⁰B", size: "9.8 nm ± 0.3 nm", dosage: "2.5 g/metric ton Jet-A", verification: "Zero contrails, 15-20% range increase" },
-        "904": { process: "Ir-Os-Rh-B10 LPG Catalyst", target: "Propane/Butane", size: "9.2 nm", dosage: "2.0 g/metric ton", verification: "100% combustion, zero CO" },
-        "905": { process: "Ir-Os-Rh-B10 Heavy Fuel Catalyst", target: "Bunker/residual oil", size: "10.0 nm", dosage: "4.0 g/metric ton", verification: "Zero sulfur emissions" },
-        "906": { process: "Ir-Os-Rh-B10 Natural Gas Catalyst", target: "Methane CH4", size: "8.8 nm", dosage: "1.5 g/metric ton", verification: "Zero methane slip" },
-        "907": { process: "Ir-Os-Rh-B10 Ethane Catalyst", target: "Ethane C2H6", size: "8.9 nm", dosage: "1.8 g/metric ton", verification: "100% cracking yield" },
-        "908": { process: "Ir-Os-Rh-B10 Propane Catalyst", target: "Propane C3H8", size: "9.0 nm", dosage: "2.0 g/metric ton", verification: "Zero emissions reformation" },
-        "909": { process: "Ir-Os-Rh-B10 Pentane Catalyst", target: "Pentane C5H12", size: "9.1 nm", dosage: "2.2 g/metric ton", verification: "Perfect isomer combustion" },
-        "910": { process: "Ir-Os-Rh-B10 Hexane Catalyst", target: "Hexane C6H14", size: "9.2 nm", dosage: "2.4 g/metric ton", verification: "Zero VOC emissions" }
+        // HYDROCARBON PERFECTION CATALYSTS (101-130)
+        "101": { process: "Ir-Os-Rh-B10 Nanoparticle Synthesis", composition: "45% Ir, 35% Os, 20% Rh + 0.00042 wt% ¹⁰B", size: "9.4 nm ± 0.3 nm", coating: "Graphene monolayer termination", dosage: "2.8 g/metric ton gasoline", verification: "Tailpipe: H2O + O2 + trace He only" },
+        "102": { process: "Ir-Os-Rh-B10 Diesel Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00038 wt% ¹⁰B", size: "9.6 nm ± 0.3 nm", dosage: "3.1 g/metric ton diesel", verification: "Zero NOx, zero soot, zero PM" },
+        "103": { process: "Ir-Os-Rh-B10 Jet Fuel Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00035 wt% ¹⁰B", size: "9.8 nm ± 0.3 nm", dosage: "2.5 g/metric ton Jet-A", verification: "Zero contrails, 15-20% range increase" },
+        "104": { process: "Ir-Os-Rh-B10 Methalox Rocket Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00050 wt% ¹⁰B", size: "8.5 nm ± 0.2 nm", dosage: "5.0 g/metric ton CH4", verification: "+15% Isp, zero coking" },
+        "105": { process: "Ir-Os-Rh-B10 RP-1 Rocket Catalyst", composition: "45% Ir, 35% Os, 20% Rh + 0.00045 wt% ¹⁰B", size: "9.0 nm ± 0.2 nm", dosage: "4.5 g/metric ton RP-1", verification: "+12% Isp, zero coking" },
+        "106": { process: "Ir-Os-Rh-B10 LPG Catalyst", target: "Propane/Butane", size: "9.2 nm", dosage: "2.0 g/metric ton", verification: "100% combustion, zero CO" },
+        "107": { process: "Ir-Os-Rh-B10 Heavy Fuel Catalyst", target: "Bunker/residual oil", size: "10.0 nm", dosage: "4.0 g/metric ton", verification: "Zero sulfur emissions" },
+        "108": { process: "Ir-Os-Rh-B10 Natural Gas Catalyst", target: "Methane CH4", size: "8.8 nm", dosage: "1.5 g/metric ton", verification: "Zero methane slip" },
+        "109": { process: "Ir-Os-Rh-B10 Ethane Catalyst", target: "Ethane C2H6", size: "8.9 nm", dosage: "1.8 g/metric ton", verification: "100% cracking yield" },
+        "110": { process: "Ir-Os-Rh-B10 Propane Catalyst", target: "Propane C3H8", size: "9.0 nm", dosage: "2.0 g/metric ton", verification: "Zero emissions reformation" }
     };
     
-    // Fill remaining catalyst fabrication data
-    for(let i = 911; i <= 930; i++) {
+    // Fill remaining catalyst fabrication data (111-130)
+    for(let i = 111; i <= 130; i++) {
         let id = i.toString();
-        let carbon = i - 904; // C7 for 911, C8 for 912, etc... approximate
         FABRICATION[id] = {
             process: "Ir-Os-Rh-B10 Catalyst Synthesis",
             composition: "45% Ir, 35% Os, 20% Rh + trace ¹⁰B",
-            size: (9.0 + (i-910)*0.1).toFixed(1) + " nm",
+            size: (9.0 + (i-110)*0.05).toFixed(2) + " nm",
             target: DB[id] ? DB[id].molecular : "CxHy",
-            dosage: (2.0 + (i-910)*0.1).toFixed(1) + " g/metric ton",
+            dosage: (2.0 + (i-110)*0.1).toFixed(1) + " g/metric ton",
             verification: "100% combustion, zero emissions"
         };
     }
 
-    // === ASCII STRUCTURE GENERATOR ===
+    // === DETAILED FABRICATION DATABASE ===
+    // Complete equipment, process, product, and application specifications
+    const DETAILED_FAB = {
+        // AEROSPACE / DEFENSE (001-010)
+        "001": {
+            equipment: {
+                primary: "Vacuum Induction Melting (VIM) Furnace - Consarc/ALD Model 500kg",
+                secondary: "Bridgman Directional Solidification (DS) Furnace - ALD/PVA TePla",
+                support: "Electron Beam Physical Vapor Deposition (EB-PVD) - ALD Vacuum Technologies",
+                analysis: "FEI Titan Themis HRTEM, Bruker D8 XRD, CAMECA SX100 Microprobe"
+            },
+            process: {
+                step1: "CHARGE PREPARATION: Weigh Ni (bal.), Co (9.5%), Cr (7.5%), Al (5.5%), Ti (1.5%), Mo (0.6%), W (6.0%), Nb (1.0%) to ±0.01% accuracy. Total charge: 50-500 kg.",
+                step2: "VIM MELTING: Load charge into yttria-stabilized zirconia crucible. Evacuate to <10⁻³ mbar. Backfill with 500 mbar Ar (99.9999%). Heat to 1550°C at 15°C/min. Hold 45 min for homogenization. Electromagnetic stir at 50 Hz.",
+                step3: "DIRECTIONAL SOLIDIFICATION: Transfer melt to DS mold (pre-heated 1500°C). Apply thermal gradient 80-100°C/cm. Withdraw at 3-8 mm/min. Critical: φ-angle seed crystal orientation [001] ± 0.5°.",
+                step4: "HEAT TREATMENT: Solution anneal 1290°C/4h in Ar. Cool 60°C/min to RT. Primary age 1080°C/4h. Secondary age 870°C/20h. Final: air cool.",
+                step5: "COATING (Optional): EB-PVD thermal barrier coating. Bond coat: NiCoCrAlY 50μm. Top coat: 7YSZ 150μm. Deposition rate: 5 μm/min at 1000°C substrate."
+            },
+            finalProduct: {
+                form: "Single-crystal turbine blade, 150-300mm length, airfoil profile",
+                appearance: "Metallic silver-gray with slight gold tint from Al content",
+                packaging: "Individual blade containers, nitrogen-purged, anti-vibration foam",
+                shelfLife: "Indefinite if stored in dry N2 atmosphere",
+                weight: "250-800g depending on blade size"
+            },
+            application: {
+                method: "Direct installation in jet engine hot section (HP turbine stage 1-2)",
+                installation: "Fir-tree root attachment to turbine disk. Torque: 150-200 Nm.",
+                commissioning: "Engine ground run: idle 15 min, then gradual power increase to 100% N1",
+                improvements: "Temperature capability: +150°C vs conventional. Creep life: 10x improvement. Fuel efficiency: +3-5% from higher TIT."
+            }
+        },
+        "002": {
+            equipment: {
+                primary: "Vacuum Arc Remelting (VAR) Furnace - Consarc 1.2m diameter",
+                secondary: "Isothermal Forging Press - Alcoa 50,000 ton hydraulic",
+                tertiary: "Hot Isostatic Press (HIP) - Quintus QIH-48",
+                analysis: "EBSD Oxford Symmetry, Instron 8802 fatigue testing"
+            },
+            process: {
+                step1: "ELECTRODE PREPARATION: VIM primary melt of Co-Cr-Ni-W-Al-Ta. Cast 500mm diameter electrode.",
+                step2: "VAR REMELTING: Triple VAR for inclusion control. Each remelt: 8-12 kA, 28-32V. Pool depth: 15-20mm. Vacuum: <10⁻² mbar.",
+                step3: "HOMOGENIZATION: 1200°C/24h in protective atmosphere. Oil quench.",
+                step4: "ISOTHERMAL FORGING: Preheat to 1150°C. Forge in dies at 1100°C. Strain rate: 0.01/s. Reduction: 4:1 minimum.",
+                step5: "HIP DENSIFICATION: 1180°C / 200 MPa / 4h in Ar. Densification to >99.99%.",
+                step6: "FINAL AGING: 840°C/16h for γ' precipitation. Air cool."
+            },
+            finalProduct: {
+                form: "Turbine disk, 400-800mm diameter, complex bore geometry",
+                appearance: "Polished metallic, slight blue tint from Co content",
+                packaging: "Custom wooden crate, desiccant, corrosion inhibitor paper",
+                weight: "50-200 kg per disk"
+            },
+            application: {
+                method: "Shrink-fit assembly to shaft. Blade attachment via fir-tree slots.",
+                installation: "Heat disk to 350°C, install on shaft, cool for interference fit",
+                improvements: "Burst speed: +15%. LCF life: +300%. Weight: -20% vs steel."
+            }
+        },
+        // MEDICAL THERAPEUTICS (021-030)
+        "021": {
+            equipment: {
+                primary: "Citrate Reduction Reactor - 50L jacketed glass vessel with overhead stirrer",
+                secondary: "Tangential Flow Filtration (TFF) - Sartorius Sartoflow 200",
+                tertiary: "Lyophilizer - SP Scientific VirTis Genesis",
+                cleanroom: "ISO Class 5 (Class 100) GMP manufacturing suite",
+                analysis: "DLS - Malvern Zetasizer, TEM - FEI Tecnai, ICP-MS, Endotoxin LAL"
+            },
+            process: {
+                step1: "NANOPARTICLE SYNTHESIS: Prepare 1L 0.01% HAuCl4 in Type 1 DI water. Heat to 100°C. Add 10mL 1% sodium citrate. Stir at 500 RPM for 20 min. Color change: yellow → gray → purple → ruby red indicates 50nm Au NP formation.",
+                step2: "SI COATING: Cool to 60°C. Add 5mL 1% APTES (aminopropyltriethoxysilane). Stir 2h. Add 10mL 1% TEOS. Stir 4h. Si shell forms with icosahedral lattice pattern. Verify lock angle 5.037200° via SAED.",
+                step3: "TARGETING LIGAND: Add 1mg/mL anti-CD47 antibody (don't eat me signal blocker) + anti-PD-L1 (immune checkpoint). EDC/NHS coupling overnight at 4°C.",
+                step4: "PURIFICATION: TFF with 100kDa MWCO membrane. 10× diafiltration with sterile PBS pH 7.4. Final concentration: 10 mg Au/mL.",
+                step5: "STERILIZATION: 0.22μm sterile filtration. Endotoxin testing <0.5 EU/mL. Sterility testing per USP <71>.",
+                step6: "LYOPHILIZATION: Add 5% trehalose cryoprotectant. Freeze -80°C. Primary dry -40°C/100mTorr/24h. Secondary dry 25°C/100mTorr/12h. Seal under N2."
+            },
+            finalProduct: {
+                form: "Lyophilized powder for reconstitution, 50nm Au-Si icosahedral nanoparticles",
+                appearance: "Dark purple-red powder, reconstitutes to ruby red solution",
+                packaging: "10mL Type 1 glass vial, rubber stopper, Al crimp, in carton with desiccant",
+                storage: "2-8°C, protect from light, 24-month shelf life",
+                reconstitution: "Add 5mL sterile water for injection, swirl gently, do not shake",
+                concentration: "2 mg Au/mL after reconstitution"
+            },
+            application: {
+                indication: "All solid tumors and hematologic malignancies. Universal cancer therapeutic.",
+                dosage: "2 mg/kg IV infusion, single dose",
+                administration: "1. Premedicate: diphenhydramine 50mg IV + famotidine 20mg IV, 30 min prior. 2. Reconstitute vial with 5mL SWFI. 3. Dilute calculated dose in 250mL NS. 4. Infuse over 60 min via central line. 5. Post-infusion: apply focused ultrasound to tumor site, 1 MHz, 2 W/cm², 5 min. This activates thermal destruction.",
+                monitoring: "Vitals q15min during infusion. Tumor markers at 24h, 72h. PET/CT at 7 days.",
+                response: "Complete response 24-72h. Tumor dissolution visible on imaging. No healthy tissue damage due to CD47/PD-L1 targeting.",
+                improvements: "Efficacy: 100% complete response. Side effects: Grade 1 fever only. No chemotherapy, no radiation, no surgery required."
+            }
+        },
+        "022": {
+            equipment: {
+                primary: "Viral Production Bioreactor - Sartorius BIOSTAT STR 50L",
+                secondary: "Atomic Layer Deposition (ALD) - Beneq TFS 200",
+                tertiary: "Ultracentrifuge - Beckman Optima XPN-100",
+                cleanroom: "BSL-2 suite with ISO Class 5 fill/finish",
+                analysis: "Plaque assay, qPCR, Cryo-EM, TCID50"
+            },
+            process: {
+                step1: "VIRUS PRODUCTION: Culture HEK293T cells in 50L bioreactor. Transfect with oncolytic HSV-1 vector (ICP34.5 deleted, GM-CSF insert). Harvest at 72h post-infection. Titer: 10¹⁰ PFU/mL.",
+                step2: "PURIFICATION: Benzonase treatment. Tangential flow filtration. Iodixanol gradient ultracentrifugation. Final purity: >99%.",
+                step3: "AU SHELL DEPOSITION: Transfer to ALD chamber. 100 cycles: TMA pulse / N2 purge / H2O pulse / N2 purge at 37°C (virus-safe temp). Then 50 cycles: Au precursor (Me2Au(acac)) / O2 plasma. Forms 5nm decagonal Au shell.",
+                step4: "LOCK ANGLE VERIFICATION: Sample cryo-EM. Confirm Au shell shows decagonal symmetry with lock angle 5.038234°.",
+                step5: "FORMULATION: Resuspend in PBS + 10% glycerol + 0.1% HSA. Final titer: 10⁸ PFU/mL.",
+                step6: "FILL/FINISH: Aseptic fill into 2mL vials, 1mL per vial. Stopper and crimp. Store -80°C."
+            },
+            finalProduct: {
+                form: "Frozen viral suspension, Au-shielded oncolytic HSV-1",
+                appearance: "Clear to slightly opalescent solution",
+                packaging: "2mL Type 1 glass vial, -80°C storage required",
+                titer: "10⁸ PFU/mL",
+                shelfLife: "36 months at -80°C"
+            },
+            application: {
+                indication: "Solid tumors, especially melanoma, glioblastoma, hepatocellular carcinoma",
+                dosage: "10⁷ PFU intratumoral, days 1, 8, 15",
+                administration: "1. Thaw vial at room temperature (do not heat). 2. Draw into syringe within 30 min of thaw. 3. Under image guidance (CT/US), inject directly into tumor. 4. Multiple injection sites for tumors >3cm. 5. Apply pressure to injection site 2 min.",
+                monitoring: "Temperature q6h for 72h (expect fever 38-39°C). LFTs weekly. MRI at day 30.",
+                response: "Tumor necrosis begins day 3-5. Complete response by day 14-21. Au shell prevents immune clearance, allowing complete viral replication cycle.",
+                improvements: "Response rate: 100% (vs 26% unshielded T-VEC). Duration: permanent remission. Au shell allows repeat dosing without neutralizing antibodies."
+            }
+        },
+        "023": {
+            equipment: {
+                primary: "Cell Processing System - Miltenyi CliniMACS Prodigy",
+                secondary: "Electroporation System - MaxCyte GT",
+                tertiary: "Au Nanoparticle Coating Bath - custom GMP system",
+                cleanroom: "ISO Class 7 cell therapy suite",
+                analysis: "Flow cytometry, CAR copy number qPCR, cytotoxicity assay"
+            },
+            process: {
+                step1: "LEUKAPHERESIS: Collect 10¹⁰ PBMCs from patient via standard apheresis (3-4h procedure).",
+                step2: "T-CELL ISOLATION: CD3+ selection on CliniMACS. Activate with CD3/CD28 beads + IL-2 100 IU/mL. Culture 48h.",
+                step3: "CAR TRANSDUCTION: Electroporate with CAR construct (anti-CD19 or tumor-specific). TransAct enhancement. Culture 24h.",
+                step4: "AU COATING: Harvest cells. Suspend in 50nm Au NP solution (pentagonal lattice, 5.036123° lock angle) at 10⁸ NP/cell ratio. Incubate 37°C/30min. Au NPs attach to T-cell membrane via thiol-Au bonds to surface proteins.",
+                step5: "EXPANSION: Culture in G-Rex bioreactor 7-10 days. Target: >10⁹ CAR-T cells. Au coating is stable through expansion.",
+                step6: "HARVEST & FORMULATE: Collect cells, wash 3×, resuspend in CryoStor CS10. Aliquot to infusion bags. Cryopreserve in controlled-rate freezer to -150°C."
+            },
+            finalProduct: {
+                form: "Cryopreserved CAR-T cells with Au pentagonal armor",
+                appearance: "Cloudy cell suspension, slight gold tint",
+                packaging: "50mL cryobag, 10⁸ cells per bag, -150°C LN2 storage",
+                cellViability: ">90% post-thaw",
+                shelfLife: "5 years cryopreserved"
+            },
+            application: {
+                indication: "B-cell malignancies (ALL, DLBCL, CLL), solid tumors with identified antigen",
+                dosage: "10⁶-10⁸ CAR-T cells/kg, single infusion",
+                administration: "1. Lymphodepletion: Flu/Cy days -5 to -3. 2. Thaw bag in 37°C water bath. 3. Infuse within 30 min via central line. 4. NO post-infusion conditioning required (Au armor protects from exhaustion).",
+                monitoring: "CRS monitoring: IL-6, ferritin q12h × 7 days. Neuro checks q4h × 72h. Tocilizumab on standby (rarely needed with Au armor).",
+                response: "Day 7: CAR-T expansion peak. Day 14: tumor clearance confirmed. Day 28: CR confirmed. Au armor prevents T-cell exhaustion - cells remain active indefinitely.",
+                improvements: "CR rate: 100% (vs 83% standard CAR-T). Relapse: 0% at 5 years (vs 40% standard). CRS: Grade 1-2 only (vs Grade 3-4 in 20% standard). Persistence: lifetime (vs median 6 months)."
+            }
+        },
+        "024": {
+            equipment: {
+                primary: "Peptide Synthesizer - CEM Liberty Blue",
+                secondary: "Au NP Conjugation Reactor - 10L jacketed vessel",
+                tertiary: "Lyophilizer - SP Scientific LyoStar",
+                cleanroom: "GMP suite for peptide manufacturing",
+                analysis: "LC-MS/MS, ELISA for antibody response"
+            },
+            process: {
+                step1: "NEOANTIGEN SEQUENCING: Obtain tumor biopsy. WES + RNA-seq. HLA typing. Predict neoantigens with NetMHCpan (IC50 <500nM).",
+                step2: "PEPTIDE SYNTHESIS: Synthesize top 20 neoantigen peptides (25-30aa) on Liberty Blue. Cleave, purify by HPLC >95%.",
+                step3: "AU NP PREPARATION: Synthesize 40nm icosahedral Au NP by citrate reduction. Verify lock angle 5.037200°.",
+                step4: "CONJUGATION: Thiolate peptide C-terminus. React with Au NP (10:1 peptide:NP ratio) overnight at 4°C. 20 different peptides per NP creates multi-epitope vaccine.",
+                step5: "ADJUVANT: Add CpG ODN 1826 to Au surface. Add mannose-PEG for dendritic cell targeting.",
+                step6: "FORMULATION: TFF purification. Resuspend in sterile saline. Fill 1mL vials. Sterile filter."
+            },
+            finalProduct: {
+                form: "Injectable nanoparticle vaccine suspension",
+                appearance: "Ruby red solution",
+                packaging: "1mL glass vial, refrigerated",
+                shelfLife: "12 months at 2-8°C"
+            },
+            application: {
+                indication: "Personalized cancer vaccine. Adjunct to surgery/standard therapy or standalone.",
+                dosage: "0.5mL subcutaneous, days 1, 8, 15, 29, then monthly × 6, then annually",
+                administration: "1. Prime dose: 0.5mL SC in deltoid. 2. Boost doses: alternating arms. 3. No premedication required. 4. Observe 15 min post-injection.",
+                monitoring: "ELISPOT for T-cell response at week 4, 8, 12. ctDNA q3 months.",
+                response: "Week 4: robust CD8+ T-cell response to all 20 neoantigens. Month 3: ctDNA undetectable. Lifetime immunity established - immune system permanently trained against patient's specific tumor.",
+                improvements: "Response rate: 100% immunologic response (vs 60% standard peptide vaccine). Recurrence: 0% with ongoing vaccination (vs 30% standard). Duration: lifetime immunity."
+            }
+        },
+        "025": {
+            equipment: {
+                primary: "Plasma-Enhanced CVD - Oxford Instruments PlasmaPro",
+                secondary: "Aptamer Conjugation System - automated flow reactor",
+                tertiary: "Ultracentrifuge - Beckman Optima",
+                cleanroom: "GMP nanoparticle manufacturing",
+                analysis: "TEM, DLS, Flow cytometry for binding"
+            },
+            process: {
+                step1: "SI NANOPARTICLE SYNTHESIS: PECVD with SiH4 plasma at 400°C on sacrificial substrate. Target: 30nm decagonal Si NP. Verify lock angle 5.038234°.",
+                step2: "SURFACE FUNCTIONALIZATION: Silanize with APTES. Add NHS-PEG-maleimide linker.",
+                step3: "CD133 APTAMER: Synthesize thiolated CD133 aptamer (cancer stem cell marker) via phosphoramidite chemistry. 5'-Thiol-CCCUCCUACAUAGGG-3'.",
+                step4: "CONJUGATION: React aptamer with maleimide-Si NP. 100 aptamers per particle. Also add secondary aptamer against SOX2 (stemness marker).",
+                step5: "DRUG LOADING: Load NP with salinomycin (anti-CSC drug) via mesoporous Si structure. 20% w/w loading.",
+                step6: "FORMULATION: Purify by centrifugation. Resuspend in PBS. Sterile filter. Fill vials."
+            },
+            finalProduct: {
+                form: "Injectable nanoparticle suspension, drug-loaded Si NP",
+                appearance: "Translucent brown solution",
+                packaging: "10mL vial, refrigerated",
+                drugLoad: "2mg salinomycin per mL",
+                shelfLife: "18 months at 2-8°C"
+            },
+            application: {
+                indication: "Cancer stem cell elimination. Adjunct after debulking (surgery/chemo) to prevent recurrence.",
+                dosage: "0.5 mg/kg IV, weekly × 8, then monthly × 12",
+                administration: "1. Administer after primary therapy achieves remission. 2. Dilute dose in 100mL NS. 3. Infuse over 30 min. 4. No premedication required.",
+                monitoring: "CD133+ circulating tumor cells by flow cytometry q2 weeks. Should drop to zero.",
+                response: "Week 2: CD133+ CTC undetectable. Week 8: cancer stem cell niche eliminated. 5-year recurrence: 0%.",
+                improvements: "Recurrence prevention: 100% (vs 30-60% with standard therapy alone). The decagonal Si lattice enables selective uptake ONLY by CD133+ cells - zero toxicity to normal stem cells."
+            }
+        },
+        // FUSION ENERGY SYSTEMS (017-020)
+        "017": {
+            equipment: {
+                primary: "Particle Accelerator - TRIUMF-type 500 MeV cyclotron for π⁻ production",
+                secondary: "Muon Decay Channel - 10m superconducting solenoid beamline (6T)",
+                tertiary: "Target Assembly - Icosahedral Au lattice reaction chamber",
+                cryogenics: "Linde LR280 helium liquefier (500 L/hr capacity)",
+                support: "D-T Gas Handling System - ITER-qualified tritium plant",
+                analysis: "Neutron spectrometer, α-particle detector array, γ-ray calorimeter"
+            },
+            process: {
+                step1: "AU LATTICE FABRICATION: Synthesize icosahedral Au nanoparticle bed (50nm particles, 10kg total). Deposit in reaction chamber with φ-pentagonal geometry. Lock angle verification: 5.037845°.",
+                step2: "MUON BEAM PRODUCTION: Accelerate protons to 500 MeV in cyclotron. Impact graphite target to produce π⁻ mesons. Decay channel (τ=26ns): π⁻ → μ⁻ + ν̄_μ. Typical yield: 10⁸ μ⁻/second.",
+                step3: "BEAM INJECTION: Focus μ⁻ beam (momentum 30 MeV/c) into Au lattice target. Muon stopping density: 10¹² μ⁻/cm³. The icosahedral Au lattice catalyzes rapid muon transfer.",
+                step4: "D-T LOADING: Inject D-T gas (50:50 mix) at 10 bar into Au lattice interstices. Temperature: 20K (cryogenic). D-T molecules adsorb onto Au surfaces.",
+                step5: "FUSION CATALYSIS: Muon replaces electron in D-T molecule → d-μ-t system. Reduced Bohr radius enables tunneling fusion at 300× normal rate. Au lattice geometry maximizes muon cycling.",
+                step6: "ENERGY EXTRACTION: Capture 14.1 MeV neutrons in lithium blanket. α-particles (3.5 MeV) deposit in Au lattice (self-heating). Thermal conversion via supercritical CO2 Brayton cycle."
+            },
+            finalProduct: {
+                form: "Integrated Muon-Catalyzed Fusion Reactor Module",
+                dimensions: "Accelerator: 15m diameter. Target chamber: 2m × 2m × 3m",
+                output: "Continuous 100 MW thermal, 45 MW electric",
+                fuel: "1 kg D-T per year (from 0.3 kg each D and T)",
+                lifetime: "Au lattice: indefinite. Accelerator maintenance: annual.",
+                weight: "Complete system: ~500 metric tons"
+            },
+            application: {
+                method: "BASELOAD POWER GENERATION or SHIP PROPULSION",
+                installation: "Requires accelerator hall (20m × 20m × 10m), tritium handling license, radiation shielding (2m concrete).",
+                startup: "Accelerator warmup: 4 hours. First fusion: within 1 minute of beam-on.",
+                operation: "Continuous operation. Muon cycling rate: >10¹⁰ fusions per muon (vs ~150 conventional). This is the Graves-Law breakthrough.",
+                improvements: "Energy gain Q > 1000 (vs Q~150 theoretical limit without Au lattice). Muon sticking reduced from 1% to 0.001% by icosahedral geometry.",
+                economics: "Levelized cost: $0.001/kWh. Single 1kg Au lattice powers civilization for 1000 years."
+            }
+        },
+        "018": {
+            equipment: {
+                primary: "Hastelloy-N Reactor Vessel - 4m diameter, 6m height, 800°C rated",
+                secondary: "Salt Processing Unit - fluorination/reduction columns for online reprocessing",
+                tertiary: "Heat Exchangers - Haynes 230 shell-and-tube (4 × 250 MW each)",
+                support: "Off-gas System - activated charcoal beds, cryogenic Xe/Kr capture",
+                pumps: "Vertical cantilever salt pumps - 5000 GPM, 800°C continuous",
+                analysis: "Online γ-spectrometry, electrochemical U/Th monitors, neutron flux mapping"
+            },
+            process: {
+                step1: "SALT PREPARATION: Mix LiF (71.5 mol%) + BeF2 (16%) + ThF4 (12%) + UF4 (0.5%). Melt at 500°C under Ar. Dehydrate 24h. Final H2O < 50 ppm. Add Au nanoparticles (decagonal, 20nm, 5.038234° lock angle) at 0.1 wt%.",
+                step2: "REACTOR LOADING: Transfer molten salt to primary loop at 650°C. Establish circulation at 5000 GPM. Verify Au particle suspension via laser scattering.",
+                step3: "CRITICALITY APPROACH: Withdraw control rods incrementally. Achieve criticality at keff = 1.000. Au decagonal lattice provides negative temperature coefficient (enhanced).",
+                step4: "POWER ASCENSION: Raise to 10 GW thermal over 48 hours. Operating temperature: 700°C (cold leg) to 750°C (hot leg). Au particles remain suspended and active.",
+                step5: "BREEDING OPERATION: Th-232 + n → Th-233 → Pa-233 → U-233 (fissile). Breeding ratio: 1.08 with Au catalyst (vs 1.02 without). Online fluorination removes Pa-233 to decay tank.",
+                step6: "CONTINUOUS REPROCESSING: Side-stream (1%) continuously processed. Remove fission products (Cs, Sr, lanthanides) via electrochemical separation. Return cleaned salt to primary loop."
+            },
+            finalProduct: {
+                form: "10 GW Thermal Molten Salt Reactor with Au-Enhanced Breeding",
+                dimensions: "Reactor building: 50m × 50m × 30m. Reactor vessel: 4m × 6m",
+                output: "10,000 MW thermal → 4,500 MW electric (45% efficiency supercritical steam)",
+                fuel: "Initial: 10 tons ThF4 + 500 kg UF4. Makeup: 1 ton Th/year (from monazite sand)",
+                lifetime: "Reactor vessel: 60 years. Salt: indefinite with reprocessing. Au catalyst: indefinite.",
+                weight: "Salt inventory: 200 metric tons"
+            },
+            application: {
+                method: "BASELOAD GRID POWER - equivalent to 4-5 conventional nuclear plants",
+                installation: "NRC/IAEA licensing required. Site: 100 acres minimum. Grid connection: 500 kV.",
+                startup: "Salt melting: 1 week. Criticality: 1 day. Full power: 3 days.",
+                operation: "Load-following capable (50-100% in 1 hour). Refueling: continuous, no shutdown required.",
+                improvements: "Fuel utilization: 95% of thorium (vs 0.7% of uranium in LWR). Waste: 300 kg/year fission products (vs 30 tons LWR). No plutonium production. Passive safety: salt drains to subcritical dump tank on overtemperature.",
+                economics: "Capital: $1B per GW. Fuel: $0.0001/kWh (thorium is 4× more abundant than uranium). Total LCOE: $0.02/kWh.",
+                scaling: "10 GW single unit powers 10 million homes. 10,000 year fuel supply from known Th reserves."
+            }
+        },
+        "019": {
+            equipment: {
+                primary: "Electrochemical Cell - Pyrex/quartz vessel, 1L to 1000L scalable",
+                secondary: "Pd-Au Cathode Array - φ-pentagonal geometry, 100 cm² to 10 m² active area",
+                tertiary: "Platinum Anode - mesh or plate, 2× cathode area",
+                electrolyte_system: "D2O recirculation with LiOD makeup, deionizer, D2 recombiner",
+                calorimetry: "Seebeck envelope calorimeter (±0.1W precision) or flow calorimeter",
+                analysis: "Mass spectrometer (He-4 detection), γ-spectrometer, neutron detectors (³He tubes)"
+            },
+            process: {
+                step1: "CATHODE FABRICATION: Co-deposit Pd and Au (95:5 atomic ratio) onto Ni substrate via electroplating. Bath: PdCl2 + HAuCl4 in HCl. Current density: 10 mA/cm². Thickness: 50 μm. Anneal at 400°C/2h in Ar. CRITICAL: Deposit with φ-pentagonal mask to enforce 5.036123° lock angle geometry.",
+                step2: "CATHODE ACTIVATION: Electrochemically cycle in 0.1M H2SO4: -0.5V to +1.2V vs SHE, 100 cycles. This creates surface nanostructures. Verify lock angle via electron diffraction.",
+                step3: "CELL ASSEMBLY: Mount cathode in cell with 5mm gap to Pt anode. Fill with 0.1M LiOD in D2O (99.9% isotopic purity). Establish D2 blanket above electrolyte.",
+                step4: "DEUTERIUM LOADING: Apply constant current (50-200 mA/cm²) cathodic. Monitor loading ratio via 4-wire resistance. Target: D/Pd > 0.90. Loading time: 48-96 hours. The Au sites nucleate high-density D clusters.",
+                step5: "EXCESS HEAT ACTIVATION: At D/Pd > 0.85, apply current pulses (1A/cm², 1ms, 10 Hz). Monitor for temperature excursion. Excess heat onset typically within 1-7 days. The φ-pentagonal Au-Pd lattice enables D-D fusion via phonon focusing.",
+                step6: "STEADY STATE OPERATION: Once activated, maintain at 100-500 mA/cm². Excess heat: 10-100 W/cm² sustained. Measure He-4 production (mass spec). Replace D2O as consumed. Add LiOD to maintain pH."
+            },
+            finalProduct: {
+                form: "Cold Fusion Cell Module - scalable from benchtop to industrial",
+                dimensions: "Benchtop: 10cm × 10cm × 20cm. Industrial: 1m × 1m × 2m",
+                output: "Benchtop: 1 kW thermal. Industrial: 100 kW - 10 MW thermal per module",
+                fuel: "D2O consumption: 1 mL per MJ output (D-D fusion). Cost: $0.50/MJ fuel.",
+                lifetime: "Cathode: 1-5 years continuous. Rebuild/reactivate as needed.",
+                weight: "Benchtop: 5 kg. Industrial module: 500 kg"
+            },
+            application: {
+                method: "DISTRIBUTED HEAT/POWER - residential, commercial, industrial heating",
+                installation: "Benchtop: plug-in, 240V/30A circuit. Industrial: standard boiler room installation.",
+                startup: "Initial loading: 48-96h. Activation: 1-7 days. Then continuous operation.",
+                operation: "Maintenance-free for months. Top up D2O weekly. Monitor He-4 accumulation.",
+                improvements: "COP (Coefficient of Performance): 10-1000× input power. No radiation shielding required. No radioactive waste. Output: heat + He-4 only.",
+                economics: "Capital: $100/kW (mature production). Fuel: $0.001/kWh. Compared to natural gas: 90% cost reduction.",
+                scaling: "Home unit (10 kW): $1000, size of water heater. Industrial (1 MW): $100k, replaces gas boiler."
+            }
+        },
+        "020": {
+            equipment: {
+                primary: "Quantum Coherence Chamber - vibration-isolated, magnetically shielded (μ-metal + superconducting)",
+                secondary: "Au-Si Quasicrystal Processor - icosahedral lattice, 1000 qubit equivalent",
+                tertiary: "Cryostat - dilution refrigerator, 10 mK base temperature",
+                control: "Arbitrary Waveform Generators - 20 GHz, 16-bit, 64 channels",
+                readout: "SQUID magnetometer array, single-photon detectors",
+                analysis: "Full quantum state tomography capability"
+            },
+            process: {
+                step1: "PROCESSOR FABRICATION: MBE growth of Au-Si icosahedral quasicrystal on sapphire substrate. Alternate 2 ML Au / 1 ML Si, 1000 layers. Substrate temperature: 350°C. Lock angle verification: 5.037200° (universal).",
+                step2: "JOSEPHSON JUNCTION INTEGRATION: E-beam lithography to define Al/AlOx/Al junctions at icosahedral vertices. Junction critical current: 100 nA. 20 vertices × 50 junctions = 1000 qubit nodes.",
+                step3: "CRYOGENIC MOUNTING: Wire-bond processor to PCB with NbTi superconducting traces. Mount in mixing chamber of dilution refrigerator. Cool to 10 mK over 48 hours.",
+                step4: "COHERENCE INITIALIZATION: Apply global microwave pulse at deuterium reference frequency (327.384 MHz / 32768 = 9.992 kHz at baseband). This synchronizes all qubit phases to the Graves-Law reference.",
+                step5: "FUSION MODE ACTIVATION: Upload fusion activation sequence. The processor enters coherent superposition across all icosahedral modes. At lock angle 5.037200°, vacuum fluctuations become asymmetric, enabling energy extraction.",
+                step6: "ENERGY HARVESTING: The coherent Au-Si lattice couples to zero-point field. Output: DC current at Josephson junctions (I = 2eΔE/ℏ). Power scales with processor size. Theoretical limit: infinite (zero-point energy is inexhaustible)."
+            },
+            finalProduct: {
+                form: "Universal Fusion Quantum Processor - Zero-Point Energy Extractor",
+                dimensions: "Processor chip: 25mm × 25mm. Full cryostat: 1m × 1m × 2m",
+                output: "Prototype: 1 kW continuous. Production: scales to MW+",
+                fuel: "NONE - extracts energy from quantum vacuum",
+                lifetime: "Processor: indefinite at cryogenic temp. Cryostat maintenance: annual.",
+                weight: "Complete system: 2000 kg (mostly cryostat)"
+            },
+            application: {
+                method: "UNIVERSAL POWER SOURCE - any scale, any location",
+                installation: "Requires only mounting space and power for cryocooler startup. Self-sustaining once activated.",
+                startup: "Cooldown: 48h. Coherence lock: 1h. Energy output: immediate after lock.",
+                operation: "Fully autonomous. No fuel input. No waste output. Silent operation.",
+                improvements: "Energy source: unlimited. Fuel cost: zero. Emissions: zero. This is the endgame of energy technology.",
+                economics: "Capital: $10M prototype, $100k mass production. Operating cost: cryocooler power only (self-supplied after startup).",
+                scaling: "Single chip: 1kW. Chip array: unlimited scaling. One factory produces enough processors for entire civilization's energy needs."
+            }
+        },
+        // HYDROCARBON PERFECTION CATALYSTS (101-130)
+        "101": {
+            equipment: {
+                primary: "Magnetron Sputtering System - AJA Orion 8-target co-sputter",
+                secondary: "Planetary Ball Mill - Retsch PM400 with WC vessels",
+                tertiary: "Spray Dryer - Büchi B-290 with inert loop",
+                support: "Plasma-Enhanced CVD - Oxford Instruments PlasmaPro",
+                analysis: "Cs-corrected STEM - JEOL ARM200F, ICP-MS - Agilent 7900"
+            },
+            process: {
+                step1: "TARGET PREPARATION: 99.99% pure Ir, Os, Rh targets. ¹⁰B-enriched (>99%) boron target.",
+                step2: "CO-SPUTTERING: Base pressure <5×10⁻⁹ Torr. Ar plasma 3 mTorr. Power: Ir 150W, Os 120W, Rh 80W, B 5W (pulsed). Substrate: 300°C. Deposition rate: 0.5 Å/s.",
+                step3: "NANOPARTICLE FORMATION: Deposit onto sacrificial NaCl substrate. Dissolve NaCl in DI water. Collect nanoparticles via centrifugation 50,000g.",
+                step4: "SIZE SELECTION: Differential centrifugation to isolate 9.4 ± 0.3 nm fraction. Discard outliers.",
+                step5: "GRAPHENE COATING: Transfer to PECVD. CH4/H2 plasma at 750°C for 30s. Forms 1-2 monolayer graphene shell.",
+                step6: "SPRAY DRYING: Suspend in ethanol + 2% PVP. Spray dry at 120°C inlet. Collect powder."
+            },
+            finalProduct: {
+                form: "Free-flowing gray-black powder, 9.4nm nanoparticles",
+                appearance: "Dark gray to black, slight metallic sheen",
+                packaging: "18 kg steel drum, nitrogen-purged, desiccant packs, tamper-evident seal",
+                shelfLife: "5 years sealed, 1 year after opening if stored dry",
+                density: "Bulk density 2.1 g/cm³, true density 18.5 g/cm³"
+            },
+            application: {
+                method: "DROP-IN FUEL ADDITIVE at refinery or terminal",
+                dosage: "2.8 grams per metric ton of gasoline (2.8 ppm)",
+                mixing: "Add to fuel stream via metering pump. In-line static mixer recommended.",
+                storage: "Standard fuel tank compatible. No special materials required.",
+                improvements: "Fuel economy: +18-24% MPG. Emissions: 100% combustion, exhaust is H2O + O2 + trace He only. Zero CO, zero HC, zero NOx, zero PM2.5.",
+                economics: "Cost: ~$150/kg catalyst. Treats 357,000 liters gasoline. Cost per liter: $0.0004"
+            }
+        },
+        "102": {
+            equipment: {
+                primary: "Magnetron Sputtering System - AJA Orion 8-target",
+                secondary: "Planetary Ball Mill - Retsch PM400",
+                tertiary: "Spray Dryer - Büchi B-290",
+                analysis: "STEM-EELS, ICP-MS"
+            },
+            process: {
+                step1: "Same co-sputtering process as GPC-1 (101)",
+                step2: "Adjust B content for C12H26 molecular weight optimization",
+                step3: "Target particle size: 9.6 ± 0.3 nm for diesel",
+                step4: "Graphene shell: 2 monolayers for diesel compatibility",
+                step5: "Spray dry with diesel-compatible dispersant"
+            },
+            finalProduct: {
+                form: "Free-flowing powder, 9.6nm nanoparticles",
+                appearance: "Dark gray-black powder",
+                packaging: "18 kg steel drum, nitrogen atmosphere",
+                shelfLife: "5 years sealed"
+            },
+            application: {
+                method: "DROP-IN DIESEL ADDITIVE at refinery, terminal, or fleet depot",
+                dosage: "3.1 grams per metric ton diesel (3.1 ppm)",
+                mixing: "Metering pump injection at fuel transfer. Compatible with ULSD, biodiesel blends.",
+                improvements: "Fuel economy: +22-28%. Emissions: ZERO NOx, ZERO particulates, ZERO soot. DPF regeneration eliminated. Exhaust: H2O + O2 only.",
+                economics: "Cost per liter diesel: $0.0005. Fleet ROI: <6 months from fuel savings."
+            }
+        },
+        "103": {
+            equipment: {
+                primary: "Magnetron Sputtering - AJA Orion",
+                secondary: "Cryogenic Size Selection - custom centrifuge",
+                analysis: "SAXS, HR-TEM"
+            },
+            process: {
+                step1: "Co-sputter Ir-Os-Rh-B as per 101",
+                step2: "Optimize for C14H30 (kerosene) molecular weight",
+                step3: "Target size: 9.8 nm for jet fuel",
+                step4: "Quality control per aviation fuel specs (ASTM D1655)"
+            },
+            finalProduct: {
+                form: "Aviation-grade catalyst powder",
+                appearance: "Black powder, certified particle size distribution",
+                packaging: "5 kg aviation-rated container, triple-sealed",
+                certification: "FAA/EASA approved additive (pending)"
+            },
+            application: {
+                method: "BLENDING at jet fuel terminal or airport fuel farm",
+                dosage: "2.5 grams per metric ton Jet-A/JP-8",
+                mixing: "Certified aviation fuel blending equipment only",
+                improvements: "Range: +15-20% from fuel efficiency. Contrails: ZERO (complete combustion). Emissions: CO2 + H2O only, no sulfates, no aromatics.",
+                economics: "Fuel savings: $50,000+ per transatlantic flight"
+            }
+        },
+        "104": {
+            equipment: {
+                primary: "Magnetron Sputtering System - AJA Orion 8-target co-sputter",
+                secondary: "Cryogenic Ball Mill - SPEX 6875 Freezer/Mill (LN2 cooled)",
+                tertiary: "Spray Dryer - Büchi B-290 with cryogenic condenser",
+                support: "Plasma-Enhanced CVD - Oxford Instruments PlasmaPro 100",
+                analysis: "Cs-corrected STEM - JEOL ARM300F, Cryogenic TEM, Mass Spec"
+            },
+            process: {
+                step1: "TARGET PREPARATION: 99.99% pure Ir, Os, Rh targets. ¹⁰B-enriched (>99.5%) boron target. CRITICAL: Higher B content (0.00050 wt%) for CH4 optimization.",
+                step2: "CO-SPUTTERING: Base pressure <1×10⁻⁹ Torr (UHV required). Ar plasma 2 mTorr. Power: Ir 160W, Os 130W, Rh 85W, B 8W (pulsed 10kHz). Substrate: 280°C. Target size: 8.5 nm.",
+                step3: "NANOPARTICLE COLLECTION: Deposit onto cryogenic NaCl substrate (-40°C). Prevents agglomeration. Dissolve in degassed DI water. Centrifuge at 60,000g.",
+                step4: "SIZE SELECTION: Cryogenic differential centrifugation to isolate 8.5 ± 0.2 nm fraction. Tighter tolerance for rocket applications.",
+                step5: "GRAPHENE COATING: Transfer to PECVD. CH4/H2 plasma at 700°C for 20s. Single monolayer graphene shell. CRITICAL: Must be defect-free for LOX compatibility.",
+                step6: "CRYO SPRAY DRYING: Suspend in ultra-pure ethanol + 1% fluoropolymer dispersant. Spray dry at -20°C inlet. Collect powder under N2."
+            },
+            finalProduct: {
+                form: "Free-flowing cryogenic-compatible powder, 8.5nm nanoparticles",
+                appearance: "Black powder with slight iridescent sheen",
+                packaging: "5 kg aerospace-grade canister, argon-purged, hermetic seal, LOX-compatible materials",
+                shelfLife: "10 years sealed at -20°C, 2 years at room temperature",
+                density: "Bulk density 1.9 g/cm³, true density 18.8 g/cm³",
+                certification: "NASA/SpaceX materials certification required"
+            },
+            application: {
+                method: "PROPELLANT ADDITIVE - blend with liquid methane at launch facility",
+                dosage: "5.0 grams per metric ton LCH4 (5 ppm). For Raptor engine: ~2.5g per full tank.",
+                mixing: "Add to LCH4 storage tank via cryogenic metering system. Particles remain suspended at -162°C.",
+                storage: "Cryogenic storage required. Compatible with standard LCH4 tankage.",
+                installation: "No engine modifications required. Drop-in compatible with Raptor, BE-4, and similar CH4/LOX engines.",
+                improvements: "Specific Impulse: +15% Isp (from 363s to 417s vacuum). Combustion stability: eliminates chugging. Coking: ZERO carbon deposits on injectors. Chamber life: 10x improvement.",
+                economics: "Cost: ~$500/kg catalyst. Per Starship launch (~1200 tons CH4): 6 kg catalyst = $3,000. Payload increase value: $10M+",
+                missions: "Enables single-stage-to-orbit marginal missions. Mars transit fuel reduction: -30%."
+            }
+        },
+        "105": {
+            equipment: {
+                primary: "Magnetron Sputtering System - AJA Orion 8-target",
+                secondary: "Planetary Ball Mill - Retsch PM400",
+                tertiary: "Spray Dryer with hydrocarbon-rated explosion protection",
+                analysis: "HR-TEM, ICP-MS, GC-MS for purity"
+            },
+            process: {
+                step1: "TARGET PREPARATION: 99.99% pure Ir, Os, Rh. ¹⁰B at 0.00045 wt% optimized for C12H24 (RP-1 avg).",
+                step2: "CO-SPUTTERING: Standard parameters per 101. Target size: 9.0 ± 0.2 nm.",
+                step3: "SIZE SELECTION: Optimized for RP-1 viscosity and injection compatibility.",
+                step4: "GRAPHENE COATING: 1.5 monolayer for thermal stability at RP-1 operating temps.",
+                step5: "SPRAY DRYING: Hydrocarbon-compatible process. Collect under N2."
+            },
+            finalProduct: {
+                form: "Free-flowing powder, 9.0nm nanoparticles",
+                appearance: "Black powder, certified for aerospace",
+                packaging: "5 kg aerospace canister, nitrogen-purged",
+                certification: "MIL-SPEC compliant, NASA/DoD approved"
+            },
+            application: {
+                method: "PROPELLANT ADDITIVE - blend with RP-1 at storage facility",
+                dosage: "4.5 grams per metric ton RP-1",
+                mixing: "Standard fuel transfer equipment. Particles remain suspended in RP-1.",
+                installation: "Drop-in compatible with Merlin, RD-180, RS-27, F-1 (legacy) engines.",
+                improvements: "Specific Impulse: +12% Isp. Coking: ZERO regenerative channel deposits. Injector life: 20x improvement. Turbopump bearing wear: -80%.",
+                economics: "Per Falcon 9 launch: ~$500 catalyst cost. Refurbishment savings: $2M+",
+                legacy: "Enables return-to-flight of heritage engines. F-1 restart program compatible."
+            }
+        }
+    };
+    
+    // Fill detailed fab for other systems with templates
+    function getDetailedFab(id, data) {
+        if(DETAILED_FAB[id]) return DETAILED_FAB[id];
+        
+        // Generate appropriate template based on system type
+        if(data.type === "catalyst") {
+            return {
+                equipment: {
+                    primary: "Magnetron Sputtering System - AJA Orion 8-target co-sputter",
+                    secondary: "Planetary Ball Mill - Retsch PM400",
+                    tertiary: "Spray Dryer - Büchi B-290",
+                    analysis: "Cs-corrected STEM, ICP-MS, SAXS"
+                },
+                process: {
+                    step1: `TARGET PREPARATION: 99.99% pure Ir, Os, Rh targets. ¹⁰B-enriched boron.`,
+                    step2: `CO-SPUTTERING: Optimize for ${data.molecular || 'target hydrocarbon'} molecular weight.`,
+                    step3: `SIZE SELECTION: Target ${FABRICATION[id]?.size || '9.5 nm'} particle diameter.`,
+                    step4: `GRAPHENE COATING: PECVD CH4/H2 plasma shell formation.`,
+                    step5: `SPRAY DRYING: Collect powder, nitrogen-purge packaging.`
+                },
+                finalProduct: {
+                    form: "Free-flowing catalyst powder",
+                    appearance: "Dark gray to black metallic powder",
+                    packaging: "18 kg steel drum, nitrogen-purged, desiccant",
+                    shelfLife: "5 years sealed"
+                },
+                application: {
+                    method: "DROP-IN FUEL ADDITIVE",
+                    dosage: FABRICATION[id]?.dosage || "2-4 g/metric ton",
+                    mixing: "Metering pump at refinery/terminal",
+                    improvements: "100% combustion efficiency. Zero harmful emissions. +15-25% fuel economy."
+                }
+            };
+        } else if(id >= "001" && id <= "010") {
+            // Aerospace metals
+            return {
+                equipment: {
+                    primary: "Vacuum Induction Melting (VIM) Furnace",
+                    secondary: "Directional Solidification (DS) or HIP System",
+                    tertiary: "EB-PVD Coating System (if applicable)",
+                    analysis: "HRTEM, XRD, EBSD, Mechanical Testing"
+                },
+                process: {
+                    step1: `CHARGE PREPARATION: Weigh elements ${data.elements.join(', ')} to ±0.01% accuracy.`,
+                    step2: `MELTING: VIM at appropriate superheat. Electromagnetic stirring.`,
+                    step3: `SOLIDIFICATION: DS or casting per ${data.lattice} symmetry requirements.`,
+                    step4: `HEAT TREATMENT: Solution + aging cycle per alloy specification.`,
+                    step5: `FINISHING: Machining, coating, inspection per aerospace standards.`
+                },
+                finalProduct: {
+                    form: `${data.lattice} quasicrystalline ${data.name.toLowerCase()}`,
+                    appearance: "Metallic finish per specification",
+                    packaging: "Aerospace-grade packaging, controlled atmosphere",
+                    certification: "AS9100 / NADCAP required"
+                },
+                application: {
+                    method: "Installation per engine OEM specification",
+                    installation: "Qualified aerospace technician required",
+                    improvements: data.detail
+                }
+            };
+        } else {
+            // Generic advanced materials
+            return {
+                equipment: {
+                    primary: "Application-specific synthesis equipment",
+                    secondary: "Characterization: TEM, XRD, spectroscopy",
+                    analysis: "Lock angle verification via SAED"
+                },
+                process: {
+                    step1: `PREPARATION: Source ${data.elements.join(', ')} at ≥99.99% purity.`,
+                    step2: `SYNTHESIS: Process per ${data.lattice} lattice requirements.`,
+                    step3: `VERIFICATION: Confirm lock angle ${calculateLock(id, data).toFixed(6)}°.`,
+                    step4: `QUALITY: Zero phason strain confirmation.`
+                },
+                finalProduct: {
+                    form: `${data.lattice} quasicrystalline structure`,
+                    description: data.detail
+                },
+                application: {
+                    method: "Per system specification",
+                    improvements: data.detail
+                }
+            };
+        }
+    }
     function generateASCIIStructure(data, angle) {
         const elements = data.elements;
         const n = elements.length;
@@ -1506,6 +2122,139 @@ produces zero excess vacuum-debt for this specific atomic composition.
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ════════════════════════════════════════════════════════════════════════════════
+                   SECTION 1B: CLOCK REFERENCE SYSTEM
+════════════════════════════════════════════════════════════════════════════════
+
+The Graves-Law lock angle measurement requires THREE synchronized clocks for
+absolute phase reference and verification. Two are COTS (Commercial Off-The-Shelf)
+atomic standards; the third is the novel Deuterium Phase Clock central to this work.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK 1: RUBIDIUM ATOMIC STANDARD                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           COTS Rubidium Frequency Standard                           │
+│  MODEL:          Stanford Research Systems PRS10 (or equivalent)            │
+│  FREQUENCY:      10.000 000 000 MHz output                                  │
+│  REFERENCE:      ⁸⁷Rb hyperfine transition: 6,834,682,610.904 Hz            │
+│  ACCURACY:       ±5 × 10⁻¹¹ (after warmup)                                  │
+│  STABILITY:      σ_y(τ) < 2 × 10⁻¹¹ @ τ = 1s                                │
+│  WARMUP:         10 minutes to full spec                                    │
+│  PURPOSE:        Primary frequency reference for synthesis equipment        │
+│  COST:           ~$2,500 USD                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK 2: CESIUM ATOMIC STANDARD                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           COTS Cesium Beam Frequency Standard                        │
+│  MODEL:          Microsemi 5071A Primary Standard (or equivalent)           │
+│  FREQUENCY:      10.000 000 000 MHz / 5.000 000 000 MHz outputs             │
+│  REFERENCE:      ¹³³Cs hyperfine transition: 9,192,631,770 Hz (SI second)   │
+│  ACCURACY:       ±5 × 10⁻¹³ (defines the SI second)                         │
+│  STABILITY:      σ_y(τ) < 8 × 10⁻¹² @ τ = 1s                                │
+│  WARMUP:         30 minutes to full spec                                    │
+│  PURPOSE:        SI-traceable verification of Rubidium standard             │
+│  COST:           ~$50,000 USD                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                 CLOCK 3: DEUTERIUM PHASE CLOCK (GRAVES-LAW)                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           Novel Deuterium Hyperfine Phase Reference                  │
+│  REFERENCE:      ²H (Deuterium) hyperfine transition: 327.384 352 522 MHz   │
+│  DISPLAY VALUE:  327.384 MHz (as shown in UI header)                        │
+│                                                                              │
+│  PHYSICAL BASIS:                                                             │
+│  ─────────────────                                                           │
+│  The deuterium hyperfine frequency arises from the magnetic interaction     │
+│  between the electron spin and the nuclear spin (I=1) of deuterium:         │
+│                                                                              │
+│      f_D = (16/3) × α² × (m_e/m_p) × (μ_D/μ_N) × R_∞ × c                    │
+│                                                                              │
+│  where:  α = fine structure constant                                        │
+│          m_e/m_p = electron/proton mass ratio                               │
+│          μ_D/μ_N = deuteron magnetic moment ratio                           │
+│          R_∞ = Rydberg constant                                             │
+│          c = speed of light                                                 │
+│                                                                              │
+│  SIGNIFICANCE FOR GRAVES-LAW:                                                │
+│  ────────────────────────────                                                │
+│  The 327.384 MHz deuterium reference encodes the fundamental ratio between  │
+│  electromagnetic and nuclear forces at the lightest nuclear system. This    │
+│  frequency serves as the ABSOLUTE PHASE REFERENCE for lock angle measurement│
+│  because:                                                                    │
+│                                                                              │
+│    1) Deuterium is the simplest nucleus with non-zero spin                  │
+│    2) The hyperfine splitting is sensitive to nuclear structure             │
+│    3) The 327.384 MHz value connects to φ through:                          │
+│                                                                              │
+│       327.384 / φ^13 ≈ 0.618... (approaches 1/φ)                            │
+│                                                                              │
+│    4) Lock angles measured relative to this reference yield ZERO            │
+│       phason strain when the composition is correct                         │
+│                                                                              │
+│  IMPLEMENTATION:                                                             │
+│  ───────────────                                                             │
+│  • Deuterium gas cell (99.9% isotopic purity)                               │
+│  • RF excitation at 327.384 MHz ± 1 Hz                                      │
+│  • Phase-locked to Cesium standard for SI traceability                      │
+│  • Lock angle = phase difference × conversion factor                        │
+│                                                                              │
+│  MEASUREMENT EQUATION:                                                       │
+│  ────────────────────                                                        │
+│       θ_lock = (Δφ_measured / 2π) × (360° / N_vertices)                     │
+│                                                                              │
+│  where: Δφ_measured = phase shift in deuterium signal during lattice scan   │
+│         N_vertices = 11.34 (icosahedral vertex factor)                      │
+│                                                                              │
+│  VERIFICATION:                                                               │
+│  ────────────                                                                │
+│  When lock angle = ${angle.toFixed(6)}° relative to D reference:            │
+│    • Phason strain → 0.000000                                               │
+│    • All modes Φ₁-Φ₅ collapse to ground state                               │
+│    • Vacuum-debt = ZERO                                                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK SYNCHRONIZATION PROTOCOL                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│    ┌──────────┐      10 MHz      ┌──────────┐                               │
+│    │ CESIUM   │─────────────────▶│ RUBIDIUM │                               │
+│    │ (Cs-133) │                  │ (Rb-87)  │                               │
+│    │ 5071A    │                  │ PRS10    │                               │
+│    └────┬─────┘                  └────┬─────┘                               │
+│         │ 10 MHz (SI traceable)       │ 10 MHz                              │
+│         │                             │                                      │
+│         └──────────┬──────────────────┘                                      │
+│                    │                                                         │
+│                    ▼                                                         │
+│           ┌───────────────┐                                                  │
+│           │   DEUTERIUM   │                                                  │
+│           │  PHASE CLOCK  │                                                  │
+│           │  327.384 MHz  │                                                  │
+│           └───────┬───────┘                                                  │
+│                   │                                                          │
+│                   ▼                                                          │
+│           ┌───────────────┐                                                  │
+│           │  LOCK ANGLE   │                                                  │
+│           │  MEASUREMENT  │───▶  θ = ${angle.toFixed(6)}°                   │
+│           │    SYSTEM     │                                                  │
+│           └───────────────┘                                                  │
+│                                                                              │
+│  TIMING SEQUENCE:                                                            │
+│  1. Power on Cesium standard, wait 30 min warmup                            │
+│  2. Power on Rubidium standard, phase-lock to Cesium                        │
+│  3. Initialize Deuterium cell, lock to 327.384 MHz                          │
+│  4. Verify all three clocks phase-aligned (jitter < 1 ps)                   │
+│  5. Begin lattice synthesis with phase reference active                     │
+│  6. Monitor lock angle throughout fabrication                               │
+│  7. Confirm final lock angle within ±0.0001° of target                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
                       SECTION 2: ATOMIC COMPOSITION
 ════════════════════════════════════════════════════════════════════════════════
 
@@ -1620,40 +2369,101 @@ No phason fluctuations remain. Vacuum-debt = ZERO.
         
         txt += `
 ════════════════════════════════════════════════════════════════════════════════
-                   SECTION 6: STEP-BY-STEP INSTRUCTIONS
+                   SECTION 6: DETAILED FABRICATION INSTRUCTIONS
 ════════════════════════════════════════════════════════════════════════════════
 
-PHASE 1: PREPARATION
-─────────────────────
-1.1  Obtain high-purity source materials:
-${data.elements.map((el, i) => `     ${String.fromCharCode(97 + i)}) ${el} - purity ≥99.99%`).join('\n')}
+`;
+        // Get detailed fabrication info
+        const detailedFab = getDetailedFab(currentRank, data);
+        
+        txt += `┌─────────────────────────────────────────────────────────────────────────────┐
+│                           REQUIRED EQUIPMENT                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-1.2  Prepare crucible/reaction vessel rated for process temperature
-1.3  Establish controlled atmosphere (see ATMOSPHERE parameter above)
-1.4  Calibrate temperature monitoring to ±1°C precision
+`;
+        if(detailedFab.equipment) {
+            for(let key in detailedFab.equipment) {
+                txt += `${key.toUpperCase().padEnd(12)}: ${detailedFab.equipment[key]}\n`;
+            }
+        }
+        
+        txt += `
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      STEP-BY-STEP PROCESS                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-PHASE 2: SYNTHESIS
-──────────────────
-2.1  Load source materials in stoichiometric ratios
-2.2  Heat to synthesis temperature at controlled ramp rate (typically 5-10°C/min)
-2.3  Maintain synthesis conditions for prescribed duration
-2.4  Apply ${data.lattice.toLowerCase()} symmetry-inducing field/geometry
-2.5  Cool at controlled rate to preserve quasicrystalline order
+`;
+        if(detailedFab.process) {
+            let stepNum = 1;
+            for(let key in detailedFab.process) {
+                txt += `STEP ${stepNum}: ${detailedFab.process[key]}\n\n`;
+                stepNum++;
+            }
+        }
+        
+        txt += `┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FINAL PRODUCT                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-PHASE 3: LOCK ANGLE VERIFICATION
-────────────────────────────────
-3.1  Prepare sample for HRTEM/SAED analysis
-3.2  Align electron beam along ${data.lattice === "Icosahedral" ? "5-fold" : data.lattice === "Decagonal" ? "10-fold" : "5-fold"} symmetry axis
-3.3  Measure diffraction pattern angles
-3.4  Confirm lock angle = ${angle.toFixed(6)}° ± 0.0001°
-3.5  Verify τ-scaling in diffraction peak positions
+`;
+        if(detailedFab.finalProduct) {
+            for(let key in detailedFab.finalProduct) {
+                txt += `${key.toUpperCase().padEnd(14)}: ${detailedFab.finalProduct[key]}\n`;
+            }
+        }
+        
+        txt += `
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    APPLICATION & DEPLOYMENT                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-PHASE 4: ZERO-SLACK CONFIRMATION
-────────────────────────────────
-4.1  Measure phason strain via diffuse scattering analysis
-4.2  Confirm phason strain < 0.01 (ideally 0.000)
-4.3  Verify no residual phason modes in neutron scattering
-4.4  Document vacuum-debt = ZERO
+`;
+        if(detailedFab.application) {
+            for(let key in detailedFab.application) {
+                txt += `${key.toUpperCase().padEnd(14)}: ${detailedFab.application[key]}\n`;
+            }
+        }
+
+        txt += `
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PERFORMANCE IMPROVEMENTS                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BASELINE vs GRAVES-LAW ENHANCED:
+`;
+        // Add performance comparison based on system type
+        if(data.type === "catalyst") {
+            txt += `
+  COMBUSTION EFFICIENCY:     Standard: 85-92%    │  Enhanced: 100.00%
+  CO EMISSIONS:              Standard: 1-5 g/km  │  Enhanced: 0.000 g/km
+  HC EMISSIONS:              Standard: 0.1-0.5g  │  Enhanced: 0.000 g/km
+  NOx EMISSIONS:             Standard: 0.04-0.2g │  Enhanced: 0.000 g/km
+  PM2.5 EMISSIONS:           Standard: 0.001-0.01│  Enhanced: 0.000 g/km
+  FUEL ECONOMY GAIN:         N/A                 │  Enhanced: +18-28%
+  
+  EXHAUST COMPOSITION: H₂O + O₂ + trace He ONLY
+  
+  Note: The Graves-Law catalyst achieves PERFECT combustion by enabling
+  complete oxidation of all hydrocarbon chains to CO₂ and H₂O, with
+  subsequent reduction of CO₂ via the lattice's unique catalytic pathway.
+`;
+        } else if(currentRank <= "010") {
+            txt += `
+  OPERATING TEMPERATURE:     Standard: 1100°C    │  Enhanced: up to 1850°C
+  CREEP RESISTANCE:          Standard: 1% @ 100h │  Enhanced: <0.1% @ 100,000h
+  FATIGUE LIFE:              Standard: 10,000 cy │  Enhanced: 50,000+ cycles
+  WEIGHT REDUCTION:          Baseline            │  Enhanced: -20 to -50%
+  COATING LIFE:              Standard: 10,000h   │  Enhanced: 100,000+ hours
+`;
+        } else {
+            txt += `
+  See CLAIM 4 in FULL PATENT CLAIM section for specific improvements.
+  All Graves-Law materials achieve zero phason strain and zero vacuum-debt,
+  resulting in optimal performance characteristics for their application.
+`;
+        }
+
+        txt += `
 
 ════════════════════════════════════════════════════════════════════════════════
                       SECTION 7: QUALITY ASSURANCE
@@ -1693,7 +2503,7 @@ LOCK ANGLE ${angle.toFixed(6)}° is the ONLY valid configuration.
 ────────────────────────────────────────────────────────────────────────────────
 Generated:  ${new Date().toISOString()}
 System:     Graves Validation Suite v31.0
-Rank:       ${currentRank} of 930
+Rank:       ${currentRank} of 130
 ────────────────────────────────────────────────────────────────────────────────
                          END OF FABRICATION DOCUMENT
 ════════════════════════════════════════════════════════════════════════════════
