@@ -3,199 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProtoDynamics Advanced Materials Demo v2.0</title>
+    <title>ProtoDynamics Advanced Materials Demo v2.0 | Zero-Slack Synthesis</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.167.1/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { margin: 0; background: #0a0a1a; color: #e0e0ff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #container { position: relative; width: 100vw; height: 100vh; }
-        
-        /* UI Layer */
-        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .overlay { position: absolute; background: rgba(10,10,30,0.85); padding: 20px; border-radius: 10px; pointer-events: auto; backdrop-filter: blur(5px); border: 1px solid #333; }
-        
-        #header { top: 20px; left: 50%; transform: translateX(-50%); text-align: center; max-width: 800px; }
-        #header h1 { margin: 0; font-size: 2.2em; background: -webkit-linear-gradient(#fff, #3a6dff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        #tabs { top: 160px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; }
-        .tab { padding: 12px 24px; background: #1a1a3a; border: 1px solid #4a4a8a; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .tab:hover { background: #2a2a6a; }
-        .tab.active { background: #3a6dff; border-color: #6a9fff; box-shadow: 0 0 15px rgba(58, 109, 255, 0.4); }
-        
-        #grid { top: 230px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 1200px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-height: 65vh; overflow-y: auto; padding: 20px; background: rgba(15,15,40,0.6); border-radius: 10px; scrollbar-width: thin; scrollbar-color: #3a6dff #0a0a1a; }
-        
-        .card { background: #1a1a3a; border: 1px solid #4a4a8a; border-radius: 10px; padding: 15px; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
-        .card:hover { background: #2a2a5a; transform: translateY(-5px); border-color: #3a6dff; }
-        .card h3 { margin: 0 0 5px 0; color: #fff; }
-        .badge { background: #0a8020; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; display: inline-block; margin-top: 8px; letter-spacing: 1px; }
-        
-        /* Detail View */
-        #detail { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: row; z-index: 20; }
-        #detail-left { width: 60%; height: 100%; position: relative; background: radial-gradient(circle at center, #1a1a3a 0%, #000 100%); }
-        #detail-right { width: 40%; padding: 40px; overflow-y: auto; background: #0a0a1a; border-left: 1px solid #333; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
-        th { color: #888; text-transform: uppercase; font-size: 0.8em; }
-        td { color: #fff; }
-        .highlight { color: #00ff88; font-weight: bold; }
-        
-        #log { background: #000; padding: 15px; border: 1px solid #333; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85em; height: 150px; overflow-y: auto; margin-top: 20px; color: #0f0; box-shadow: inset 0 0 10px #000; }
-        
-        #play { width: 100%; padding: 15px; background: #3a6dff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 20px; font-size: 1.1em; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        #play:hover { background: #4a7dff; box-shadow: 0 0 20px rgba(58, 109, 255, 0.5); }
-        #play:disabled { background: #333; cursor: not-allowed; color: #555; box-shadow: none; }
+        :root {
+            --bg-deep: #05050a;
+            --panel-bg: rgba(10, 10, 25, 0.95);
+            --accent-blue: #3a6dff;
+            --accent-green: #00ff88;
+            --text-main: #e0e0ff;
+            --border-glow: 1px solid #2a2a5a;
+        }
 
-        #close { position: absolute; top: 20px; right: 30px; font-size: 40px; cursor: pointer; color: #666; transition: 0.2s; }
-        #close:hover { color: #fff; }
+        body { 
+            margin: 0; 
+            background: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden; 
+        }
+
+        #container { position: relative; width: 100vw; height: 100vh; }
+
+        /* UI Layer */
+        #ui { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            z-index: 10; 
+        }
+
+        .overlay { 
+            position: absolute; 
+            background: var(--panel-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            pointer-events: auto; 
+            border: var(--border-glow);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #header { 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            text-align: center; 
+            width: 90%; 
+            max-width: 1000px; 
+        }
         
-        h2 { margin-top: 0; color: #3a6dff; }
-        .process { margin-top: 20px; font-style: italic; color: #888; border-left: 3px solid #3a6dff; padding-left: 15px; }
+        #header h1 { 
+            margin: 0; 
+            font-size: 2.2em; 
+            letter-spacing: 3px; 
+            color: var(--accent-blue); 
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(58, 109, 255, 0.5);
+        }
+
+        #header p { margin: 10px 0 0; opacity: 0.8; font-size: 0.95em; line-height: 1.5; }
+
+        #tabs { 
+            top: 160px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: flex; 
+            gap: 15px; 
+        }
+
+        .tab { 
+            padding: 12px 25px; 
+            background: #151530; 
+            border: 1px solid #3a3a70; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8888aa;
+        }
+
+        .tab:hover { border-color: var(--accent-blue); color: #fff; }
+        .tab.active { 
+            background: var(--accent-blue); 
+            border-color: #6a9fff; 
+            color: white; 
+            box-shadow: 0 0 20px rgba(58, 109, 255, 0.4); 
+        }
+
+        #grid { 
+            top: 230px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 95%; 
+            max-width: 1300px; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+            max-height: 65vh; 
+            overflow-y: auto; 
+            padding: 20px; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-blue) #05050a;
+        }
+
+        /* Material Cards */
+        .card { 
+            background: #0f0f25; 
+            border: 1px solid #252545; 
+            border-radius: 10px; 
+            padding: 20px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover { 
+            background: #151535; 
+            border-color: var(--accent-blue); 
+            transform: translateY(-5px); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
+        .card h3 { margin: 0 0 10px 0; font-size: 1.2em; color: #fff; }
+        .card p { margin: 0; font-size: 0.85em; color: #999; line-height: 1.5; flex-grow: 1; }
         
-        /* 3D Container */
-        #scene-container { width: 100%; height: 100%; }
+        .badge { 
+            background: #0a8020; 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-size: 0.7em; 
+            display: inline-block; 
+            margin-top: 15px; 
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* Detail/Simulation View */
+        #detail { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: #020205; 
+            display: none; 
+            flex-direction: row; 
+            z-index: 100; 
+        }
+
+        #detail-left { 
+            width: 55%; 
+            height: 100%; 
+            position: relative; 
+            background: radial-gradient(circle at center, #0a0a20 0%, #020205 100%);
+        }
+
+        #detail-right { 
+            width: 45%; 
+            padding: 50px; 
+            overflow-y: auto; 
+            background: #080815; 
+            border-left: 1px solid #1a1a3a;
+        }
+
+        #close { 
+            position: absolute; 
+            top: 30px; 
+            right: 40px; 
+            font-size: 45px; 
+            cursor: pointer; 
+            color: #444; 
+            z-index: 110; 
+            transition: 0.2s;
+        }
+        #close:hover { color: #fff; transform: rotate(90deg); }
+
+        /* Data Tables */
+        table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #1a1a3a; }
+        th { color: #555; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px; }
+        td { font-size: 0.95em; }
+        .highlight { color: var(--accent-green); font-weight: bold; }
+
+        /* Console Log */
+        #log { 
+            background: #000; 
+            padding: 20px; 
+            border-radius: 8px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 0.85em; 
+            height: 200px; 
+            overflow-y: auto; 
+            margin: 25px 0; 
+            color: #00ff44; 
+            border: 1px solid #003311;
+            line-height: 1.6;
+        }
+
+        #play { 
+            width: 100%; 
+            padding: 20px; 
+            background: var(--accent-blue); 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 800; 
+            color: white; 
+            text-transform: uppercase; 
+            font-size: 1.1em; 
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        #play:hover { background: #5080ff; box-shadow: 0 0 30px rgba(58,109,255,0.4); }
+        #play:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
+
+        .process-info { 
+            border-left: 4px solid var(--accent-blue); 
+            padding-left: 20px; 
+            margin-top: 30px; 
+            font-style: italic; 
+            color: #777799; 
+            font-size: 0.9em; 
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
+
     <div id="container">
         <div id="ui">
             <div id="header" class="overlay">
-                <h1>ProtoDynamics Advanced Materials Demo v2.0</h1>
-                <p>Interactive preview of proprietary material systems.<br>
-                <span style="color:#888; font-size:0.9em;">CVD / PECVD / MesoScribe / Zero-Slack Synthesis</span></p>
+                <h1>ProtoDynamics Advanced Materials Stack</h1>
+                <p>Achievement of Zero-Slack molecular alignment via CVD, PECVD, and MesoScribe deposition.<br>
+                Theoretical foundation: Manifold alignment using the constant $\phi \approx 1.618$.</p>
             </div>
             
             <div id="tabs" class="overlay">
-                <div class="tab active" onclick="switchTab('hydro')">Hydrocarbon Perfection</div>
-                <div class="tab" onclick="switchTab('metal')">Metal & Glass Perfection</div>
-                <div class="tab" onclick="switchTab('thermal')">Thermal-Spray Quasicrystals</div>
+                <div class="tab active" onclick="switchCategory('hydro')">Hydrocarbon Perfection</div>
+                <div class="tab" onclick="switchCategory('metal')">Metal & Glass Perfection</div>
+                <div class="tab" onclick="switchCategory('thermal')">Thermal Quasicrystals</div>
             </div>
             
-            <div id="grid" class="overlay">
-                </div>
+            <div id="grid" class="overlay"></div>
         </div>
 
         <div id="detail">
-            <div id="detail-left">
-                <div id="scene-container"></div>
-            </div>
+            <span id="close" onclick="closeDetail()">&times;</span>
+            <div id="detail-left"></div>
             <div id="detail-right">
-                <span id="close" onclick="closeDetail()">&times;</span>
-                <h2 id="detail-title">Material Name</h2>
-                <div class="badge" id="detail-id">ID: 000</div>
-                <p id="detail-desc">Material description goes here.</p>
+                <h2 id="detail-title" style="margin: 0 0 10px 0; font-size: 2em; color: var(--accent-blue);"></h2>
+                <p id="detail-desc" style="color: #aaa; margin-bottom: 30px;"></p>
                 
-                <button id="play" onclick="runSimulation()">Initialize Synthesis</button>
+                <button id="play" onclick="startSynthesis()">Initialize Synthesis</button>
                 
-                <div id="log">
-                    > SYSTEM READY<br>
-                    > WAITING FOR INPUT...
-                </div>
+                <div id="log"></div>
                 
                 <div id="detail-table-container"></div>
                 
-                <p class="process" id="detail-process">Process description...</p>
+                <div class="process-info" id="detail-process"></div>
                 
-                <div style="margin-top:40px; border-top: 1px solid #333; padding-top:20px;">
-                    <small style="color:#555;">CONFIDENTIAL // PROTODYNAMICS INTERNAL<br>
-                    Proprietary Alignment Achieved. Full technical stack available under mutual NDA.</small>
-                </div>
+                <p style="margin-top: 40px; font-size: 0.8em; color: #444; border-top: 1px solid #1a1a3a; padding-top: 20px;">
+                    PROPRIETARY PROCESS // NDA REQUIRED FOR FULL SPECIFICATIONS. 
+                    Protodynamics Zero-Slack System &copy; 2025
+                </p>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        const ranks = {
+        // --- THE FULL 30-SYSTEM DATABASE ---
+        const materials = {
             hydro: [
-                {id:901, name:"Methane Perfection", desc:"Ultra-clean combustion via perfect CH₄ chain ordering.", viz:"chain", before:{eff:"32%", waste:"High"}, after:{eff:"70%+", waste:"Near Zero"}, process:"PECVD-synthesized nano-powder drop-in to natural gas streams for chain ordering perfection."},
-                {id:902, name:"Octane Zero-Slack", desc:"Infinite knock margin gasoline additive.", viz:"chain", before:{eff:"38%", knock:"Frequent"}, after:{eff:"75%+", knock:"Zero"}, process:"Superparamagnetic nano-catalyst blended at refinery for gasoline zero-slack matrix."},
-                {id:903, name:"Diesel Cetane Boost", desc:"Instant ignition matrix for heavy transport.", viz:"chain", before:{eff:"42%", soot:"High"}, after:{eff:"80%", soot:"<1%"}, process:"Ionic alignment of long-chain hydrocarbons using polarization fields."},
-                {id:904, name:"Propane Alignment", desc:"High-density storage and burn for LP systems.", viz:"chain", before:{eff:"40%", pressure:"Standard"}, after:{eff:"78%", pressure:"Optimized"}, process:"Cryogenic settling with magnetic alignment additives."},
-                {id:905, name:"Jet-A1 Perfection", desc:"High-altitude stable aviation fuel matrix.", viz:"chain", before:{eff:"35%", freeze:"-47C"}, after:{eff:"72%", freeze:"-65C"}, process:"Nano-scale surfactant integration for perfect lattice stability."},
-                {id:906, name:"Kerosene Stabilizer", desc:"Clean burning heating and rocketry fuel.", viz:"chain", before:{eff:"39%", coking:"Mod"}, after:{eff:"76%", coking:"Zero"}, process:"De-oxygenation catalyst applied during refinement."},
-                {id:907, name:"Ethanol Bridge", desc:"Perfect bonding between alcohol and gasoline.", viz:"chain", before:{eff:"30%", phase:"Sep"}, after:{eff:"68%", phase:"Stable"}, process:"Amphiphilic nano-particles bridging polar and non-polar molecules."},
-                {id:908, name:"Bunker-C Cleaner", desc:"Zero-sulfur emission heavy fuel oil modifier.", viz:"chain", before:{eff:"50%", sulfur:"High"}, after:{eff:"85%", sulfur:"Trapped"}, process:"Calcium-based lattice scavengers for sulfur encapsulation."},
-                {id:909, name:"Hydrogen Carrier", desc:"Liquid organic hydrogen carrier perfection.", viz:"chain", before:{eff:"N/A", density:"Low"}, after:{eff:"95%", density:"High"}, process:"Reversible hydrogenation catalyst optimization."},
-                {id:910, name:"Syn-Gas Aligner", desc:"Synthesis gas optimization for chemical plants.", viz:"chain", before:{eff:"60%", yield:"Std"}, after:{eff:"92%", yield:"Max"}, process:"Carbon-Monoxide alignment via nickel-based quasicrystals."}
-            ],
-            metal: [
-                {id:801, name:"Titanium Zero-Slack", desc:"Void-free titanium for aerospace structure.", viz:"lattice", before:{yield:"800MPa", fatigue:"Std"}, after:{yield:"1400MPa", fatigue:"Infinite"}, process:"Vacuum arc remelting with acoustic resonance alignment."},
-                {id:802, name:"Amorphous Steel", desc:"Glassy metal structure with no grain boundaries.", viz:"lattice", before:{elastic:"2%", hard:"50HRC"}, after:{elastic:"4%", hard:"70HRC"}, process:"Rapid cooling injection molding with nucleation inhibitors."},
-                {id:803, name:"Copper Super-Cond", desc:"Room temp near-superconductor alignment.", viz:"lattice", before:{cond:"100%", heat:"Std"}, after:{cond:"118%", heat:"Low"}, process:"Oxygen-free continuous casting with magnetic flux pinning."},
-                {id:804, name:"Aluminum-Li Lattice", desc:"Ultra-lightweight high-stiffness alloy.", viz:"lattice", before:{weight:"1.0", stiff:"Std"}, after:{weight:"0.8", stiff:"2x"}, process:"Lithium isotope separation and lattice injection."},
-                {id:805, name:"Perfect Pyrex", desc:"Bubble-free borosilicate glass.", viz:"lattice", before:{clear:"95%", shock:"Std"}, after:{clear:"99.9%", shock:"High"}, process:"Micro-gravity simulation bath during annealing."},
-                {id:806, name:"Gorilla-X Matrix", desc:"Shatter-proof display substrate.", viz:"lattice", before:{break:"10N", scratch:"9"}, after:{break:"500N", scratch:"10+"}, process:"Chemical strengthening via potassium-ion hyper-saturation."},
-                {id:807, name:"Inconel-718+", desc:"Higher heat tolerance for turbine blades.", viz:"lattice", before:{temp:"700C", creep:"Std"}, after:{temp:"1100C", creep:"Zero"}, process:"Single-crystal growth direction control via laser seeding."},
-                {id:808, name:"Gold Solder", desc:"Low-temp eutetic gold for electronics.", viz:"lattice", before:{temp:"280C", conduct:"Good"}, after:{temp:"150C", conduct:"Perfect"}, process:"Nano-scale alloying with germanium and silicon."},
-                {id:809, name:"Tungsten Carbide-Z", desc:"Zero-wear tooling material.", viz:"lattice", before:{wear:"Std", life:"100h"}, after:{wear:"Zero", life:"5000h"}, process:"Cobalt binder replacement with graphene mesh."},
-                {id:810, name:"Memory Shape Nitinol", desc:"Instant snap-back alloy for actuators.", viz:"lattice", before:{resp:"0.1s", force:"Low"}, after:{resp:"0.01s", force:"High"}, process:"Pre-straining via cryogenic mechanical alignment."}
+                {
+                    id: 901, name: "Methane Perfection", 
+                    desc: "Precision PECVD synthesis to achieve perfect CH₄ chain ordering, eliminating unburnt hydrocarbons and maximizing kinetic release.",
+                    before: { efficiency: "32%", hc_waste: "High", emissions: "Standard" },
+                    after: { efficiency: "70%+", hc_waste: "Near Zero", harvest: "45 kg/1000 km Graphite" },
+                    process: "PECVD nano-powder drop-in to natural gas streams creates a zero-slack alignment matrix during high-pressure combustion.",
+                    vizType: "chain"
+                },
+                {
+                    id: 902, name: "Octane Zero-Slack", 
+                    desc: "Molecular synchronization of gasoline chains to prevent pre-detonation and ensure unified expansion wavefronts.",
+                    before: { efficiency: "38%", knock_margin: "Low", torque: "Nominal" },
+                    after: { efficiency: "75%+", knock_margin: "Infinite", harvest: "55 kg/1000 km Graphite" },
+                    process: "Superparamagnetic nano-catalyst infused at refinement stage to achieve perfect lattice stability in C₈H₁₈.",
+                    vizType: "chain"
+                },
+                {
+                    id: 903, name: "Diesel Cetane Aligner", 
+                    desc: "Elimination of diesel soot via single-crystal hydrocarbon additives, forcing 100% conversion of long-chain chains.",
+                    before: { efficiency: "42%", particulate: "High", fuel_visc: "Var" },
+                    after: { efficiency: "80%+", particulate: "< 0.1%", harvest: "62 kg/1000 km Graphite" },
+                    process: "Ionic alignment of long-chain hydrocarbons using polarization-tuned CVD precursors.",
+                    vizType: "chain"
+                },
+                {
+                    id: 904, name: "Propane Alignment", 
+                    desc: "Optimized LPG combustion for high-altitude/low-temp environments without pressure loss.",
+                    before: { efficiency: "40%", volatility: "High" },
+                    after: { efficiency: "78%", harvest: "38 kg/1000 km Graphite" },
+                    process: "Cryogenic settling with magnetic alignment additives during transfer.",
+                    vizType: "chain"
+                },
+                {
+                    id: 905, name: "Jet-A1 Molecular Stack", 
+                    desc: "Aviation fuel enhancement providing extreme stability at thermal limits and zero-particulate turbine exhaust.",
+                    before: { efficiency: "35%", freeze_point: "-47C" },
+                    after: { efficiency: "72%", freeze_point: "-65C", harvest: "48 kg/1000 km Graphite" },
+                    process: "Nano-scale surfactant integration ensuring perfect lattice stability across pressure differentials.",
+                    vizType: "chain"
+                },
+                {
+                    id: 906, name: "Kerosene Perfection", 
+                    desc: "Zero-coking rocket and heating fuel achieved through sulfur-trapping lattice additives.",
+                    before: { coking: "Moderate", eff: "39%" },
+                    after: { coking: "Zero", eff: "76%", harvest: "52 kg/1000 km Graphite" },
+                    process: "De-oxygenation catalyst applied via vapor deposition during refinement cycles.",
+                    vizType: "chain"
+                },
+                {
+                    id: 907, name: "Ethanol Bridge", 
+                    desc: "Resolving phase separation and energy density loss in biofuel blends using amphiphilic alignment molecules.",
+                    before: { phase_sep: "Likely", eff: "30%" },
+                    after: { phase_sep: "None", eff: "68%", harvest: "35 kg/1000 km Graphite" },
+                    process: "Amphiphilic nano-particles bridging polar and non-polar molecular groups.",
+                    vizType: "chain"
+                },
+                {
+                    id: 908, name: "Bunker-C Scavenger", 
+                    desc: "Heavy marine fuel oil treatment that encapsulates sulfur and heavy metals into harvestable solids.",
+                    before: { emissions: "Critical", eff: "50%" },
+                    after: { emissions: "Zero", eff: "85%", harvest: "120 kg/1000 km Solids" },
+                    process: "Calcium-based lattice scavengers injected for sulfur encapsulation during pre-heating.",
+                    vizType: "chain"
+                },
+                {
+                    id: 909, name: "Hydrogen Carrier Boost", 
+                    desc: "Enhancing Liquid Organic Hydrogen Carriers (LOHC) release rates via catalytic surface perfection.",
+                    before: { density: "Low", release_rate: "Std" },
+                    after: { density: "High", release_rate: "4x", harvest: "N/A" },
+                    process: "Reversible hydrogenation catalyst optimization using single-crystal palladium substrates.",
+                    vizType: "chain"
+                },
+                {
+                    id: 910, name: "Syn-Gas Optimization", 
+                    desc: "Industrial-scale synthesis gas alignment for maximum chemical yield in Fischer-Tropsch reactors.",
+                    before: { yield: "60%", thermal_loss: "High" },
+                    after: { yield: "92%", thermal_loss: "Minimal", harvest: "Variable Graphite" },
+                    process: "Carbon-Monoxide alignment via nickel-based quasicrystal catalysts.",
+                    vizType: "chain"
+                }
+            ],metal: [
+                {
+                    id: 801, name: "Titanium Zero-Slack", 
+                    desc: "Elimination of interstitial voids in Titanium alloys using acoustic resonance during CVD cooling.",
+                    before: { yield: "850 MPa", fatigue: "Standard", density: "99.2%" },
+                    after: { yield: "1450 MPa", fatigue: "Infinite", density: "99.999%" },
+                    process: "Vacuum arc remelting integrated with acoustic alignment for zero-defect grain growth.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 802, name: "Amorphous Steel", 
+                    desc: "A glassy metal structure with no grain boundaries, offering extreme elastic energy storage.",
+                    before: { hardness: "50 HRC", elastic_limit: "2%" },
+                    after: { hardness: "72 HRC", elastic_limit: "4.5%" },
+                    process: "Ultra-rapid cooling (>10⁶ K/s) injection molding with nucleation inhibitors.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 803, name: "Copper Super-Cond", 
+                    desc: "Near-room temperature conductivity maximization through oxygen-free lattice perfection.",
+                    before: { conductivity: "101% IACS", heat_gen: "Std" },
+                    after: { conductivity: "118% IACS", heat_gen: "Low" },
+                    process: "Continuous casting under magnetic flux pinning to align copper grains longitudinally.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 804, name: "Aluminum-Li Lattice", 
+                    desc: "Ultra-lightweight aerospace alloy with structural stiffness matching heavy steels.",
+                    before: { density: "2.6 g/cm³", stiffness: "75 GPa" },
+                    after: { density: "2.1 g/cm³", stiffness: "155 GPa" },
+                    process: "Lithium isotope separation and lattice injection via plasma-enhanced CVD.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 805, name: "Perfect Borosilicate", 
+                    desc: "Thermal-shock proof glass with zero internal inclusions or micro-bubbles.",
+                    before: { optical_loss: "5%", shock_limit: "220°C" },
+                    after: { optical_loss: "0.01%", shock_limit: "850°C" },
+                    process: "Micro-gravity simulated refining bath to purge all gas inclusions before solidification.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 806, name: "Gorilla-X Matrix", 
+                    desc: "Next-gen display substrate that is effectively immune to surface-crack propagation.",
+                    before: { fracture_toughness: "Low", hardness: "9H" },
+                    after: { fracture_toughness: "High", hardness: "10+H" },
+                    process: "Chemical strengthening via potassium-ion hyper-saturation in a Zero-Slack environment.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 807, name: "Single-Crystal Inconel", 
+                    desc: "Turbine blade material capable of operating above its own standard melting point.",
+                    before: { temp_limit: "950°C", creep: "Predictable" },
+                    after: { temp_limit: "1350°C", creep: "Zero" },
+                    process: "Laser-seeded directional solidification for perfect single-crystal growth.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 808, name: "Gold Eutectic Solder", 
+                    desc: "Precision electronic bonding material with instant thermal-path establishment.",
+                    before: { bond_temp: "280°C", thermal_cond: "Std" },
+                    after: { bond_temp: "155°C", thermal_cond: "Perfect" },
+                    process: "Nano-scale alloying with germanium precursors via vapor-phase deposition.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 809, name: "Tungsten Carbide-Z", 
+                    desc: "Industrial tooling with molecularly sharp edges and near-zero wear rate.",
+                    before: { tool_life: "100 hrs", edge_radius: "5μm" },
+                    after: { tool_life: "4500 hrs", edge_radius: "10nm" },
+                    process: "Graphene mesh infusion into cobalt binder for total structural rigidity.",
+                    vizType: "lattice"
+                },
+                {
+                    id: 810, name: "Actonic Nitinol", 
+                    desc: "Shape memory alloy with zero hysteresis, enabling instant mechanical response.",
+                    before: { hysteresis: "High", response: "0.1s" },
+                    after: { hysteresis: "Zero", response: "0.002s" },
+                    process: "Cryogenic mechanical alignment followed by rapid thermal pulsing.",
+                    vizType: "lattice"
+                }
             ],
             thermal: [
-                {id:701, name:"Al-Cu-Fe Quasicrystal", desc:"Low friction, non-stick thermal coating.", viz:"quasi", before:{fric:"0.4", wear:"Med"}, after:{fric:"0.02", wear:"None"}, process:"MesoScribe plasma-spray deposition of pre-alloyed powders."},
-                {id:702, name:"Thermal Barrier YSZ", desc:"Yttria-Stabilized Zirconia perfection.", viz:"quasi", before:{heat:"1200C", shock:"Low"}, after:{heat:"1600C", shock:"High"}, process:"Columnar grain growth via electron beam physical vapor deposition."},
-                {id:703, name:"Phonon Blocker", desc:"Materials that stop heat but pass electricity.", viz:"quasi", before:{zt:"1.0", eff:"5%"}, after:{zt:"4.0", eff:"25%"}, process:"Nanostructuring to scatter phonons while allowing electron flow."},
-                {id:704, name:"Hyper-Insulator", desc:"Aerogel-like performance in solid spray.", viz:"quasi", before:{r_val:"5", thick:"10mm"}, after:{r_val:"50", thick:"1mm"}, process:"Hollow-sphere ceramic synthesis sprayed in vacuum."},
-                {id:705, name:"Plasma Facing Tungsten", desc:"Fusion reactor wall coating.", viz:"quasi", before:{ero:"High", temp:"2000C"}, after:{ero:"Zero", temp:"3500C"}, process:"He-cooled porous tungsten matrix infusion."},
-                {id:706, name:"Super-Hydrophobic QC", desc:"Water repellant quasicrystalline surface.", viz:"quasi", before:{angle:"110", dura:"Low"}, after:{angle:"175", dura:"Perm"}, process:"Laser surface texturing combined with QC spray."},
-                {id:707, name:"Self-Healing Ceramic", desc:"Oxidation sealing at high temperatures.", viz:"quasi", before:{crack:"Fatal", life:"Short"}, after:{crack:"Heals", life:"Long"}, process:"Encapsulated silicon-carbide precursors in matrix."},
-                {id:708, name:"Tribological QC", desc:"Gear coating for zero lubrication systems.", viz:"quasi", before:{lube:"Req", heat:"High"}, after:{lube:"None", heat:"Low"}, process:"High-velocity oxygen fuel (HVOF) spraying."},
-                {id:709, name:"Optical Black", desc:"99.99% light absorption thermal capture.", viz:"quasi", before:{abs:"95%", emit:"High"}, after:{abs:"99.9%", emit:"High"}, process:"Carbon nanotube forest growth on QC substrate."},
-                {id:710, name:"Piezo-Thermal Stack", desc:"Harvests energy from vibration and heat.", viz:"quasi", before:{pow:"mW", eff:"Low"}, after:{pow:"Watts", eff:"High"}, process:"Multi-layer deposition of varying work-function materials."}
+                {
+                    id: 701, name: "Al-Cu-Fe Quasicrystal", 
+                    desc: "Low-friction surface coating that resists oxidation and material transfer.",
+                    before: { friction_coeff: "0.45", durability: "Med" },
+                    after: { friction_coeff: "0.03", durability: "Extreme" },
+                    process: "MesoScribe plasma-spray deposition using pre-alloyed quasicrystalline powders.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 702, name: "YSZ Thermal Barrier", 
+                    desc: "Columnar grain Zirconia that allows for thermal expansion without delamination.",
+                    before: { cycle_life: "500", temp_peak: "1250°C" },
+                    after: { cycle_life: "8000", temp_peak: "1650°C" },
+                    process: "EB-PVD (Electron Beam Physical Vapor Deposition) for vertical grain alignment.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 703, name: "Phonon Blocker", 
+                    desc: "Thermal insulation that selectively allows electron flow while blocking heat vibrations.",
+                    before: { ZT_figure: "1.0", conversion: "5%" },
+                    after: { ZT_figure: "4.2", conversion: "28%" },
+                    process: "Nano-scale layering of differing density materials to scatter phonons.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 704, name: "Vacuum Spray Aerogel", 
+                    desc: "Sprayed insulation providing the performance of a vacuum flask in a thin-film coating.",
+                    before: { R_value: "5 per inch", thickness: "10mm" },
+                    after: { R_value: "65 per inch", thickness: "1.5mm" },
+                    process: "Hollow-sphere ceramic synthesis sprayed in a high-vacuum plasma environment.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 705, name: "Fusion Wall Tungsten", 
+                    desc: "Porous Tungsten matrix infused with Helium-coolant channels for reactor walls.",
+                    before: { erosion: "Significant", life: "Short" },
+                    after: { erosion: "Zero", life: "Extended" },
+                    process: "Additive manufacturing combined with CVD surface passivation.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 706, name: "Hydrophobic QC", 
+                    desc: "Quasicrystalline surface that prevents ice and water adhesion without chemical coatings.",
+                    before: { contact_angle: "105°", life: "Temporary" },
+                    after: { contact_angle: "172°", life: "Permanent" },
+                    process: "Femtosecond laser texturing of a plasma-sprayed QC substrate.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 707, name: "Self-Healing Ceramic", 
+                    desc: "Structural ceramic that seals its own micro-cracks upon exposure to oxygen at heat.",
+                    before: { failure: "Brittle", crack_limit: "0mm" },
+                    after: { failure: "Graceful", crack_limit: "2mm" },
+                    process: "Encapsulation of Silicon Carbide precursors within the structural matrix.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 708, name: "Tribological QC", 
+                    desc: "High-speed gear coating for space applications where liquid lubrication is impossible.",
+                    before: { friction: "Dry-High", heat: "Ext" },
+                    after: { friction: "Dry-Low", heat: "Min" },
+                    process: "HVOF (High-Velocity Oxygen Fuel) spray of quasicrystal precursors.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 709, name: "Vantablack-PD", 
+                    desc: "99.99% light absorption for thermal capture and sensor stray-light elimination.",
+                    before: { absorption: "92%", durability: "Fragile" },
+                    after: { absorption: "99.99%", durability: "Robust" },
+                    process: "Carbon nanotube forest grown on a proprietary QC interface layer.",
+                    vizType: "quasi"
+                },
+                {
+                    id: 710, name: "Piezo-Thermal Stack", 
+                    desc: "Multi-layered material that converts ambient vibration and heat into electrical power.",
+                    before: { power_density: "Low", eff: "2%" },
+                    after: { power_density: "High", eff: "18%" },
+                    process: "Atomic Layer Deposition (ALD) of alternating piezoelectric and thermoelectric layers.",
+                    vizType: "quasi"
+                }
             ]
         };
 
-        // --- GLOBAL VARS ---
+        // --- GLOBAL ENGINE STATE ---
         let currentCat = 'hydro';
-        let currentRank = null;
-        let scene, camera, renderer, controls, atomGroup;
-        let animationId;
+        let currentItem = null;
+        let scene, camera, renderer, controls, latticeGroup;
         let isSimulating = false;
 
-        // --- INIT 3D ENGINE ---
+        // --- 3D INITIALIZATION ---
         function init3D() {
-            const container = document.getElementById('scene-container');
-            
+            const container = document.getElementById('detail-left');
             scene = new THREE.Scene();
-            scene.background = null; // Transparent, let CSS handle gradient
-
-            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 0, 8);
+            
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 10);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
+            const ambient = new THREE.AmbientLight(0x4040ff, 0.5);
+            scene.add(ambient);
             
-            const dirLight = new THREE.DirectionalLight(0x3a6dff, 2);
-            dirLight.position.set(5, 5, 5);
-            scene.add(dirLight);
-            
-            const backLight = new THREE.DirectionalLight(0xff3a3a, 1);
-            backLight.position.set(-5, -5, -5);
-            scene.add(backLight);
+            const sun = new THREE.DirectionalLight(0xffffff, 2);
+            sun.position.set(5, 10, 7);
+            scene.add(sun);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.autoRotate = true;
-            controls.autoRotateSpeed = 1.0;
+            controls.autoRotateSpeed = 0.5;
 
-            atomGroup = new THREE.Group();
-            scene.add(atomGroup);
+            latticeGroup = new THREE.Group();
+            scene.add(latticeGroup);
 
-            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
             animate();
-        }
-
-        function onWindowResize() {
-            const container = document.getElementById('scene-container');
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
         }
 
         function animate() {
@@ -204,242 +581,162 @@
             renderer.render(scene, camera);
         }
 
-        // --- VISUALIZATION LOGIC ---
-        function createLattice(type, state) {
-            // Clear existing
-            while(atomGroup.children.length > 0){ 
-                atomGroup.remove(atomGroup.children[0]); 
-            }
-
-            const geometry = new THREE.SphereGeometry(0.3, 32, 32);
+        // --- LATTICE GENERATION ---
+        function buildLattice(type, state) {
+            while(latticeGroup.children.length > 0) latticeGroup.remove(latticeGroup.children[0]);
             
-            // Materials
-            const matBase = new THREE.MeshStandardMaterial({ 
-                color: state === 'before' ? 0x888888 : 0x3a6dff, 
-                roughness: state === 'before' ? 0.7 : 0.1,
-                metalness: state === 'before' ? 0.2 : 0.9,
-                emissive: state === 'before' ? 0x000000 : 0x111144
+            const atomGeo = new THREE.SphereGeometry(0.25, 32, 32);
+            const bondMat = new THREE.MeshStandardMaterial({ color: 0x444466 });
+            
+            const atomMat = new THREE.MeshStandardMaterial({ 
+                color: state === 'before' ? 0x888888 : 0x00ff88,
+                emissive: state === 'before' ? 0x000000 : 0x004411,
+                roughness: 0.1,
+                metalness: 0.8
             });
-
-            const matDefect = new THREE.MeshStandardMaterial({ 
-                color: 0xff3333, roughness: 0.9 
-            });
-
-            // Grid Layout
-            const size = 3;
-            const spacing = 1.2;
-            const offset = (size * spacing) / 2 - (spacing/2);
 
             if (type === 'chain') {
-                // Linear Chains (Hydro)
-                for(let x=0; x<3; x++) {
-                    let lastPos = null;
-                    for(let y=0; y<5; y++) {
-                        const mesh = new THREE.Mesh(geometry, matBase);
-                        // Randomize position if "before"
-                        let jx = state === 'before' ? (Math.random()-0.5)*0.5 : 0;
-                        let jy = state === 'before' ? (Math.random()-0.5)*0.5 : 0;
-                        let jz = state === 'before' ? (Math.random()-0.5)*0.5 : 0;
-                        
-                        mesh.position.set(
-                            (x - 1) * 2 + jx, 
-                            (y - 2) * 1 + jy, 
-                            0 + jz
-                        );
-                        atomGroup.add(mesh);
-
-                        // Connectors
-                        if(lastPos) {
-                            const dist = mesh.position.distanceTo(lastPos);
-                            const cyl = new THREE.Mesh(
-                                new THREE.CylinderGeometry(0.05, 0.05, dist),
-                                matBase
-                            );
-                            cyl.position.copy(lastPos).lerp(mesh.position, 0.5);
-                            cyl.lookAt(mesh.position);
-                            cyl.rotateX(Math.PI/2);
-                            atomGroup.add(cyl);
-                        }
-                        lastPos = mesh.position.clone();
-                    }
+                // Hydrocarbon Chain
+                for(let i=0; i<12; i++) {
+                    const atom = new THREE.Mesh(atomGeo, atomMat);
+                    const jitter = state === 'before' ? (Math.random()-0.5)*1.2 : 0;
+                    atom.position.set(i*1.2 - 6, jitter, jitter);
+                    latticeGroup.add(atom);
                 }
-            } 
-            else if (type === 'quasi') {
-                // Icosahedral cluster (Thermal)
-                const phi = (1 + Math.sqrt(5)) / 2;
-                const vertices = [
+            } else if (type === 'quasi') {
+                // Icosahedral Quasicrystal Cluster
+                const phi = 1.61803398875;
+                const verts = [
                     [0, 1, phi], [0, 1, -phi], [0, -1, phi], [0, -1, -phi],
                     [1, phi, 0], [1, -phi, 0], [-1, phi, 0], [-1, -phi, 0],
                     [phi, 0, 1], [phi, 0, -1], [-phi, 0, 1], [-phi, 0, -1]
                 ];
-                
-                vertices.forEach(v => {
-                    const mesh = new THREE.Mesh(geometry, matBase);
-                    let j = state === 'before' ? (Math.random()-0.5) : 0;
-                    mesh.position.set(v[0]+j, v[1]+j, v[2]+j);
-                    atomGroup.add(mesh);
-                    // Add center connections
-                    const center = new THREE.Vector3(0,0,0);
-                    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, mesh.position.distanceTo(center)), matBase);
-                    cyl.position.copy(center).lerp(mesh.position, 0.5);
-                    cyl.lookAt(mesh.position);
-                    cyl.rotateX(Math.PI/2);
-                    atomGroup.add(cyl);
+                verts.forEach(v => {
+                    const atom = new THREE.Mesh(atomGeo, atomMat);
+                    const jitter = state === 'before' ? (Math.random()-0.5)*1.5 : 1;
+                    atom.position.set(v[0]*jitter, v[1]*jitter, v[2]*jitter);
+                    latticeGroup.add(atom);
                 });
-                // Center atom
-                const centerMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), matBase);
-                atomGroup.add(centerMesh);
-            }
-            else {
-                // Cubic Lattice (Metal/Glass)
-                for(let x=0; x<size; x++) {
-                    for(let y=0; y<size; y++) {
-                        for(let z=0; z<size; z++) {
-                            const mesh = new THREE.Mesh(geometry, matBase);
-                            
-                            let jx = state === 'before' ? (Math.random()-0.5)*0.8 : 0;
-                            let jy = state === 'before' ? (Math.random()-0.5)*0.8 : 0;
-                            let jz = state === 'before' ? (Math.random()-0.5)*0.8 : 0;
-
-                            mesh.position.set(
-                                x*spacing - offset + jx,
-                                y*spacing - offset + jy,
-                                z*spacing - offset + jz
-                            );
-                            atomGroup.add(mesh);
+            } else {
+                // Metallic/Glass Lattice
+                for(let x=-1; x<=1; x++) {
+                    for(let y=-1; y<=1; y++) {
+                        for(let z=-1; z<=1; z++) {
+                            const atom = new THREE.Mesh(atomGeo, atomMat);
+                            const jitter = state === 'before' ? (Math.random()-0.5)*0.8 : 0;
+                            atom.position.set(x*2 + jitter, y*2 + jitter, z*2 + jitter);
+                            latticeGroup.add(atom);
                         }
                     }
                 }
             }
-
-            // Add Defects (Red spheres) for 'before' state
-            if (state === 'before') {
-                for(let i=0; i<6; i++) {
-                    const defect = new THREE.Mesh(new THREE.SphereGeometry(0.15), matDefect);
-                    defect.position.set(
-                        (Math.random()-0.5)*4,
-                        (Math.random()-0.5)*4,
-                        (Math.random()-0.5)*4
-                    );
-                    atomGroup.add(defect);
-                }
-                controls.autoRotateSpeed = 0.5;
-            } else {
-                controls.autoRotateSpeed = 4.0; // Fast spin on success
-            }
+            
+            controls.autoRotateSpeed = state === 'before' ? 0.5 : 3.0;
         }
 
-        // --- UI LOGIC ---
-        function buildGrid(cat) {
+        // --- UI & SIMULATION LOGIC ---
+        function switchCategory(cat) {
+            currentCat = cat;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderGrid();
+        }
+
+        function renderGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            
-            ranks[cat].forEach(item => {
+            materials[currentCat].forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openDetail(item);
                 
-                let stats = "";
-                // Grab first key of 'after' object to show as preview
-                const firstKey = Object.keys(item.after)[0];
-                const firstVal = item.after[firstKey];
+                const mainMetric = Object.keys(item.after)[0];
+                const mainVal = item.after[mainMetric];
                 
                 card.innerHTML = `
                     <h3>${item.name}</h3>
-                    <div style="font-size:0.85em; color:#aaa; margin-bottom:10px;">${item.desc}</div>
-                    <div class="badge">Target: ${firstVal} ${firstKey}</div>
+                    <p>${item.desc}</p>
+                    <div class="badge">Target: ${mainVal}</div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function switchTab(cat) {
-            currentCat = cat;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            buildGrid(cat);
-        }
-
         function openDetail(item) {
-            currentRank = item;
+            currentItem = item;
             document.getElementById('detail').style.display = 'flex';
-            document.getElementById('detail-title').textContent = item.name;
-            document.getElementById('detail-id').textContent = 'ID: ' + item.id;
-            document.getElementById('detail-desc').textContent = item.desc;
-            document.getElementById('detail-process').textContent = item.process;
+            document.getElementById('detail-title').innerText = item.name;
+            document.getElementById('detail-desc').innerText = item.desc;
+            document.getElementById('detail-process').innerText = "SYNTHESIS PROCESS: " + item.process;
+            document.getElementById('log').innerHTML = "> SYSTEM STANDBY. Ready for precursor injection.";
             document.getElementById('detail-table-container').innerHTML = '';
+            document.getElementById('play').disabled = false;
+            document.getElementById('play').innerText = "Initialize Synthesis";
             
-            const log = document.getElementById('log');
-            log.innerHTML = '> SYSTEM READY<br>> WAITING FOR INPUT...';
-            log.scrollTop = log.scrollHeight;
-            
-            const btn = document.getElementById('play');
-            btn.disabled = false;
-            btn.textContent = "Initialize Synthesis";
-            
-            isSimulating = false;
-            createLattice(item.viz, 'before');
+            buildLattice(item.vizType, 'before');
         }
 
         function closeDetail() {
             document.getElementById('detail').style.display = 'none';
         }
 
-        function runSimulation() {
+        function startSynthesis() {
             if(isSimulating) return;
             isSimulating = true;
             
             const btn = document.getElementById('play');
             btn.disabled = true;
-            btn.textContent = "Processing...";
+            btn.innerText = "Processing...";
             
             const log = document.getElementById('log');
-            const appendLog = (txt) => {
-                log.innerHTML += `<br>> ${txt}`;
+            const steps = [
+                "> EVACUATING CHAMBER...",
+                "> INJECTING GASEOUS PRECURSORS...",
+                "> ACTIVATING CVD CATALYST...",
+                "> PHI-CONSTANT ALIGNMENT IN PROGRESS...",
+                "> ZERO-SLACK LATTICE ACHIEVED."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                log.innerHTML += `<br>${steps[i]}`;
                 log.scrollTop = log.scrollHeight;
-            }
-
-            appendLog("INJECTING PRECURSORS...");
-            
-            setTimeout(() => {
-                appendLog("HEATING CHAMBER TO OPTIMAL TEMP...");
-                // Add jitter effect?
-            }, 1000);
-
-            setTimeout(() => {
-                appendLog("ALIGNING LATTICE...");
-                appendLog("REMOVING DEFECTS...");
-            }, 2500);
-
-            setTimeout(() => {
-                appendLog("ZERO-SLACK ACHIEVED.");
-                appendLog("COMPILING REPORT...");
-                
-                // Update 3D
-                createLattice(currentRank.viz, 'after');
-                
-                // Show Table
-                let tableHtml = `<table><tr><th>Metric</th><th>Conventional</th><th>ProtoDynamics</th></tr>`;
-                
-                Object.keys(currentRank.before).forEach(key => {
-                    tableHtml += `<tr>
-                        <td style="text-transform:capitalize">${key}</td>
-                        <td>${currentRank.before[key]}</td>
-                        <td class="highlight">${currentRank.after[key]}</td>
-                    </tr>`;
-                });
-                tableHtml += `</table>`;
-                
-                document.getElementById('detail-table-container').innerHTML = tableHtml;
-                
-                btn.textContent = "Synthesis Complete";
-                isSimulating = false;
-            }, 4000);
+                i++;
+                if(i >= steps.length) {
+                    clearInterval(interval);
+                    completeSimulation();
+                }
+            }, 800);
         }
 
-        // --- START ---
+        function completeSimulation() {
+            buildLattice(currentItem.vizType, 'after');
+            
+            let table = '<table><tr><th>Metric</th><th>Conventional</th><th>ProtoDynamics</th></tr>';
+            for(let key in currentItem.before) {
+                table += `<tr>
+                    <td style="text-transform:capitalize">${key.replace('_',' ')}</td>
+                    <td>${currentItem.before[key]}</td>
+                    <td class="highlight">${currentItem.after[key]}</td>
+                </tr>`;
+            }
+            if(currentItem.after.harvest) {
+                table += `<tr style="background: rgba(0,255,136,0.05)">
+                    <td>Graphite Harvest</td>
+                    <td>-</td>
+                    <td class="highlight">${currentItem.after.harvest}</td>
+                </tr>`;
+            }
+            table += '</table>';
+            
+            document.getElementById('detail-table-container').innerHTML = table;
+            document.getElementById('play').innerText = "Synthesis Successful";
+            isSimulating = false;
+        }
+
+        // --- STARTUP ---
         init3D();
-        buildGrid('hydro');
+        renderGrid();
 
     </script>
 </body>
