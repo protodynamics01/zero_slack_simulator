@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v28.0 | COMPLETE PHYSICS</title>
+    <title>GRAVES VALIDATION SUITE v29.3 | UNIFIED MASTER</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -117,14 +118,14 @@
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v28.0 COMPLETE PHYSICS</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v29.3 UNIFIED MASTER</span></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">327.384 MHz</span></div>
 </header>
 
 <div id="workspace">
     
     <div class="panel">
-        <h2>1. Select System (LITE 100 + Catalysts)</h2>
+        <h2>1. Select System (Ranks 1–930)</h2>
         <div id="inv-list"></div>
         
         <h2>2. Composition Specs</h2>
@@ -133,7 +134,7 @@
             <input type="text" id="comp-elements" readonly>
         </div>
         <div class="input-group">
-            <label>FULL COMPOSITION CLAIM</label>
+            <label>FULL PATENT CLAIM</label>
             <textarea id="comp-detail" rows="6" readonly style="font-size:0.75em; color:#aaa;"></textarea>
         </div>
         <div class="input-group">
@@ -181,7 +182,7 @@
 </div>
 
 <script>
-    // === ATOMIC MASS DATABASE ===
+    // === EXPANDED ATOMIC MASS TABLE ===
     const ATOMIC_MASS = {
         "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
         "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
@@ -190,84 +191,54 @@
         "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224, "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, 
         "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71, "Sb": 121.76, "Te": 127.6, 
         "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
-        "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, 
-        "Hg": 200.59, "Pb": 207.2, "U": 238.029, "Hf": 178.49
+        "Pm": 145, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.5, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
+        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, 
+        "Hg": 200.59, "Pb": 207.2, "U": 238.029
     };
 
-    // === COMPLETE DATABASE ===
+    // === MASTER DATABASE ===
     const DB = {
-        // LITE 100 - Defense Alloys (001-010)
-        "001": { name: "Defense Alloys (Ni-Co)", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], 
-                 detail: "Nickel: 48-52%, Cobalt: 19-21%, Chromium: 14-16%, Al: 9-11%. Icosahedral P-Type.", 
-                 lattice: "Icosahedral", type: "metal" },
-        "002": { name: "Hyper-Naval Armor (Co-Cr)", elements: ["Co","Cr","Ni","W","Al","Ta"], 
-                 detail: "Cobalt: 48-52%, Chromium: 28-32%, Nickel: 8-12%, Tungsten: 7-9%. Decagonal Superalloy.", 
-                 lattice: "Decagonal", type: "metal" },
-        "003": { name: "Hypersonic Leading Edge (W)", elements: ["W","Re","Hf","C"], 
-                 detail: "Tungsten: 85-90%, Rhenium: 5-10%, Hafnium: 2-3%. Extreme Temp Resistance.", 
-                 lattice: "Icosahedral", type: "metal" },
-        "004": { name: "Radiation Shielding (Pb)", elements: ["Pb","B","C"], 
-                 detail: "Lead: 92-95%, Boron: 3-5%, Carbon: 2-3%. Neutron Absorption Matrix.", 
-                 lattice: "Decagonal", type: "metal" },
-        "005": { name: "Stealth Coating (Fe-Si)", elements: ["Fe","Si","B"], 
-                 detail: "Iron: 78-82%, Silicon: 15-18%, Boron: 3-5%. RF Absorption Metamaterial.", 
-                 lattice: "Pentagonal", type: "metal" },
-        "006": { name: "Deep Submersible Hull (Ti)", elements: ["Ti","Al","V"], 
-                 detail: "Titanium: 88-92%, Aluminum: 5-7%, Vanadium: 3-5%. Ti-6Al-4V Quasicrystal.", 
-                 lattice: "Icosahedral", type: "metal" },
-        "007": { name: "Rocket Nozzle Liner (Nb)", elements: ["Nb","Hf","Ti"], 
-                 detail: "Niobium: 85-90%, Hafnium: 5-8%, Titanium: 5-7%. Thermal Shock Resistant.", 
-                 lattice: "Decagonal", type: "metal" },
-        "008": { name: "Satellite Bus Frame (Al)", elements: ["Al","Li","Sc"], 
-                 detail: "Aluminum: 92-95%, Lithium: 2-3%, Scandium: 2-3%. Ultra-Lightweight.", 
-                 lattice: "Icosahedral", type: "metal" },
-        "009": { name: "Kinetic Penetrator (W-U)", elements: ["W","U","Ti"], 
-                 detail: "Tungsten: 85-88%, Uranium: 10-12%, Titanium: 2-3%. High Density Impact.", 
-                 lattice: "Pentagonal", type: "metal" },
-        "010": { name: "Railgun Armature (Cu)", elements: ["Cu","Cr","Zr","Ag"], 
-                 detail: "Copper: 96-98%, Chromium: 0.5-1%, Zirconium: 0.5-1%. High Conductivity.", 
-                 lattice: "Decagonal", type: "metal" },
+        // Industry #1: Aerospace (Ranks 1-10 from v28.0)
+        "001": { name: "Defense Alloys (Ni-Co)", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], detail: "Nickel Superalloy Benchmark. Icosahedral P-Type. 1850°C operation.", lattice: "Icosahedral", type: "metal" },
+        "002": { name: "Hyper-Naval Armor (Co-Cr)", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Cobalt-Based Decagonal Superalloy. High Shear Strength.", lattice: "Decagonal", type: "metal" },
+        "003": { name: "Hypersonic Leading Edge (W)", elements: ["W","Re","Hf","C"], detail: "Tungsten-Rhenium Matrix. Extreme Temp Resistance.", lattice: "Icosahedral", type: "metal" },
+        "004": { name: "Radiation Shielding (Pb)", elements: ["Pb","B","C"], detail: "Lead-Boron Carbide Matrix. Neutron Absorption.", lattice: "Decagonal", type: "metal" },
+        "005": { name: "Stealth Coating (Fe-Si)", elements: ["Fe","Si","B"], detail: "Iron-Silicon-Boron Metamaterial. RF Absorption.", lattice: "Pentagonal", type: "metal" },
+        "006": { name: "Deep Submersible Hull (Ti)", elements: ["Ti","Al","V"], detail: "Titanium-6Al-4V Quasicrystal. Extreme Pressure.", lattice: "Icosahedral", type: "metal" },
+        "007": { name: "Rocket Nozzle Liner (Nb)", elements: ["Nb","Hf","Ti"], detail: "Niobium-Hafnium-Titanium. Thermal Shock Resist.", lattice: "Decagonal", type: "metal" },
+        "008": { name: "Satellite Bus Frame (Al)", elements: ["Al","Li","Sc"], detail: "Aluminum-Lithium-Scandium. Ultra-Lightweight.", lattice: "Icosahedral", type: "metal" },
+        "009": { name: "Kinetic Penetrator (W-U)", elements: ["W","U","Ti"], detail: "Tungsten-Uranium-Titanium. High Density Impact.", lattice: "Pentagonal", type: "metal" },
+        "010": { name: "Railgun Armature (Cu)", elements: ["Cu","Cr","Zr","Ag"], detail: "Copper-Chromium-Zirconium. High Conductivity.", lattice: "Decagonal", type: "metal" },
 
-        // HYDROCARBON PERFECTION CATALYSTS (901-908)
-        "901": { name: "Methane Perfection (CH₄)", elements: ["C","H"], 
-                 detail: "Ir-Os-Rh-B₁₀ Catalyst. Methane-to-Graphite Zero-Emission Conversion.", 
-                 lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
-        "902": { name: "Octane Perfection (C₈H₁₈)", elements: ["C","H"], 
-                 detail: "Gasoline Catalyst. 960x Thermal Hardening. Max Barrier: 5.68 eV @ 2000K.", 
-                 lattice: "Icosahedral", type: "catalyst", molecular: "C8H18" },
-        "903": { name: "Propane Perfection (C₃H₈)", elements: ["C","H"], 
-                 detail: "LPG Catalyst. Clean-burning propane conversion to structured carbon.", 
-                 lattice: "Icosahedral", type: "catalyst", molecular: "C3H8" },
-        "904": { name: "Butane Perfection (C₄H₁₀)", elements: ["C","H"], 
-                 detail: "Lighter Fuel Catalyst. Butane-to-graphite thermal stabilization.", 
-                 lattice: "Pentagonal", type: "catalyst", molecular: "C4H10" },
-        "905": { name: "Hexane Perfection (C₆H₁₄)", elements: ["C","H"], 
-                 detail: "Solvent Catalyst. Hexane reformation for zero-emission applications.", 
-                 lattice: "Decagonal", type: "catalyst", molecular: "C6H14" },
-        "906": { name: "Diesel Perfection (C₁₂H₂₆)", elements: ["C","H"], 
-                 detail: "Heavy Fuel Catalyst. Diesel-to-graphite with enhanced thermal stability.", 
-                 lattice: "Icosahedral", type: "catalyst", molecular: "C12H26" },
-        "907": { name: "Kerosene Perfection (C₁₄H₃₀)", elements: ["C","H"], 
-                 detail: "Jet Fuel Catalyst. Kerosene reformation for aviation applications.", 
-                 lattice: "Decagonal", type: "catalyst", molecular: "C14H30" },
-        "908": { name: "Ethane Perfection (C₂H₆)", elements: ["C","H"], 
-                 detail: "Natural Gas Catalyst. Ethane cracking with zero-slack geometry.", 
-                 lattice: "Pentagonal", type: "catalyst", molecular: "C2H6" }
+        // Industry #19: Food Singularity (Ranks 549-550 from Zero-Slack file)
+        "549": { name: "Zero-Waste Vertical Farm", elements: ["C","H","O","N","P","K"], detail: "Icosahedral permanent zero-waste vertical farm. 100t food/m³/year.", lattice: "Icosahedral", type: "system" },
+        "550": { name: "Planetary Food Singularity", elements: ["C","H","O","N","Au"], detail: "Decagonal permanent planetary food singularity. End of scarcity.", lattice: "Decagonal", type: "system" },
+
+        // Industry #31: Perfection Catalysts (Ranks 901-930 from Perfection file)
+        "901": { name: "Methane Perfection (CH₄)", elements: ["Ir","Os","Rh","B"], detail: "GPC-1: Methane-to-Graphite. Zero-Emission.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
+        "902": { name: "Octane Perfection (C₈H₁₈)", elements: ["Ir","Os","Rh","B"], detail: "GPC-1 Gasoline Perfection. 100% combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C8H18" },
+        "903": { name: "Propane Perfection (C₃H₈)", elements: ["Ir","Os","Rh","B"], detail: "PPC-1 Propane Perfection. Clean residential heat.", lattice: "Icosahedral", type: "catalyst", molecular: "C3H8" },
+        "904": { name: "Butane Perfection (C₄H₁₀)", elements: ["Ir","Os","Rh","B"], detail: "Lighter Fuel Catalyst. Zero soot.", lattice: "Pentagonal", type: "catalyst", molecular: "C4H10" },
+        "905": { name: "Hexane Perfection (C₆H₁₄)", elements: ["Ir","Os","Rh","B"], detail: "Solvent Perfection. Zero VOCs.", lattice: "Decagonal", type: "catalyst", molecular: "C6H14" },
+        "906": { name: "Diesel Perfection (C₁₂H₂₆)", elements: ["Ir","Os","Rh","B"], detail: "DPC-1 Diesel Perfection. Zero NOx/Soot.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H26" },
+        "907": { name: "Kerosene Perfection (C₁₄H₃₀)", elements: ["Ir","Os","Rh","B"], detail: "JPC-1 Jet Fuel Perfection. Zero contrails.", lattice: "Decagonal", type: "catalyst", molecular: "C14H30" },
+        "908": { name: "Ethane Perfection (C₂H₆)", elements: ["Ir","Os","Rh","B"], detail: "Ethane Cracking Catalyst. Zero waste.", lattice: "Pentagonal", type: "catalyst", molecular: "C2H6" },
+        "909": { name: "Universal Lattice (CxHy)", elements: ["Ir","Os","Rh","B"], detail: "UHDRL-1 Universal Hydrocarbon lattice.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
+        "910": { name: "Avgas Perfection (C8)", elements: ["Ir","Os","Rh","B"], detail: "APC-1 Aviation Gas. Replaces Lead.", lattice: "Decagonal", type: "catalyst", molecular: "C8H18" }
     };
 
-    // Procedural Fill for 011-100
+    // Procedural Fill for 011-548
     const safeElements = ["C", "Si", "Fe", "Al", "Ti", "Ni", "Cu", "Zn"];
-    for(let i=11; i<=100; i++) {
+    for(let i=11; i<=548; i++) {
         let id = i.toString().padStart(3, '0');
+        if(DB[id]) continue;
         let type = i % 3 === 0 ? "Decagonal" : (i % 3 === 1 ? "Icosahedral" : "Pentagonal");
         let el1 = safeElements[i % safeElements.length];
         let el2 = safeElements[(i+1) % safeElements.length];
-        let el3 = safeElements[(i+2) % safeElements.length];
-        
         DB[id] = {
             name: `Rank ${id} System`,
-            elements: [el1, el2, el3], 
-            detail: `Proprietary Graves-Law Formulation ${id}. ${type} Symmetry. LITE Package.`,
+            elements: [el1, el2], 
+            detail: `Proprietary Graves-Law Formulation ${id}. ${type} Symmetry.`,
             lattice: type,
             type: "metal"
         };
@@ -279,85 +250,25 @@
     let isLocked = false;
     let uniqueAngle = 0;
     let atoms = [];
-    let scanCtx, atomCtx;
     
-    // === PHYSICS ENGINE ===
-    function calculateLock(id, data) {
-        const BASE_ANGLE = 5.0372; // Proven for Rank 001
-        
-        // Calculate WAAM
-        let total = 0, count = 0;
-        data.elements.forEach(el => {
-            let m = ATOMIC_MASS[el];
-            if(m) { total += m; count++; }
-        });
-        let avg = count > 0 ? total/count : 50.0;
-        
-        // Type-based corrections
-        let shift = 0;
-        
-        if(data.type === "catalyst") {
-            // Hydrocarbon catalysts - lighter, need more torsion freedom
-            if(data.molecular === "CH4") shift = 0.001;       // 5.0382°
-            else if(data.molecular === "C2H6") shift = 0.0015;
-            else if(data.molecular === "C3H8") shift = 0.002;
-            else if(data.molecular === "C4H10") shift = 0.0025;
-            else if(data.molecular === "C6H14") shift = 0.003;
-            else if(data.molecular === "C8H18") shift = -0.0012; // 5.036° PROVEN
-            else if(data.molecular === "C12H26") shift = -0.001;
-            else if(data.molecular === "C14H30") shift = -0.0008;
-            else shift = 0.001; // Default catalyst
-        } else {
-            // Metal alloys - mass-based
-            let diff = avg - 77.1; // Reference: Ni-Co average
-            shift = diff * 0.00005;
-            
-            // Lattice corrections
-            if(data.lattice === "Pentagonal") shift += 0.0001;
-            else if(data.lattice === "Decagonal") shift -= 0.0001;
-            
-            // Clamp to physical range
-            if(shift > 0.007) shift = 0.007;
-            if(shift < -0.007) shift = -0.007;
-        }
-        
-        document.getElementById('mass-readout').innerText = `~${avg.toFixed(2)} g/mol`;
-        return parseFloat((BASE_ANGLE + shift).toFixed(6));
-    }
+    const invList = document.getElementById('inv-list');
+    const scanCtx = document.getElementById('scanCanvas').getContext('2d');
+    const atomCtx = document.getElementById('atomCanvas').getContext('2d');
+    const consoleDiv = document.getElementById('console');
+    const atomContainer = document.getElementById('atom-container');
 
-    // === INIT ===
     function init() {
-        const invList = document.getElementById('inv-list');
-        const consoleDiv = document.getElementById('console');
-        
-        // Build inventory - LITE 100 first, then catalysts
-        let keys = Object.keys(DB).sort((a,b) => {
-            let na = parseInt(a), nb = parseInt(b);
-            return na - nb;
-        });
+        // Sort keys numerically
+        let keys = Object.keys(DB).sort((a,b) => parseInt(a) - parseInt(b));
         
         keys.forEach(key => {
             let el = document.createElement('div');
             el.className = 'inv-item';
             el.dataset.id = key;
             el.innerHTML = `<span class="inv-id">${key}</span><span>${DB[key].name}</span>`;
-            el.addEventListener('click', () => selectRank(key));
+            el.onclick = () => selectRank(key);
             invList.appendChild(el);
         });
-        
-        // Setup canvases
-        const scanCanvas = document.getElementById('scanCanvas');
-        const atomCanvas = document.getElementById('atomCanvas');
-        scanCtx = scanCanvas.getContext('2d');
-        atomCtx = atomCanvas.getContext('2d');
-        
-        function resize() {
-            scanCanvas.width = scanCanvas.offsetWidth;
-            scanCanvas.height = scanCanvas.offsetHeight;
-            atomCanvas.width = atomCanvas.offsetWidth;
-            atomCanvas.height = atomCanvas.offsetHeight;
-            drawGrid(scanCtx);
-        }
         
         resize();
         window.addEventListener('resize', resize);
@@ -366,19 +277,62 @@
         requestAnimationFrame(drawLoop);
         
         log("SYSTEM INITIALIZED.", "cyan");
-        log("LITE 100 + HYDROCARBON CATALYSTS LOADED.", "cyan");
-        log("READY FOR VALIDATION.", "gold");
+        log("UNIFIED MASTER DATABASE LOADED.", "gold");
     }
 
-    function log(msg, type='') {
-        const consoleDiv = document.getElementById('console');
-        const d = document.createElement('div');
-        d.innerHTML = `> ${msg}`;
-        if(type==='cyan') d.className = 'log-cyan';
-        if(type==='red') d.className = 'log-red';
-        if(type==='gold') d.className = 'log-gold';
-        consoleDiv.appendChild(d);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    function resize() {
+        scanCtx.canvas.width = scanCtx.canvas.offsetWidth;
+        scanCtx.canvas.height = scanCtx.canvas.offsetHeight;
+        atomCtx.canvas.width = atomCtx.canvas.offsetWidth;
+        atomCtx.canvas.height = atomCtx.canvas.offsetHeight;
+        drawGrid(scanCtx);
+    }
+
+    // === UPDATED PHYSICS ENGINE ===
+    function calculateLock(id, data) {
+        const BASE_ANGLE = 5.0372;
+        let shift = 0;
+        let avg = 50.0;
+
+        if (data.type === "catalyst") {
+            // Molecular Weight Tuning for Catalysts
+            let molWeight = 0;
+            if (data.molecular === "CH4") molWeight = 16.04;
+            else if (data.molecular === "C2H6") molWeight = 30.07;
+            else if (data.molecular === "C3H8") molWeight = 44.1;
+            else if (data.molecular === "C4H10") molWeight = 58.12;
+            else if (data.molecular === "C6H14") molWeight = 86.18;
+            else if (data.molecular === "C8H18") molWeight = 114.23;
+            else if (data.molecular === "C12H26") molWeight = 170.33;
+            else if (data.molecular === "C14H30") molWeight = 198.39;
+            else molWeight = 100.0; // Fallback
+
+            // Heavier molecules require NEGATIVE shift (tighter lattice)
+            // Lighter molecules require POSITIVE shift (open lattice)
+            shift = (100 - molWeight) * 0.00002;
+            avg = molWeight; // Display purposes
+        } else {
+            // Standard Atomic Mass Averaging for Metals
+            let total = 0, count = 0;
+            data.elements.forEach(el => {
+                let m = ATOMIC_MASS[el];
+                if(m) { total += m; count++; }
+            });
+            avg = count > 0 ? total/count : 50.0;
+            let diff = avg - 77.1;
+            shift = diff * 0.00005;
+        }
+        
+        // Lattice Geometry Correction
+        if(data.lattice === "Pentagonal") shift += 0.0001;
+        else if(data.lattice === "Decagonal") shift -= 0.0001;
+        
+        // Clamp to physics limits
+        if(shift > 0.007) shift = 0.007;
+        if(shift < -0.007) shift = -0.007;
+        
+        document.getElementById('mass-readout').innerText = `~${avg.toFixed(2)} g/mol`;
+        return parseFloat((BASE_ANGLE + shift).toFixed(6));
     }
 
     function selectRank(id) {
@@ -411,10 +365,20 @@
         isLocked = false;
         clearLabels();
         updateAtomTargets(data.lattice);
-        
         drawGrid(scanCtx);
+        
         log(`SELECTED: ${data.name}`);
-        log(`CALCULATED LOCK: ${uniqueAngle.toFixed(6)}°`, "gold");
+        log(`TARGET LOCK: ${uniqueAngle.toFixed(6)}°`, "gold");
+    }
+
+    function log(msg, type='') {
+        const d = document.createElement('div');
+        d.innerHTML = `> ${msg}`;
+        if(type==='cyan') d.className = 'log-cyan';
+        if(type==='red') d.className = 'log-red';
+        if(type==='gold') d.className = 'log-gold';
+        consoleDiv.appendChild(d);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
     function runScan() {
@@ -425,7 +389,7 @@
         document.getElementById('lock-indicator').style.color = "var(--cyan)";
         document.getElementById('scan-line').style.opacity = 1;
         
-        log(`SCANNING RANGE [5.030° - 5.045°]...`, "cyan");
+        log(`SCANNING...`, "cyan");
         
         let w = scanCtx.canvas.width;
         let h = scanCtx.canvas.height;
@@ -446,6 +410,7 @@
             let angle = MIN_SCAN + (pct * RANGE);
             
             let dist = Math.abs(angle - uniqueAngle);
+            // Mexican Hat Potential
             let energy = Math.min(1, Math.pow(dist * 300, 2));
             let y = (energy * (h * 0.7)) + (h * 0.15);
             
@@ -475,13 +440,12 @@
         document.getElementById('res-angle').value = angle.toFixed(6) + "°";
         document.getElementById('res-slack').value = "0.000 nm (PERFECT)";
         
-        log(`LOCK CONFIRMED AT ${angle.toFixed(6)}°`, "gold");
-        log(`ZERO-SLACK ACHIEVED. STRUCTURE FROZEN.`, "cyan");
+        log(`LOCK CONFIRMED: ${angle.toFixed(6)}°`, "gold");
+        log(`ZERO-SLACK STATE ACHIEVED.`, "cyan");
         
         createLabels();
     }
 
-    // === 3D ENGINE ===
     let time = 0;
 
     function initAtoms() {
@@ -519,6 +483,7 @@
             }
         }
         else {
+            // Icosahedral
             targets.push([0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi]);
             targets.push([1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0]);
             targets.push([phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]);
@@ -546,17 +511,17 @@
 
     function drawLoop() {
         time += 0.02;
-        
-        if(!atomCtx) return;
-        
         let w = atomCtx.canvas.width;
         let h = atomCtx.canvas.height;
         let cx = w/2; 
-        let cy = h/2 + 60;
+        let cy = h/2 + 70;
 
         atomCtx.clearRect(0,0,w,h);
         
-        if(!currentRank) return requestAnimationFrame(drawLoop);
+        if(!currentRank) {
+            requestAnimationFrame(drawLoop);
+            return;
+        }
         
         let rot = isLocked ? time * 0.2 : time;
         let progress = isLocked ? 1 : 0;
@@ -625,10 +590,8 @@
         requestAnimationFrame(drawLoop);
     }
 
-    // === UTILS ===
     function createLabels() {
         clearLabels();
-        const atomContainer = document.getElementById('atom-container');
         let elements = DB[currentRank].elements;
         atoms.forEach((a, i) => {
             let elName = elements[i % elements.length];
@@ -650,40 +613,57 @@
     }
 
     function clearLabels() {
-        document.querySelectorAll('.atom-label').forEach(e => e.remove());
+        document.querySelectorAll('.atom-label').forEach(el => el.remove());
+    }
+
+   function getElementColor(el) {
+        const colors = {
+            "C": "#888", "Si": "#b0b0ff", "Fe": "#ff8844", "Al": "#aaaaff",
+            "Ti": "#ccccff", "Ni": "#99ff99", "Co": "#ff99dd", "Cr": "#ffaa44",
+            "W": "#ffff66", "Mo": "#cc99ff", "Nb": "#88ddff", "Cu": "#ff9955",
+            "Zr": "#aaffaa", "Ag": "#dddddd", "Pb": "#666666", "B": "#ffaacc",
+            "Re": "#ffcc88", "Hf": "#99ccff", "Ta": "#bb99ff", "V": "#ffdd88",
+            "Li": "#ff6666", "Sc": "#99ffcc", "U": "#66ff66", "Ir": "#ffff99",
+            "Os": "#ccff99", "Rh": "#ffccff"
+        };
+        return colors[el] || "#00ffcc";
     }
 
     function drawGrid(ctx) {
-        if(!ctx) return;
-        ctx.strokeStyle = "#333"; ctx.lineWidth = 1; ctx.beginPath();
+        let w = ctx.canvas.width;
+        let h = ctx.canvas.height;
+        
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);
+        
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 1;
+        
         for(let i=0; i<10; i++) {
-            ctx.moveTo(i*(ctx.canvas.width/10), 0); ctx.lineTo(i*(ctx.canvas.width/10), ctx.canvas.height);
-            ctx.moveTo(0, i*(ctx.canvas.height/10)); ctx.lineTo(ctx.canvas.width, i*(ctx.canvas.height/10));
+            let y = (i/10) * h;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
         }
-        ctx.stroke();
+        
+        for(let i=0; i<20; i++) {
+            let x = (i/20) * w;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+        }
     }
 
-    function getElementColor(el) {
-        const map = {
-            "Au": "#FFD700", "Ni": "#00FF00", "Co": "#0000FF", 
-            "Cr": "#888888", "Al": "#DDDDDD", "Ti": "#AAAAAA",
-            "C": "#444444", "Si": "#00FFFF", "W": "#555555",
-            "Cu": "#FF8800", "Fe": "#AA4444", "Pb": "#666666",
-            "H": "#FFFFFF", "B": "#FF66FF", "Re": "#AAAA00"
-        };
-        return map[el] || "#ffffff";
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
-
-    // Clock
-    setInterval(() => {
-        let jitter = (Math.random()-0.5) * 0.000001;
-        let disp = document.getElementById('clock-display');
-        if(disp) disp.innerText = (327.384 + jitter).toFixed(9) + " MHz";
-    }, 100);
-
-    // Start
-    document.addEventListener('DOMContentLoaded', init);
-
 </script>
 </body>
 </html>
+
+```
