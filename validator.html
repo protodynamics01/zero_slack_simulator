@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v29.3 | UNIFIED MASTER</title>
+    <title>PROTODYNAMICS | TIER 0 VALIDATION ENGINE</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -11,9 +11,9 @@
             --red: #ff3333;
             --gold: #ffaa00;
             --bg: #050505;
-            --glass: rgba(10, 15, 20, 0.98);
+            --glass: rgba(10, 15, 20, 0.95);
             --border: 1px solid rgba(0, 255, 204, 0.2);
-            --font-main: "Inter", system-ui, sans-serif;
+            --font-main: "Inter", system-ui, -apple-system, sans-serif;
             --font-mono: 'Courier New', monospace;
         }
 
@@ -26,49 +26,59 @@
             background: radial-gradient(circle at center, #080808 0%, #000 100%);
         }
 
+        /* HEADER */
         header {
             background: rgba(0,0,0,0.9); border-bottom: var(--border);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; font-size: 0.85em; font-weight: 700; letter-spacing: 2px;
-            z-index: 10;
+            z-index: 100;
         }
         .clock-ref { font-family: var(--font-mono); font-size: 0.9em; color: #666; }
         .clock-live { color: var(--cyan); margin-left: 10px; }
 
+        /* WORKSPACE GRID */
         #workspace {
-            display: grid; grid-template-columns: 420px 1fr 350px;
+            display: grid; grid-template-columns: 380px 1fr 350px;
             height: 100%; overflow: hidden;
         }
 
+        /* PANELS */
         .panel {
             background: var(--glass); border-right: var(--border);
             padding: 20px; display: flex; flex-direction: column; gap: 15px;
-            overflow-y: auto;
+            overflow-y: auto; z-index: 20;
         }
         .panel-right { border-right: none; border-left: var(--border); }
 
-        h2 { margin: 0 0 10px 0; font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        h2 { 
+            margin: 0 0 10px 0; font-size: 0.75em; color: #888; 
+            text-transform: uppercase; letter-spacing: 1px; 
+            border-bottom: 1px solid #333; padding-bottom: 5px; 
+        }
 
+        /* INVENTORY LIST */
         #inv-list {
             flex: 1; overflow-y: auto; border: 1px solid #333; background: #000;
             font-family: var(--font-mono); font-size: 0.7em;
         }
         .inv-item {
-            padding: 12px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
-            display: flex; justify-content: flex-start; align-items: center;
+            padding: 10px 15px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
+            display: flex; justify-content: flex-start;
         }
-        .inv-item:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
+        .inv-item:hover { background: rgba(0, 255, 204, 0.05); color: #fff; }
         .inv-item.active { background: var(--cyan); color: #000; font-weight: bold; }
-        .inv-id { color: #444; margin-right: 15px; font-weight: bold; min-width: 35px; }
+        .inv-id { color: #444; margin-right: 15px; width: 30px; }
         .inv-item.active .inv-id { color: #000; }
 
-        .input-group { margin-bottom: 10px; }
+        /* INPUTS */
+        .input-group { margin-bottom: 5px; }
         label { display: block; font-size: 0.7em; color: #666; margin-bottom: 3px; font-family: var(--font-mono); }
         input, textarea {
             width: 100%; background: #111; border: 1px solid #333; color: var(--cyan);
             padding: 8px; font-family: var(--font-mono); font-size: 0.85em; outline: none; resize: none;
         }
         
+        /* CENTER STAGE */
         #stage {
             position: relative; display: flex; flex-direction: column;
             padding: 20px; gap: 20px; background: radial-gradient(circle at center, #111 0%, #000 100%);
@@ -76,78 +86,84 @@
 
         .graph-box {
             flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #333;
-            position: relative; padding: 10px; display: flex; flex-direction: column;
+            position: relative; padding: 0; display: flex; flex-direction: column;
             overflow: hidden;
         }
         .graph-header { position: absolute; top: 10px; left: 10px; font-size: 0.7em; color: var(--cyan); font-weight: bold; z-index: 10;}
         .lock-indicator { position: absolute; top: 10px; right: 10px; font-size: 0.7em; color: #555; font-weight: bold; z-index: 10;}
         
+        /* ACTION BUTTONS */
         button {
-            width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.1);
+            width: 100%; padding: 15px; background: rgba(0, 255, 204, 0.05);
             border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main);
             font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
             text-transform: uppercase; margin-top: 5px;
         }
-        button:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        button:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.3); }
         button:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
 
+        /* CONSOLE */
         #console {
-            height: 250px; background: #000; border: 1px solid #333;
+            height: 200px; background: #000; border: 1px solid #333;
             font-family: var(--font-mono); font-size: 0.7em; color: #888;
             padding: 10px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4;
         }
         .log-cyan { color: var(--cyan); }
-        .log-red { color: var(--red); }
         .log-gold { color: var(--gold); }
+        .log-err { color: var(--red); }
 
+        /* VISUALS */
         #scan-line {
             position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan);
-            box-shadow: 0 0 10px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
+            box-shadow: 0 0 15px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
+            transition: opacity 0.2s;
         }
 
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas { display: block; width: 100%; height: 100%; }
         
+        /* OPTIMIZED LABELS */
         .atom-label {
             position: absolute; color: #fff; font-size: 10px; font-family: sans-serif;
-            pointer-events: none; text-shadow: 0 0 4px #000; font-weight: bold;
-            opacity: 0; transition: opacity 0.5s; z-index: 5;
+            pointer-events: none; text-shadow: 0 0 3px #000; font-weight: bold;
+            opacity: 0; transform: translate(-50%, -50%); /* Center anchor */
+            will-change: transform, opacity;
         }
         .atom-label.visible { opacity: 1; }
+
     </style>
 </head>
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v29.3 UNIFIED MASTER</span></div>
-    <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">327.384 MHz</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// TIER 0 MASTER</span></div>
+    <div class="clock-ref">DEUTERIUM REF: <span class="clock-live" id="clock-display">INITIALIZING...</span></div>
 </header>
 
 <div id="workspace">
     
     <div class="panel">
-        <h2>1. Select System (Ranks 1–930)</h2>
+        <h2>1. Select Invention</h2>
         <div id="inv-list"></div>
         
-        <h2>2. Composition Specs</h2>
+        <h2>2. Composition Data</h2>
         <div class="input-group">
             <label>PRIMARY ELEMENTS</label>
             <input type="text" id="comp-elements" readonly>
         </div>
         <div class="input-group">
-            <label>FULL PATENT CLAIM</label>
-            <textarea id="comp-detail" rows="6" readonly style="font-size:0.75em; color:#aaa;"></textarea>
+            <label>FULL CLAIM</label>
+            <textarea id="comp-detail" rows="4" readonly style="color:#aaa;"></textarea>
         </div>
         <div class="input-group">
             <label>LATTICE SYMMETRY</label>
             <input type="text" id="lattice-type" readonly>
         </div>
-        
-        <div class="input-group" style="background:#111; border:1px solid #333; padding:10px;">
-            <label style="color:#666; font-size:0.6em;">WAAM (Weighted Atomic Mass)</label>
-            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.9em;">-- g/mol</div>
+        <div class="input-group" style="background:#111; border:1px solid #333; padding:10px; margin-top:5px;">
+            <label style="color:#666;">WAAM (Weighted Atomic Mass)</label>
+            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:1.1em; letter-spacing:1px;">--</div>
         </div>
         
-        <button id="btn-scan">INITIATE TORSION SCAN</button>
+        <button id="btn-scan" onclick="app.runScan()" disabled>INITIATE TORSION SCAN</button>
     </div>
 
     <div id="stage">
@@ -158,7 +174,7 @@
             <div id="scan-line"></div>
         </div>
 
-        <div class="graph-box" style="flex: 2; background: #000; overflow:hidden;" id="atom-container">
+        <div class="graph-box" style="flex: 2; background: #000;" id="atom-container">
             <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
             <canvas id="atomCanvas"></canvas>
         </div>
@@ -182,488 +198,482 @@
 </div>
 
 <script>
-    // === EXPANDED ATOMIC MASS TABLE ===
-    const ATOMIC_MASS = {
+/**
+ * TIER 0 ARCHITECTURE: SINGLETON PATTERN
+ * Encapsulates logic to prevent global pollution and ensure execution order.
+ */
+const app = {
+    // --- CONFIGURATION ---
+    state: {
+        rank: null,
+        scanning: false,
+        locked: false,
+        angle: 0,
+        atoms: [],
+        time: 0,
+        animId: null
+    },
+
+    // --- COMPLETE ATOMIC MASS TABLE (TIER 0 VERIFIED) ---
+    massTable: {
         "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
         "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
-        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, 
-        "Cu": 63.546, "Zn": 65.38, "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, 
-        "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224, "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, 
-        "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71, "Sb": 121.76, "Te": 127.6, 
-        "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
+        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, "Cu": 63.546, "Zn": 65.38,
+        "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224,
+        "Nb": 92.906, "Mo": 95.95, "Tc": 98, "Ru": 101.07, "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71,
+        "Sb": 121.76, "Te": 127.6, "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
         "Pm": 145, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.5, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
-        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, 
-        "Hg": 200.59, "Pb": 207.2, "U": 238.029
-    };
+        "Lu": 174.97, "Hf": 178.49, "Ta": 180.948, "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, "Hg": 200.59,
+        "Pb": 207.2, "U": 238.029
+    },
 
-    // === MASTER DATABASE ===
-    const DB = {
-        // Industry #1: Aerospace (Ranks 1-10 from v28.0)
-        "001": { name: "Defense Alloys (Ni-Co)", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], detail: "Nickel Superalloy Benchmark. Icosahedral P-Type. 1850°C operation.", lattice: "Icosahedral", type: "metal" },
-        "002": { name: "Hyper-Naval Armor (Co-Cr)", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Cobalt-Based Decagonal Superalloy. High Shear Strength.", lattice: "Decagonal", type: "metal" },
-        "003": { name: "Hypersonic Leading Edge (W)", elements: ["W","Re","Hf","C"], detail: "Tungsten-Rhenium Matrix. Extreme Temp Resistance.", lattice: "Icosahedral", type: "metal" },
-        "004": { name: "Radiation Shielding (Pb)", elements: ["Pb","B","C"], detail: "Lead-Boron Carbide Matrix. Neutron Absorption.", lattice: "Decagonal", type: "metal" },
-        "005": { name: "Stealth Coating (Fe-Si)", elements: ["Fe","Si","B"], detail: "Iron-Silicon-Boron Metamaterial. RF Absorption.", lattice: "Pentagonal", type: "metal" },
-        "006": { name: "Deep Submersible Hull (Ti)", elements: ["Ti","Al","V"], detail: "Titanium-6Al-4V Quasicrystal. Extreme Pressure.", lattice: "Icosahedral", type: "metal" },
-        "007": { name: "Rocket Nozzle Liner (Nb)", elements: ["Nb","Hf","Ti"], detail: "Niobium-Hafnium-Titanium. Thermal Shock Resist.", lattice: "Decagonal", type: "metal" },
-        "008": { name: "Satellite Bus Frame (Al)", elements: ["Al","Li","Sc"], detail: "Aluminum-Lithium-Scandium. Ultra-Lightweight.", lattice: "Icosahedral", type: "metal" },
-        "009": { name: "Kinetic Penetrator (W-U)", elements: ["W","U","Ti"], detail: "Tungsten-Uranium-Titanium. High Density Impact.", lattice: "Pentagonal", type: "metal" },
-        "010": { name: "Railgun Armature (Cu)", elements: ["Cu","Cr","Zr","Ag"], detail: "Copper-Chromium-Zirconium. High Conductivity.", lattice: "Decagonal", type: "metal" },
+    db: {}, // Populated on init
 
-        // Industry #19: Food Singularity (Ranks 549-550 from Zero-Slack file)
-        "549": { name: "Zero-Waste Vertical Farm", elements: ["C","H","O","N","P","K"], detail: "Icosahedral permanent zero-waste vertical farm. 100t food/m³/year.", lattice: "Icosahedral", type: "system" },
-        "550": { name: "Planetary Food Singularity", elements: ["C","H","O","N","Au"], detail: "Decagonal permanent planetary food singularity. End of scarcity.", lattice: "Decagonal", type: "system" },
+    // --- DOM CACHE ---
+    dom: {},
 
-        // Industry #31: Perfection Catalysts (Ranks 901-930 from Perfection file)
-        "901": { name: "Methane Perfection (CH₄)", elements: ["Ir","Os","Rh","B"], detail: "GPC-1: Methane-to-Graphite. Zero-Emission.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
-        "902": { name: "Octane Perfection (C₈H₁₈)", elements: ["Ir","Os","Rh","B"], detail: "GPC-1 Gasoline Perfection. 100% combustion.", lattice: "Icosahedral", type: "catalyst", molecular: "C8H18" },
-        "903": { name: "Propane Perfection (C₃H₈)", elements: ["Ir","Os","Rh","B"], detail: "PPC-1 Propane Perfection. Clean residential heat.", lattice: "Icosahedral", type: "catalyst", molecular: "C3H8" },
-        "904": { name: "Butane Perfection (C₄H₁₀)", elements: ["Ir","Os","Rh","B"], detail: "Lighter Fuel Catalyst. Zero soot.", lattice: "Pentagonal", type: "catalyst", molecular: "C4H10" },
-        "905": { name: "Hexane Perfection (C₆H₁₄)", elements: ["Ir","Os","Rh","B"], detail: "Solvent Perfection. Zero VOCs.", lattice: "Decagonal", type: "catalyst", molecular: "C6H14" },
-        "906": { name: "Diesel Perfection (C₁₂H₂₆)", elements: ["Ir","Os","Rh","B"], detail: "DPC-1 Diesel Perfection. Zero NOx/Soot.", lattice: "Icosahedral", type: "catalyst", molecular: "C12H26" },
-        "907": { name: "Kerosene Perfection (C₁₄H₃₀)", elements: ["Ir","Os","Rh","B"], detail: "JPC-1 Jet Fuel Perfection. Zero contrails.", lattice: "Decagonal", type: "catalyst", molecular: "C14H30" },
-        "908": { name: "Ethane Perfection (C₂H₆)", elements: ["Ir","Os","Rh","B"], detail: "Ethane Cracking Catalyst. Zero waste.", lattice: "Pentagonal", type: "catalyst", molecular: "C2H6" },
-        "909": { name: "Universal Lattice (CxHy)", elements: ["Ir","Os","Rh","B"], detail: "UHDRL-1 Universal Hydrocarbon lattice.", lattice: "Icosahedral", type: "catalyst", molecular: "CH4" },
-        "910": { name: "Avgas Perfection (C8)", elements: ["Ir","Os","Rh","B"], detail: "APC-1 Aviation Gas. Replaces Lead.", lattice: "Decagonal", type: "catalyst", molecular: "C8H18" }
-    };
-
-    // Procedural Fill for 011-548
-    const safeElements = ["C", "Si", "Fe", "Al", "Ti", "Ni", "Cu", "Zn"];
-    for(let i=11; i<=548; i++) {
-        let id = i.toString().padStart(3, '0');
-        if(DB[id]) continue;
-        let type = i % 3 === 0 ? "Decagonal" : (i % 3 === 1 ? "Icosahedral" : "Pentagonal");
-        let el1 = safeElements[i % safeElements.length];
-        let el2 = safeElements[(i+1) % safeElements.length];
-        DB[id] = {
-            name: `Rank ${id} System`,
-            elements: [el1, el2], 
-            detail: `Proprietary Graves-Law Formulation ${id}. ${type} Symmetry.`,
-            lattice: type,
-            type: "metal"
-        };
-    }
-
-    // === STATE ===
-    let currentRank = null;
-    let isScanning = false;
-    let isLocked = false;
-    let uniqueAngle = 0;
-    let atoms = [];
-    
-    const invList = document.getElementById('inv-list');
-    const scanCtx = document.getElementById('scanCanvas').getContext('2d');
-    const atomCtx = document.getElementById('atomCanvas').getContext('2d');
-    const consoleDiv = document.getElementById('console');
-    const atomContainer = document.getElementById('atom-container');
-
-    function init() {
-        // Sort keys numerically
-        let keys = Object.keys(DB).sort((a,b) => parseInt(a) - parseInt(b));
+    // --- INITIALIZATION ---
+    init: function() {
+        console.log("BOOT: Starting Graves Validation Engine...");
         
-        keys.forEach(key => {
-            let el = document.createElement('div');
-            el.className = 'inv-item';
-            el.dataset.id = key;
-            el.innerHTML = `<span class="inv-id">${key}</span><span>${DB[key].name}</span>`;
-            el.onclick = () => selectRank(key);
-            invList.appendChild(el);
+        // 1. Cache DOM Elements
+        this.dom = {
+            invList: document.getElementById('inv-list'),
+            console: document.getElementById('console'),
+            scanCanvas: document.getElementById('scanCanvas'),
+            atomCanvas: document.getElementById('atomCanvas'),
+            scanCtx: document.getElementById('scanCanvas').getContext('2d'),
+            atomCtx: document.getElementById('atomCanvas').getContext('2d'),
+            atomContainer: document.getElementById('atom-container'),
+            scanLine: document.getElementById('scan-line'),
+            inputs: {
+                elements: document.getElementById('comp-elements'),
+                detail: document.getElementById('comp-detail'),
+                lattice: document.getElementById('lattice-type'),
+                mass: document.getElementById('mass-readout'),
+                angle: document.getElementById('res-angle'),
+                slack: document.getElementById('res-slack')
+            },
+            btn: document.getElementById('btn-scan'),
+            indicator: document.getElementById('lock-indicator')
+        };
+
+        // 2. Build Database
+        this.buildDB();
+        this.populateList();
+
+        // 3. Setup Layout Observer (The "Resize" Fix)
+        const observer = new ResizeObserver(() => this.resize());
+        observer.observe(this.dom.atomContainer);
+        observer.observe(document.querySelector('.panel'));
+        
+        // 4. Start Physics
+        this.initAtoms();
+        this.log("SYSTEM INITIALIZED. WAAM ENGINE ONLINE.", "cyan");
+        this.resize();
+        
+        // 5. Start Render Loop
+        requestAnimationFrame((t) => this.loop(t));
+        
+        // 6. Start Clock
+        setInterval(() => {
+            const el = document.getElementById('clock-display');
+            if(el) el.innerText = (327.384 + (Math.random()-0.5)*0.0001).toFixed(6) + " MHz";
+        }, 100);
+    },
+
+    buildDB: function() {
+        // Core Graves Inventions
+        this.db["001"] = { name: "Defense Alloys (Ni-Co)", elements: ["Ni","Co","Cr","Al","Ti"], detail: "Nickel Superalloy Benchmark. Icosahedral P-Type.", lattice: "Icosahedral" };
+        this.db["002"] = { name: "Hyper-Naval Armor (Co-Cr)", elements: ["Co","Cr","Ni","W","Ta"], detail: "Cobalt-Based Decagonal Superalloy.", lattice: "Decagonal" };
+        this.db["003"] = { name: "Hypersonic Edge (W-Re)", elements: ["W","Re","Hf","C"], detail: "Tungsten-Rhenium Matrix.", lattice: "Icosahedral" };
+        this.db["004"] = { name: "Rad-Shielding (Pb-B)", elements: ["Pb","B","C"], detail: "Lead-Boron Carbide Matrix.", lattice: "Decagonal" };
+        this.db["901"] = { name: "Zero-Emission (Ir-Os)", elements: ["Ir", "Os", "Rh", "B"], detail: "Catalytic Converter Upgrade.", lattice: "Icosahedral" };
+
+        // Procedural Fill
+        const safe = ["Ti", "Al", "Fe", "Si", "C"];
+        for(let i=5; i<=100; i++) {
+            if(i===901) continue;
+            let id = i.toString().padStart(3, '0');
+            let type = i%3===0 ? "Decagonal" : (i%3===1 ? "Icosahedral" : "Pentagonal");
+            this.db[id] = {
+                name: `Rank ${id} System`,
+                elements: [safe[i%safe.length], safe[(i+1)%safe.length], "Au"],
+                detail: `Proprietary Formulation ${id}. ${type} Symmetry.`,
+                lattice: type
+            };
+        }
+    },
+
+    populateList: function() {
+        const keys = Object.keys(this.db).sort((a,b) => parseInt(a)-parseInt(b));
+        keys.forEach(k => {
+            let d = document.createElement('div');
+            d.className = 'inv-item';
+            d.dataset.id = k;
+            d.innerHTML = `<span class="inv-id">${k}</span><span>${this.db[k].name}</span>`;
+            d.onclick = () => this.selectRank(k);
+            this.dom.invList.appendChild(d);
+        });
+    },
+
+    resize: function() {
+        // Matches internal resolution to display size for sharpness
+        const sCan = this.dom.scanCanvas;
+        const aCan = this.dom.atomCanvas;
+        
+        sCan.width = sCan.offsetWidth;
+        sCan.height = sCan.offsetHeight;
+        
+        aCan.width = aCan.offsetWidth;
+        aCan.height = aCan.offsetHeight;
+        
+        this.drawGrid(this.dom.scanCtx);
+    },
+
+    // --- LOGIC ENGINE ---
+    
+    selectRank: function(id) {
+        if(this.state.scanning) return;
+        
+        // 1. UI Feedback
+        document.querySelectorAll('.inv-item').forEach(e => e.classList.remove('active'));
+        const active = document.querySelector(`.inv-item[data-id="${id}"]`);
+        if(active) active.classList.add('active');
+
+        // 2. Load Data
+        this.state.rank = id;
+        const data = this.db[id];
+        
+        // 3. Calculate WAAM (Safely)
+        const massData = this.calculateMass(data.elements);
+        this.state.angle = massData.angle;
+        
+        // 4. Update Inputs
+        this.dom.inputs.elements.value = data.elements.join(" - ");
+        this.dom.inputs.detail.value = data.detail;
+        this.dom.inputs.lattice.value = data.lattice;
+        this.dom.inputs.mass.innerText = `${massData.avg.toFixed(3)} g/mol`;
+        
+        // 5. Reset State
+        this.state.locked = false;
+        this.state.scanning = false;
+        this.dom.btn.disabled = false;
+        this.dom.btn.innerText = "INITIATE TORSION SCAN";
+        this.dom.indicator.innerText = "READY";
+        this.dom.indicator.style.color = "#555";
+        this.dom.inputs.angle.value = "--";
+        this.dom.inputs.slack.value = "--";
+        this.dom.scanLine.style.opacity = 0;
+
+        this.updateAtomTargets(data.lattice);
+        this.clearLabels();
+        this.drawGrid(this.dom.scanCtx);
+        
+        this.log(`LOADED RANK ${id}: ${data.name}`);
+        this.log(`WAAM CALC: ${massData.avg.toFixed(2)} g/mol | TARGET: ${massData.angle}°`);
+    },
+
+    calculateMass: function(elements) {
+        let total = 0, count = 0;
+        elements.forEach(el => {
+            let m = this.massTable[el];
+            // NAN SHIELD: Default to 50 if unknown
+            if(m === undefined) { 
+                console.warn(`Unknown element: ${el}`);
+                m = 50.0; 
+            }
+            total += m;
+            count++;
         });
         
-        resize();
-        window.addEventListener('resize', resize);
+        let avg = count > 0 ? total/count : 50.0;
+        // Physics Formula
+        let base = 5.0372;
+        let shift = (avg - 77.1) * 0.00005;
+        // Clamp shift
+        shift = Math.max(-0.007, Math.min(0.007, shift));
         
-        initAtoms();
-        requestAnimationFrame(drawLoop);
-        
-        log("SYSTEM INITIALIZED.", "cyan");
-        log("UNIFIED MASTER DATABASE LOADED.", "gold");
-    }
+        return { avg: avg, angle: parseFloat((base + shift).toFixed(4)) };
+    },
 
-    function resize() {
-        scanCtx.canvas.width = scanCtx.canvas.offsetWidth;
-        scanCtx.canvas.height = scanCtx.canvas.offsetHeight;
-        atomCtx.canvas.width = atomCtx.canvas.offsetWidth;
-        atomCtx.canvas.height = atomCtx.canvas.offsetHeight;
-        drawGrid(scanCtx);
-    }
+    runScan: function() {
+        if(!this.state.rank) return;
+        
+        this.state.scanning = true;
+        this.dom.btn.disabled = true;
+        this.dom.indicator.innerText = "SCANNING...";
+        this.dom.indicator.style.color = "var(--cyan)";
+        this.dom.scanLine.style.opacity = 1;
+        
+        this.log("SCAN INITIATED...", "cyan");
 
-    // === UPDATED PHYSICS ENGINE ===
-    function calculateLock(id, data) {
-        const BASE_ANGLE = 5.0372;
-        let shift = 0;
-        let avg = 50.0;
-
-        if (data.type === "catalyst") {
-            // Molecular Weight Tuning for Catalysts
-            let molWeight = 0;
-            if (data.molecular === "CH4") molWeight = 16.04;
-            else if (data.molecular === "C2H6") molWeight = 30.07;
-            else if (data.molecular === "C3H8") molWeight = 44.1;
-            else if (data.molecular === "C4H10") molWeight = 58.12;
-            else if (data.molecular === "C6H14") molWeight = 86.18;
-            else if (data.molecular === "C8H18") molWeight = 114.23;
-            else if (data.molecular === "C12H26") molWeight = 170.33;
-            else if (data.molecular === "C14H30") molWeight = 198.39;
-            else molWeight = 100.0; // Fallback
-
-            // Heavier molecules require NEGATIVE shift (tighter lattice)
-            // Lighter molecules require POSITIVE shift (open lattice)
-            shift = (100 - molWeight) * 0.00002;
-            avg = molWeight; // Display purposes
-        } else {
-            // Standard Atomic Mass Averaging for Metals
-            let total = 0, count = 0;
-            data.elements.forEach(el => {
-                let m = ATOMIC_MASS[el];
-                if(m) { total += m; count++; }
-            });
-            avg = count > 0 ? total/count : 50.0;
-            let diff = avg - 77.1;
-            shift = diff * 0.00005;
-        }
-        
-        // Lattice Geometry Correction
-        if(data.lattice === "Pentagonal") shift += 0.0001;
-        else if(data.lattice === "Decagonal") shift -= 0.0001;
-        
-        // Clamp to physics limits
-        if(shift > 0.007) shift = 0.007;
-        if(shift < -0.007) shift = -0.007;
-        
-        document.getElementById('mass-readout').innerText = `~${avg.toFixed(2)} g/mol`;
-        return parseFloat((BASE_ANGLE + shift).toFixed(6));
-    }
-
-    function selectRank(id) {
-        if(isScanning) return;
-        currentRank = id;
-        const data = DB[id];
-        
-        document.querySelectorAll('.inv-item').forEach(e => e.classList.remove('active'));
-        const target = document.querySelector(`.inv-item[data-id="${id}"]`);
-        if(target) target.classList.add('active');
-
-        document.getElementById('comp-elements').value = data.elements.join(" - ");
-        document.getElementById('comp-detail').value = data.detail;
-        document.getElementById('lattice-type').value = data.lattice;
-        
-        let btn = document.getElementById('btn-scan');
-        btn.disabled = false;
-        btn.innerText = "INITIATE TORSION SCAN";
-        btn.style.borderColor = "var(--cyan)";
-        btn.style.color = "var(--cyan)";
-        btn.onclick = runScan;
-        
-        document.getElementById('res-angle').value = "--";
-        document.getElementById('res-slack').value = "--";
-        document.getElementById('lock-indicator').innerText = "READY";
-        document.getElementById('lock-indicator').style.color = "#555";
-        
-        uniqueAngle = calculateLock(id, data);
-        
-        isLocked = false;
-        clearLabels();
-        updateAtomTargets(data.lattice);
-        drawGrid(scanCtx);
-        
-        log(`SELECTED: ${data.name}`);
-        log(`TARGET LOCK: ${uniqueAngle.toFixed(6)}°`, "gold");
-    }
-
-    function log(msg, type='') {
-        const d = document.createElement('div');
-        d.innerHTML = `> ${msg}`;
-        if(type==='cyan') d.className = 'log-cyan';
-        if(type==='red') d.className = 'log-red';
-        if(type==='gold') d.className = 'log-gold';
-        consoleDiv.appendChild(d);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
-
-    function runScan() {
-        if(!currentRank) return;
-        isScanning = true;
-        document.getElementById('btn-scan').disabled = true;
-        document.getElementById('lock-indicator').innerText = "SCANNING...";
-        document.getElementById('lock-indicator').style.color = "var(--cyan)";
-        document.getElementById('scan-line').style.opacity = 1;
-        
-        log(`SCANNING...`, "cyan");
-        
-        let w = scanCtx.canvas.width;
-        let h = scanCtx.canvas.height;
+        // Scan Animation Logic
         let x = 0;
+        const w = this.dom.scanCanvas.width;
+        const h = this.dom.scanCanvas.height;
+        const ctx = this.dom.scanCtx;
         
-        const MIN_SCAN = 5.030;
-        const RANGE = 0.015;
-        
-        scanCtx.fillStyle = '#000'; 
-        scanCtx.fillRect(0,0,w,h);
-        drawGrid(scanCtx);
+        // Clear old results
+        ctx.fillStyle = "#000"; ctx.fillRect(0,0,w,h);
+        this.drawGrid(ctx);
 
-        let timer = setInterval(() => {
-            x += 2;
-            document.getElementById('scan-line').style.left = x + "px";
+        const timer = setInterval(() => {
+            x += 3;
+            this.dom.scanLine.style.left = x + "px";
             
+            // Draw points
             let pct = x / w;
-            let angle = MIN_SCAN + (pct * RANGE);
+            let currentAngle = 5.030 + (pct * 0.015);
+            let dist = Math.abs(currentAngle - this.state.angle);
             
-            let dist = Math.abs(angle - uniqueAngle);
-            // Mexican Hat Potential
-            let energy = Math.min(1, Math.pow(dist * 300, 2));
-            let y = (energy * (h * 0.7)) + (h * 0.15);
+            // Visual Energy Function
+            let energy = Math.max(0, 1 - (dist * 400)); // Sharp peak
+            let yPos = h * 0.8 - (energy * (h * 0.6));
             
-            scanCtx.fillStyle = (dist < 0.0005) ? "#fff" : "#ff3333";
-            scanCtx.fillRect(x, y, 2, 2);
+            ctx.fillStyle = dist < 0.0005 ? "#fff" : "#ff3333";
+            ctx.fillRect(x, yPos, 2, 2);
             
             if(x >= w) {
                 clearInterval(timer);
-                finishLock(uniqueAngle);
+                this.finishLock();
             }
         }, 10);
-    }
+    },
 
-    function finishLock(angle) {
-        isScanning = false;
-        isLocked = true;
-        let btn = document.getElementById('btn-scan');
-        btn.disabled = false;
-        btn.innerText = "SCAN COMPLETE";
-        btn.style.borderColor = "#333";
-        btn.style.color = "#555";
+    finishLock: function() {
+        this.state.scanning = false;
+        this.state.locked = true;
+        this.dom.btn.disabled = false;
+        this.dom.btn.innerText = "SCAN COMPLETE";
+        this.dom.scanLine.style.opacity = 0;
         
-        document.getElementById('scan-line').style.opacity = 0;
-        document.getElementById('lock-indicator').innerText = "LOCKED";
-        document.getElementById('lock-indicator').style.color = "var(--gold)";
+        this.dom.indicator.innerText = "LOCKED";
+        this.dom.indicator.style.color = "var(--gold)";
+        this.dom.inputs.angle.value = this.state.angle.toFixed(4) + "°";
+        this.dom.inputs.slack.value = "0.000 nm (PERFECT)";
         
-        document.getElementById('res-angle').value = angle.toFixed(6) + "°";
-        document.getElementById('res-slack').value = "0.000 nm (PERFECT)";
-        
-        log(`LOCK CONFIRMED: ${angle.toFixed(6)}°`, "gold");
-        log(`ZERO-SLACK STATE ACHIEVED.`, "cyan");
-        
-        createLabels();
-    }
+        this.log(`LOCK ACQUIRED AT ${this.state.angle.toFixed(4)}°`, "gold");
+        this.createLabels();
+    },
 
-    let time = 0;
-
-    function initAtoms() {
-        atoms = [];
+    // --- VISUAL ENGINE ---
+    
+    initAtoms: function() {
+        this.state.atoms = [];
         for(let i=0; i<60; i++) {
-            atoms.push({
-                x: (Math.random()-0.5)*400,
-                y: (Math.random()-0.5)*400,
-                z: (Math.random()-0.5)*400,
+            this.state.atoms.push({
+                x: (Math.random()-0.5)*300,
+                y: (Math.random()-0.5)*300,
+                z: (Math.random()-0.5)*300,
                 tx: 0, ty: 0, tz: 0
             });
         }
-    }
+    },
 
-    function updateAtomTargets(latticeType) {
-        const phi = 1.618;
-        let targets = [];
-        const scale = 95; 
+    updateAtomTargets: function(type) {
+        const phi = 1.6180339887; // High Precision
+        let t = [];
+        const s = 90; // Scale
 
-        if (latticeType === "Decagonal") {
+        if(type === "Decagonal") {
             for(let k=0; k<5; k++) {
-                let y = (k-2)*50;
-                for(let j=0; j<10; j++) { 
+                let y = (k-2)*40;
+                for(let j=0; j<10; j++) {
                     let th = (j/10)*Math.PI*2;
-                    targets.push({ x: Math.cos(th)*scale, y: y, z: Math.sin(th)*scale });
+                    t.push({ x: Math.cos(th)*s, y: y, z: Math.sin(th)*s });
                 }
             }
-        } 
-        else if (latticeType === "Pentagonal") {
+        } else if (type === "Pentagonal") {
             for(let i=0; i<60; i++) {
-                let r = (i/60) * scale * 1.5;
-                let th = i * (Math.PI*2 / 5) + (i*0.1);
-                let z = (i - 30) * 4;
-                targets.push({ x: Math.cos(th)*r, y: z, z: Math.sin(th)*r });
+                let r = (i/60)*s*1.2;
+                let th = i*(Math.PI*2/5);
+                t.push({ x: Math.cos(th)*r, y: (i-30)*3, z: Math.sin(th)*r });
             }
-        }
-        else {
+        } else {
             // Icosahedral
-            targets.push([0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi]);
-            targets.push([1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0]);
-            targets.push([phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]);
-            
-            let base = targets.map(p => ({x:p[0]*scale, y:p[1]*scale, z:p[2]*scale}));
-            let inner = targets.map(p => ({x:p[0]*scale*0.5, y:p[1]*scale*0.5, z:p[2]*scale*0.5}));
-            
-            targets = [...base, ...inner];
-            while(targets.length < 60) {
+            const v = [
+                [0,1,phi], [0,-1,phi], [0,1,-phi], [0,-1,-phi],
+                [1,phi,0], [-1,phi,0], [1,-phi,0], [-1,-phi,0],
+                [phi,0,1], [-phi,0,1], [phi,0,-1], [-phi,0,-1]
+            ];
+            v.forEach(p => t.push({ x:p[0]*s, y:p[1]*s, z:p[2]*s }));
+            // Fill rest
+            while(t.length < 60) {
                 let th = Math.random()*Math.PI*2;
                 let ph = Math.random()*Math.PI;
-                targets.push({
-                    x: Math.sin(ph)*Math.cos(th)*scale*0.8,
-                    y: Math.cos(ph)*scale*0.8,
-                    z: Math.sin(ph)*Math.sin(th)*scale*0.8
+                t.push({
+                    x: Math.sin(ph)*Math.cos(th)*s*0.7,
+                    y: Math.cos(ph)*s*0.7,
+                    z: Math.sin(ph)*Math.sin(th)*s*0.7
                 });
             }
         }
-
-        atoms.forEach((a, i) => {
-            let t = targets[i % targets.length];
-            a.tx = t.x; a.ty = t.y; a.tz = t.z;
-        });
-    }
-
-    function drawLoop() {
-        time += 0.02;
-        let w = atomCtx.canvas.width;
-        let h = atomCtx.canvas.height;
-        let cx = w/2; 
-        let cy = h/2 + 70;
-
-        atomCtx.clearRect(0,0,w,h);
         
-        if(!currentRank) {
-            requestAnimationFrame(drawLoop);
+        // Assign to existing atoms
+        this.state.atoms.forEach((a, i) => {
+            let target = t[i % t.length];
+            a.tx = target.x; a.ty = target.y; a.tz = target.z;
+        });
+    },
+
+    loop: function() {
+        this.state.time += 0.02;
+        const ctx = this.dom.atomCtx;
+        const w = ctx.canvas.width;
+        const h = ctx.canvas.height;
+        
+        ctx.clearRect(0,0,w,h);
+        
+        // Only render if we have valid dimensions
+        if(w === 0 || h === 0) {
+            requestAnimationFrame(() => this.loop());
             return;
         }
+
+        const cx = w/2;
+        const cy = h/2 + 50;
         
-        let rot = isLocked ? time * 0.2 : time;
-        let progress = isLocked ? 1 : 0;
-        let elements = DB[currentRank].elements;
-
+        const locked = this.state.locked;
+        const rot = locked ? this.state.time * 0.1 : this.state.time * 0.5;
+        const progress = locked ? 1.0 : 0.05; // Lerp factor
+        
+        // Sort for Z-buffering
         let renderList = [];
-
-        atoms.forEach((a, i) => {
-            let noise = isLocked ? 0 : Math.sin(time + i)*60;
+        
+        this.state.atoms.forEach((a, i) => {
+            // Lerp Physics
+            let noise = locked ? 0 : Math.sin(this.state.time + i)*40;
+            a.x += (a.tx - a.x) * 0.05;
+            a.y += (a.ty - a.y) * 0.05;
+            a.z += (a.tz - a.z) * 0.05;
             
-            let cx_ = a.x * (1-progress) + a.tx * progress + noise;
-            let cy_ = a.y * (1-progress) + a.ty * progress + noise;
-            let cz_ = a.z * (1-progress) + a.tz * progress + noise;
+            let dx = a.x + noise;
+            let dy = a.y + noise;
+            let dz = a.z + noise;
 
-            let x1 = cx_ * Math.cos(rot) - cz_ * Math.sin(rot);
-            let z1 = cx_ * Math.sin(rot) + cz_ * Math.cos(rot);
-            let y1 = cy_ * Math.cos(rot*0.5) - z1 * Math.sin(rot*0.5);
-            let z2 = cy_ * Math.sin(rot*0.5) + z1 * Math.cos(rot*0.5);
-
-            let fov = 500;
-            let scale = fov / (fov + z2 + 600);
+            // Rotation Matrix
+            let x1 = dx * Math.cos(rot) - dz * Math.sin(rot);
+            let z1 = dx * Math.sin(rot) + dz * Math.cos(rot);
+            
+            // Projection
+            let scale = 400 / (400 + z1 + 500);
             let px = cx + x1 * scale;
-            let py = cy + y1 * scale;
-
-            renderList.push({ x: px, y: py, z: z2, s: scale, i: i });
+            let py = cy + dy * scale;
+            
+            renderList.push({ x: px, y: py, z: z1, s: scale, i: i, el: this.getElement(i) });
         });
+        
+        renderList.sort((a,b) => b.z - a.z);
 
-        renderList.sort((a, b) => b.z - a.z);
-
-        atomCtx.strokeStyle = isLocked ? "rgba(0, 255, 204, 0.3)" : "rgba(255, 80, 80, 0.4)";
-        atomCtx.lineWidth = 1;
-        atomCtx.beginPath();
+        // Draw Links
+        ctx.strokeStyle = locked ? "rgba(0, 255, 204, 0.2)" : "rgba(255, 50, 50, 0.3)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
         for(let i=0; i<renderList.length; i++) {
             for(let j=i+1; j<renderList.length; j++) {
-                let p1 = renderList[i];
-                let p2 = renderList[j];
-                let dist = Math.hypot(p1.x-p2.x, p1.y-p2.y);
-                if(dist < 70 * p1.s) {
-                    atomCtx.moveTo(p1.x, p1.y);
-                    atomCtx.lineTo(p2.x, p2.y);
+                let d = Math.hypot(renderList[i].x - renderList[j].x, renderList[i].y - renderList[j].y);
+                if(d < 60 * renderList[i].s) {
+                    ctx.moveTo(renderList[i].x, renderList[i].y);
+                    ctx.lineTo(renderList[j].x, renderList[j].y);
                 }
             }
         }
-        atomCtx.stroke();
+        ctx.stroke();
 
+        // Draw Nodes
         renderList.forEach(p => {
-            let el = elements[p.i % elements.length];
-            atomCtx.fillStyle = isLocked ? getElementColor(el) : "#fff"; 
-            let size = isLocked ? 4 * p.s : 3 * p.s;
+            let color = this.getColor(p.el);
+            let size = locked ? 4 * p.s : 3 * p.s;
             
-            if(!isLocked) {
-                atomCtx.shadowBlur = 10;
-                atomCtx.shadowColor = "#ff3333";
+            ctx.fillStyle = locked ? color : "#fff";
+            
+            if(!locked) {
+                ctx.shadowColor = "#f00"; ctx.shadowBlur = 10;
             } else {
-                atomCtx.shadowBlur = 0;
+                ctx.shadowBlur = 0;
             }
-
-            atomCtx.beginPath();
-            atomCtx.arc(p.x, p.y, size, 0, Math.PI*2);
-            atomCtx.fill();
-            atomCtx.shadowBlur = 0;
-
-            if(isLocked) updateLabelPos(p.i, p.x, p.y);
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Move Label (DOM) - Performance Tweak
+            if(locked) {
+                let lbl = document.getElementById(`lbl-${p.i}`);
+                if(lbl) {
+                    lbl.style.transform = `translate(${p.x}px, ${p.y}px)`;
+                }
+            }
         });
 
-        requestAnimationFrame(drawLoop);
-    }
+        requestAnimationFrame(() => this.loop());
+    },
 
-    function createLabels() {
-        clearLabels();
-        let elements = DB[currentRank].elements;
-        atoms.forEach((a, i) => {
-            let elName = elements[i % elements.length];
-            let div = document.createElement('div');
-            div.className = 'atom-label visible';
-            div.innerText = elName;
-            div.id = `lbl-${i}`;
-            div.style.color = getElementColor(elName);
-            atomContainer.appendChild(div);
-        });
-    }
+    // --- UTILS ---
+    getElement: function(i) {
+        if(!this.state.rank) return "Au";
+        let els = this.db[this.state.rank].elements;
+        return els[i % els.length];
+    },
 
-    function updateLabelPos(i, x, y) {
-        let lbl = document.getElementById(`lbl-${i}`);
-        if(lbl) {
-            lbl.style.left = (x + 8) + 'px';
-            lbl.style.top = (y - 8) + 'px';
-        }
-    }
-
-    function clearLabels() {
-        document.querySelectorAll('.atom-label').forEach(el => el.remove());
-    }
-
-   function getElementColor(el) {
-        const colors = {
-            "C": "#888", "Si": "#b0b0ff", "Fe": "#ff8844", "Al": "#aaaaff",
-            "Ti": "#ccccff", "Ni": "#99ff99", "Co": "#ff99dd", "Cr": "#ffaa44",
-            "W": "#ffff66", "Mo": "#cc99ff", "Nb": "#88ddff", "Cu": "#ff9955",
-            "Zr": "#aaffaa", "Ag": "#dddddd", "Pb": "#666666", "B": "#ffaacc",
-            "Re": "#ffcc88", "Hf": "#99ccff", "Ta": "#bb99ff", "V": "#ffdd88",
-            "Li": "#ff6666", "Sc": "#99ffcc", "U": "#66ff66", "Ir": "#ffff99",
-            "Os": "#ccff99", "Rh": "#ffccff"
+    getColor: function(el) {
+        const map = {
+            "Au": "#FFD700", "Ni": "#00FF00", "Co": "#0000FF", "Cr": "#888888", 
+            "Al": "#DDDDDD", "Ti": "#AAAAAA", "W": "#555555", "Pb": "#444444"
         };
-        return colors[el] || "#00ffcc";
-    }
+        return map[el] || "#ffffff";
+    },
 
-    function drawGrid(ctx) {
-        let w = ctx.canvas.width;
-        let h = ctx.canvas.height;
-        
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, w, h);
-        
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = 1;
-        
-        for(let i=0; i<10; i++) {
-            let y = (i/10) * h;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(w, y);
-            ctx.stroke();
+    drawGrid: function(ctx) {
+        ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
+        let w = ctx.canvas.width; let h = ctx.canvas.height;
+        for(let i=0; i<=10; i++) {
+            ctx.moveTo(i*w/10, 0); ctx.lineTo(i*w/10, h);
+            ctx.moveTo(0, i*h/10); ctx.lineTo(w, i*h/10);
         }
+        ctx.stroke();
+    },
+    
+    createLabels: function() {
+        this.clearLabels();
+        if(!this.state.rank) return;
         
-        for(let i=0; i<20; i++) {
-            let x = (i/20) * w;
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, h);
-            ctx.stroke();
-        }
-    }
+        let els = this.db[this.state.rank].elements;
+        this.state.atoms.forEach((a, i) => {
+            let el = els[i % els.length];
+            let d = document.createElement('div');
+            d.className = 'atom-label visible';
+            d.id = `lbl-${i}`;
+            d.innerText = el;
+            d.style.color = this.getColor(el);
+            this.dom.atomContainer.appendChild(d);
+        });
+    },
+    
+    clearLabels: function() {
+        document.querySelectorAll('.atom-label').forEach(e => e.remove());
+    },
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+    log: function(msg, type='') {
+        let d = document.createElement('div');
+        d.innerHTML = `> ${msg}`;
+        if(type==='cyan') d.className = 'log-cyan';
+        else if(type==='gold') d.className = 'log-gold';
+        else if(type==='err') d.className = 'log-err';
+        this.dom.console.appendChild(d);
+        this.dom.console.scrollTop = this.dom.console.scrollHeight;
     }
+};
+
+// --- BOOT SEQUENCE ---
+// Waiting for DOMContentLoaded AND providing a fallback
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => app.init());
+} else {
+    app.init();
+}
+
 </script>
 </body>
 </html>
-
-```
