@@ -3,832 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES CVD COATING SIMULATOR | NEXT-GEN MATERIALS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>GRAVES CVD COATING SIMULATOR | Zero-Slack Lattice Engineering</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #030305;
-            --bg-panel: #0e0e12;
-            --bg-surface: #18181f;
-            --cyan: #00f2ea;
-            --cyan-dim: rgba(0, 242, 234, 0.1);
-            --gold: #ffb800;
-            --green: #00ff88;
-            --red: #ff4444;
-            --border: 1px solid rgba(255, 255, 255, 0.08);
-            --glass: rgba(14, 14, 18, 0.85);
-            --font-ui: "Inter", sans-serif;
-            --font-code: "JetBrains Mono", monospace;
+            --bg-deep: #030305; --bg-panel: #0e0e12; --bg-surface: #18181f;
+            --cyan: #00f2ea; --cyan-dim: rgba(0,242,234,0.1);
+            --gold: #ffb800; --green: #00ff88; --red: #ff4444;
+            --border: 1px solid rgba(255,255,255,0.08);
+            --glass: rgba(14,14,18,0.85);
+            --font-ui: "Inter", sans-serif; --font-code: "JetBrains Mono", monospace;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            background: var(--bg-deep); color: #c0c0c0;
-            font-family: var(--font-ui); min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 50% 0%, #1a1a2e 0%, transparent 50%),
+            background: var(--bg-deep); color: #c0c0c0; font-family: var(--font-ui); min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, transparent 50%),
                 linear-gradient(0deg, rgba(0,242,234,0.015) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,242,234,0.015) 1px, transparent 1px);
             background-size: 100% 100%, 50px 50px, 50px 50px;
         }
-
         header {
-            height: 70px; padding: 0 30px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: var(--border);
-            background: rgba(3, 3, 5, 0.9);
-            backdrop-filter: blur(20px);
+            height: 70px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: var(--border); background: rgba(3,3,5,0.9); backdrop-filter: blur(20px);
             position: sticky; top: 0; z-index: 100;
         }
-
-        .brand { 
-            font-family: var(--font-code); font-weight: 700; 
-            font-size: 1.2em; color: #fff; 
-            display: flex; align-items: center; gap: 12px;
-        }
-        .brand-icon {
-            width: 36px; height: 36px; 
-            border: 2px solid var(--cyan);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1em; color: var(--cyan);
-        }
+        .brand { font-family: var(--font-code); font-weight: 700; font-size: 1.2em; color: #fff; display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 36px; height: 36px; border: 2px solid var(--cyan); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; color: var(--cyan); }
         .brand span { color: var(--cyan); }
-
-        .header-status {
-            display: flex; gap: 20px; align-items: center;
-        }
-        .status-pill { 
-            font-family: var(--font-code); font-size: 0.75em; 
-            padding: 8px 14px; border-radius: 6px; 
-            background: var(--bg-surface); border: var(--border);
-            display: flex; gap: 8px; align-items: center;
-        }
-        .live-dot { 
-            width: 8px; height: 8px; 
-            background: var(--green); border-radius: 50%; 
-            box-shadow: 0 0 10px var(--green);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        main {
-            max-width: 1600px; margin: 0 auto; padding: 30px;
-        }
-
-        .hero {
-            text-align: center; padding: 40px 20px 50px;
-        }
-        .hero h1 {
-            font-size: 2.2em; font-weight: 700; color: #fff;
-            margin-bottom: 12px;
-        }
+        .header-status { display: flex; gap: 20px; align-items: center; }
+        .status-pill { font-family: var(--font-code); font-size: 0.75em; padding: 8px 14px; border-radius: 6px; background: var(--bg-surface); border: var(--border); display: flex; gap: 8px; align-items: center; }
+        .live-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        main { max-width: 1600px; margin: 0 auto; padding: 30px; }
+        .hero { text-align: center; padding: 40px 20px 30px; }
+        .hero h1 { font-size: 2.2em; font-weight: 700; color: #fff; margin-bottom: 12px; }
         .hero h1 span { color: var(--gold); }
-        .hero p {
-            font-size: 1.1em; color: #888; max-width: 700px; margin: 0 auto;
-        }
-
-        .section-title {
-            font-size: 0.8em; font-weight: 600; color: #555;
-            text-transform: uppercase; letter-spacing: 2px;
-            margin-bottom: 20px; padding-bottom: 10px;
-            border-bottom: var(--border);
-        }
-
-        /* Material Selector */
-        .material-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px; margin-bottom: 40px;
-        }
-
-        .material-card {
-            background: var(--glass); border: var(--border);
-            border-radius: 12px; padding: 20px;
-            cursor: pointer; transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        .material-card:hover {
-            border-color: rgba(0, 242, 234, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 242, 234, 0.1);
-        }
-        .material-card.selected {
-            border-color: var(--cyan);
-            background: rgba(0, 242, 234, 0.05);
-            box-shadow: 0 0 30px rgba(0, 242, 234, 0.15);
-        }
-
-        .material-id {
-            font-family: var(--font-code); font-size: 0.75em;
-            color: var(--cyan); opacity: 0.7; margin-bottom: 8px;
-        }
-        .material-name {
-            font-size: 1.1em; font-weight: 600; color: #fff;
-            margin-bottom: 6px;
-        }
-        .material-desc {
-            font-size: 0.85em; color: #777; line-height: 1.5;
-        }
-        .material-type {
-            display: inline-block; margin-top: 12px;
-            font-size: 0.7em; padding: 4px 10px;
-            background: var(--bg-surface); border-radius: 4px;
-            color: var(--gold); font-family: var(--font-code);
-        }
-
-        /* Comparison Panel */
-        .comparison-container {
-            display: none;
-            margin-top: 40px;
-        }
+        .hero p { font-size: 1.1em; color: #888; max-width: 700px; margin: 0 auto; }
+        .physics-panel { background: linear-gradient(135deg, rgba(0,242,234,0.05) 0%, rgba(255,184,0,0.05) 100%); border: 1px solid rgba(0,242,234,0.2); border-radius: 12px; padding: 25px 30px; margin: 30px 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .physics-item { text-align: center; padding: 15px; }
+        .physics-value { font-family: var(--font-code); font-size: 1.4em; font-weight: 700; color: var(--cyan); margin-bottom: 5px; }
+        .physics-label { font-size: 0.75em; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .physics-note { grid-column: 1 / -1; text-align: center; font-size: 0.85em; color: #555; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .section-title { font-size: 0.8em; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: var(--border); }
+        .category-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .cat-tab { font-family: var(--font-code); font-size: 0.75em; padding: 10px 18px; border-radius: 6px; background: var(--bg-surface); border: var(--border); color: #888; cursor: pointer; transition: all 0.2s; }
+        .cat-tab:hover { border-color: rgba(0,242,234,0.3); color: #fff; }
+        .cat-tab.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+        .material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .material-card { background: var(--glass); border: var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+        .material-card:hover { border-color: rgba(0,242,234,0.3); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,242,234,0.1); }
+        .material-card.selected { border-color: var(--cyan); background: rgba(0,242,234,0.05); box-shadow: 0 0 30px rgba(0,242,234,0.15); }
+        .material-card.hidden { display: none; }
+        .material-id { font-family: var(--font-code); font-size: 0.75em; color: var(--cyan); opacity: 0.7; margin-bottom: 8px; }
+        .material-name { font-size: 1.05em; font-weight: 600; color: #fff; margin-bottom: 6px; }
+        .material-desc { font-size: 0.8em; color: #777; line-height: 1.5; }
+        .material-type { display: inline-block; margin-top: 12px; font-size: 0.65em; padding: 4px 10px; background: var(--bg-surface); border-radius: 4px; color: var(--gold); font-family: var(--font-code); }
+        .comparison-container { display: none; margin-top: 40px; }
         .comparison-container.visible { display: block; }
-
-        .comparison-grid {
-            display: grid; grid-template-columns: 1fr 100px 1fr;
-            gap: 0; margin-bottom: 30px;
-        }
-
-        .comparison-panel {
-            background: var(--glass); border: var(--border);
-            border-radius: 12px; padding: 25px;
-            backdrop-filter: blur(10px);
-        }
-        .comparison-panel.current {
-            border-color: rgba(255, 100, 100, 0.3);
-        }
-        .comparison-panel.enhanced {
-            border-color: rgba(0, 255, 136, 0.3);
-            background: rgba(0, 255, 136, 0.02);
-        }
-
-        .panel-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 15px; border-bottom: var(--border);
-        }
-        .panel-title {
-            font-size: 1em; font-weight: 600; color: #fff;
-        }
-        .panel-badge {
-            font-size: 0.7em; padding: 4px 10px; border-radius: 4px;
-            font-family: var(--font-code);
-        }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 0; margin-bottom: 30px; }
+        .comparison-panel { background: var(--glass); border: var(--border); border-radius: 12px; padding: 25px; backdrop-filter: blur(10px); }
+        .comparison-panel.current { border-color: rgba(255,100,100,0.3); }
+        .comparison-panel.enhanced { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.02); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: var(--border); }
+        .panel-title { font-size: 1em; font-weight: 600; color: #fff; }
+        .panel-badge { font-size: 0.7em; padding: 4px 10px; border-radius: 4px; font-family: var(--font-code); }
         .badge-current { background: rgba(255,100,100,0.2); color: var(--red); }
         .badge-enhanced { background: rgba(0,255,136,0.2); color: var(--green); }
-
-        .spec-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-        .spec-label {
-            font-size: 0.85em; color: #888;
-        }
-        .spec-value {
-            font-family: var(--font-code); font-size: 0.9em; color: #fff;
-        }
-        .spec-value.improved {
-            color: var(--green);
-        }
-
-        .comparison-arrow {
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2em; color: var(--cyan);
-        }
-
-        /* Improvement Summary */
-        .improvement-summary {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 15px; margin: 30px 0;
-        }
-        .improvement-card {
-            background: var(--bg-surface); border: var(--border);
-            border-radius: 10px; padding: 20px; text-align: center;
-        }
-        .improvement-value {
-            font-family: var(--font-code); font-size: 1.8em;
-            font-weight: 700; color: var(--green);
-            margin-bottom: 5px;
-        }
-        .improvement-label {
-            font-size: 0.75em; color: #666; text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Process Steps */
-        .process-section {
-            background: var(--glass); border: var(--border);
-            border-radius: 12px; padding: 30px; margin-top: 30px;
-        }
-
-        .process-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px;
-        }
-        .process-title {
-            font-size: 1.1em; font-weight: 600; color: #fff;
-        }
-
-        .process-steps {
-            display: grid; gap: 15px;
-        }
-        .process-step {
-            display: grid; grid-template-columns: 50px 1fr;
-            gap: 15px; padding: 20px;
-            background: var(--bg-surface); border-radius: 8px;
-            border-left: 3px solid var(--cyan);
-        }
-        .step-number {
-            width: 40px; height: 40px;
-            background: var(--cyan-dim); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-code); font-weight: 700;
-            color: var(--cyan);
-        }
-        .step-content h4 {
-            color: #fff; font-size: 0.95em; margin-bottom: 6px;
-        }
-        .step-content p {
-            color: #888; font-size: 0.85em; line-height: 1.5;
-        }
-        .step-params {
-            margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;
-        }
-        .param-tag {
-            font-family: var(--font-code); font-size: 0.7em;
-            padding: 4px 8px; background: rgba(0,242,234,0.1);
-            border-radius: 4px; color: var(--cyan);
-        }
-
-        /* Action Button */
-        .action-section {
-            text-align: center; margin-top: 40px; padding: 30px;
-        }
-        .btn-fabricate {
-            font-family: var(--font-ui); font-size: 1em;
-            font-weight: 700; padding: 18px 50px;
-            background: linear-gradient(135deg, var(--gold) 0%, #ff9500 100%);
-            border: none; border-radius: 8px;
-            color: #000; cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-        .btn-fabricate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(255, 184, 0, 0.3);
-        }
-        .btn-fabricate:disabled {
-            background: #333; color: #666; cursor: not-allowed;
-            transform: none; box-shadow: none;
-        }
-
-        /* CVD Visualization */
-        .cvd-visual {
-            background: #000; border: var(--border);
-            border-radius: 12px; height: 300px;
-            position: relative; overflow: hidden;
-            margin: 30px 0;
-        }
-        .cvd-visual canvas {
-            width: 100%; height: 100%;
-        }
-        .cvd-overlay {
-            position: absolute; top: 15px; left: 15px;
-            font-family: var(--font-code); font-size: 0.7em;
-            color: var(--cyan); opacity: 0.7;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center; padding: 40px;
-            color: #444; font-size: 0.8em;
-            border-top: var(--border);
-            margin-top: 60px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .comparison-grid { grid-template-columns: 1fr; }
-            .comparison-arrow { 
-                transform: rotate(90deg); 
-                padding: 20px 0;
-            }
-            .improvement-summary { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .material-grid { grid-template-columns: 1fr; }
-            .improvement-summary { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 1.6em; }
-        }
+        .spec-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .spec-label { font-size: 0.8em; color: #888; }
+        .spec-value { font-family: var(--font-code); font-size: 0.85em; color: #fff; }
+        .spec-value.improved { color: var(--green); }
+        .comparison-arrow { display: flex; align-items: center; justify-content: center; font-size: 2em; color: var(--cyan); }
+        .improvement-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; }
+        .improvement-card { background: var(--bg-surface); border: var(--border); border-radius: 10px; padding: 20px; text-align: center; }
+        .improvement-value { font-family: var(--font-code); font-size: 1.6em; font-weight: 700; color: var(--green); margin-bottom: 5px; }
+        .improvement-label { font-size: 0.7em; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .process-section { background: var(--glass); border: var(--border); border-radius: 12px; padding: 30px; margin-top: 30px; }
+        .process-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .process-title { font-size: 1.1em; font-weight: 600; color: #fff; }
+        .process-steps { display: grid; gap: 15px; }
+        .process-step { display: grid; grid-template-columns: 50px 1fr; gap: 15px; padding: 20px; background: var(--bg-surface); border-radius: 8px; border-left: 3px solid var(--cyan); }
+        .step-number { width: 40px; height: 40px; background: var(--cyan-dim); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-code); font-weight: 700; color: var(--cyan); }
+        .step-content h4 { color: #fff; font-size: 0.95em; margin-bottom: 6px; }
+        .step-content p { color: #888; font-size: 0.85em; line-height: 1.5; }
+        .step-params { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .param-tag { font-family: var(--font-code); font-size: 0.7em; padding: 4px 8px; background: rgba(0,242,234,0.1); border-radius: 4px; color: var(--cyan); }
+        .action-section { display: flex; gap: 15px; justify-content: center; margin-top: 40px; padding: 30px; flex-wrap: wrap; }
+        .btn-action { font-family: var(--font-ui); font-size: 0.95em; font-weight: 700; padding: 16px 40px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-fabricate { background: linear-gradient(135deg, var(--gold) 0%, #ff9500 100%); color: #000; }
+        .btn-fabricate:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(255,184,0,0.3); }
+        .btn-validate { background: linear-gradient(135deg, var(--cyan) 0%, #00b8b0 100%); color: #000; }
+        .btn-validate:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,242,234,0.3); }
+        .cvd-visual { background: #000; border: var(--border); border-radius: 12px; height: 280px; position: relative; overflow: hidden; margin: 30px 0; }
+        .cvd-visual canvas { width: 100%; height: 100%; }
+        .cvd-overlay { position: absolute; top: 15px; left: 15px; font-family: var(--font-code); font-size: 0.7em; color: var(--cyan); opacity: 0.7; }
+        .cvd-stats { position: absolute; top: 15px; right: 15px; font-family: var(--font-code); font-size: 0.7em; color: var(--gold); text-align: right; }
+        footer { text-align: center; padding: 40px; color: #444; font-size: 0.8em; border-top: var(--border); margin-top: 60px; }
+        @media (max-width: 1200px) { .comparison-grid { grid-template-columns: 1fr; } .comparison-arrow { transform: rotate(90deg); padding: 20px 0; } .improvement-summary, .physics-panel { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .material-grid { grid-template-columns: 1fr; } .improvement-summary, .physics-panel { grid-template-columns: 1fr; } .hero h1 { font-size: 1.6em; } }
     </style>
 </head>
 <body>
-
 <header>
-    <div class="brand">
-        <div class="brand-icon">◇</div>
-        GRAVES <span>CVD</span> SIMULATOR
-    </div>
+    <div class="brand"><div class="brand-icon">◇</div>GRAVES <span>CVD</span> SIMULATOR</div>
     <div class="header-status">
-        <div class="status-pill">
-            <div class="live-dot"></div>
-            SYSTEM ACTIVE
-        </div>
-        <div class="status-pill">
-            CVD EQUIPMENT CORP COMPATIBLE
-        </div>
+        <div class="status-pill"><div class="live-dot"></div>ZERO-SLACK ACTIVE</div>
+        <div class="status-pill">CVD EQUIPMENT CORP COMPATIBLE</div>
     </div>
 </header>
-
 <main>
     <div class="hero">
         <h1>Next-Generation <span>Coating Technology</span></h1>
-        <p>Compare industry-standard CVD/PVD coatings with Graves-enhanced quasicrystalline materials. See the performance difference.</p>
+        <p>Compare industry-standard CVD/PVD coatings with Graves-enhanced quasicrystalline materials. Minimum-debt lattice configurations achieving zero local slack.</p>
     </div>
-
-    <div class="section-title">Select Base Material System</div>
-    
+    <div class="physics-panel">
+        <div class="physics-item"><div class="physics-value">φ-Grid</div><div class="physics-label">Lattice Geometry</div></div>
+        <div class="physics-item"><div class="physics-value">5-Fold</div><div class="physics-label">Symmetry Type</div></div>
+        <div class="physics-item"><div class="physics-value">Zero</div><div class="physics-label">Residual Slack</div></div>
+        <div class="physics-item"><div class="physics-value">Locked</div><div class="physics-label">Phase Stability</div></div>
+        <div class="physics-note">Quasicrystalline configurations achieve minimum-debt lattice states where conventional cubic/hexagonal structures cannot. Each composition has a unique lock angle optimized for its atomic mass distribution.</div>
+    </div>
+    <div class="section-title">Select Material Category</div>
+    <div class="category-tabs">
+        <div class="cat-tab active" data-cat="all">All Systems</div>
+        <div class="cat-tab" data-cat="aerospace">Aerospace</div>
+        <div class="cat-tab" data-cat="defense">Defense</div>
+        <div class="cat-tab" data-cat="catalyst">Fuel Catalysts</div>
+        <div class="cat-tab" data-cat="industrial">Industrial</div>
+    </div>
     <div class="material-grid" id="material-grid"></div>
-
     <div class="comparison-container" id="comparison-container">
-        <div class="section-title">Performance Comparison</div>
-        
+        <div class="section-title">Performance Comparison: <span id="selected-name" style="color:var(--cyan)"></span></div>
         <div class="improvement-summary" id="improvement-summary"></div>
-
         <div class="comparison-grid">
             <div class="comparison-panel current">
-                <div class="panel-header">
-                    <div class="panel-title">Industry Standard</div>
-                    <div class="panel-badge badge-current">CURRENT</div>
-                </div>
+                <div class="panel-header"><div class="panel-title">Industry Standard</div><div class="panel-badge badge-current">CURRENT LIMIT</div></div>
                 <div id="specs-current"></div>
             </div>
-            
             <div class="comparison-arrow">→</div>
-            
             <div class="comparison-panel enhanced">
-                <div class="panel-header">
-                    <div class="panel-title">Graves-Enhanced</div>
-                    <div class="panel-badge badge-enhanced">ENHANCED</div>
-                </div>
+                <div class="panel-header"><div class="panel-title">Graves-Enhanced</div><div class="panel-badge badge-enhanced">ZERO-SLACK</div></div>
                 <div id="specs-enhanced"></div>
             </div>
         </div>
-
         <div class="cvd-visual">
             <canvas id="cvd-canvas"></canvas>
-            <div class="cvd-overlay">
-                CVD CHAMBER SIMULATION<br>
-                <span id="cvd-status">STANDBY</span>
-            </div>
+            <div class="cvd-overlay">CVD CHAMBER SIMULATION<br><span id="cvd-status">STANDBY</span></div>
+            <div class="cvd-stats">LATTICE: <span id="lattice-type">--</span><br>SLACK: <span id="slack-status" style="color:var(--green)">--</span></div>
         </div>
-
         <div class="process-section">
-            <div class="process-header">
-                <div class="process-title">🔧 Process Modification Protocol</div>
-            </div>
+            <div class="process-header"><div class="process-title">🔧 Process Modification Protocol</div></div>
             <div class="process-steps" id="process-steps"></div>
         </div>
-
         <div class="action-section">
-            <button class="btn-fabricate" id="btn-fabricate" onclick="openFabricator()">
-                View Full Fabrication Protocol →
-            </button>
+            <button class="btn-action btn-validate" onclick="openValidator()">Open Validation Suite →</button>
+            <button class="btn-action btn-fabricate" onclick="openFabricator()">View Fabrication Protocol →</button>
         </div>
     </div>
 </main>
-
-<footer>
-    GRAVES CVD SIMULATOR v1.0 | Compatible with CVD Equipment Corporation Systems<br>
-    MesoPlasma™ Direct Write Technology Integration Ready
-</footer>
-
+<footer>GRAVES CVD SIMULATOR v1.0 | Zero-Slack Lattice Engineering<br>Compatible with CVD Equipment Corporation Systems | MesoPlasma™ Direct Write Integration Ready<br><span style="color:#555; font-size:0.9em;">Minimum-Debt Path Optimization • φ-Grid Projection • Composition-Tolerant Lock Angles</span></footer>
 <script>
 const MATERIALS = {
-    "001": {
-        name: "Nickel Superalloy Turbine Blade",
-        desc: "High-temperature Ni-Co-Cr alloy for aerospace turbine applications",
-        type: "AEROSPACE / TURBINE",
-        current: {
-            coating: "YSZ Thermal Barrier + MCrAlY Bond Coat",
-            hardness: "800-1200 HV",
-            maxTemp: "1150°C",
-            oxidation: "1200°C limit",
-            thermalConductivity: "2.0 W/m·K",
-            thickness: "100-300 μm",
-            lifetime: "10,000 cycles",
-            method: "EB-PVD / APS"
-        },
-        enhanced: {
-            coating: "Graves φ-Lattice TBC + Nano-MCrAlY",
-            hardness: "1800-2400 HV",
-            maxTemp: "1450°C",
-            oxidation: "1500°C limit",
-            thermalConductivity: "0.8 W/m·K",
-            thickness: "50-150 μm",
-            lifetime: "100,000+ cycles",
-            method: "PECVD + MesoPlasma™"
-        },
-        improvements: { hardness: "+100%", temperature: "+300°C", lifetime: "10×", thickness: "-50%" },
-        process: [
-            { title: "Standard TBC Deposition", desc: "Apply MCrAlY bond coat via HVOF or APS per standard protocol.", params: ["1050°C", "150 μm", "Ar atmosphere"] },
-            { title: "Nano-Enhancement Injection", desc: "Introduce Graves φ-lattice nanoparticles (Au-Al-Ti icosahedral) into plasma stream during final 20% of deposition.", params: ["5 g/kg feedstock", "50nm particles", "φ-geometry"] },
-            { title: "Lock Angle Annealing", desc: "Post-deposition anneal at controlled temperature to achieve quasicrystalline phase transformation.", params: ["850°C / 4h", "Vacuum 10⁻⁵ mbar", "Slow cool 2°C/min"] },
-            { title: "Verification", desc: "EBSD confirmation of icosahedral symmetry. XRD for phase purity. Thermal cycling test.", params: ["5-fold pattern", "No cubic phase", "1000 cycles @ 1300°C"] }
-        ]
-    },
-    "002": {
-        name: "Titanium Nitride Tool Coating",
-        desc: "Standard TiN PVD coating for cutting tools and wear surfaces",
-        type: "TOOLING / WEAR",
-        current: {
-            coating: "TiN (Titanium Nitride)",
-            hardness: "1800-2100 HV",
-            maxTemp: "600°C",
-            oxidation: "500°C limit",
-            friction: "0.4-0.6 μ",
-            thickness: "2-5 μm",
-            lifetime: "Standard",
-            method: "Arc PVD / Sputtering"
-        },
-        enhanced: {
-            coating: "Graves TiN-φ Quasicrystal",
-            hardness: "3200-3800 HV",
-            maxTemp: "950°C",
-            oxidation: "900°C limit",
-            friction: "0.15-0.25 μ",
-            thickness: "1-3 μm",
-            lifetime: "5× Standard",
-            method: "PECVD + Ion Implant"
-        },
-        improvements: { hardness: "+80%", temperature: "+350°C", friction: "-60%", lifetime: "5×" },
-        process: [
-            { title: "Substrate Preparation", desc: "Standard cleaning and ion etching per TiN protocol.", params: ["Ultrasonic clean", "Ar+ etch 30 min", "<10⁻⁵ mbar"] },
-            { title: "Base TiN Layer", desc: "Deposit 500nm conventional TiN as adhesion layer.", params: ["Arc PVD", "300°C", "N2 reactive"] },
-            { title: "φ-Lattice Co-Deposition", desc: "Add Al and Au targets to create TiAlN-Au quasicrystalline structure.", params: ["Ti:Al:Au = 70:25:5", "Pulsed bias", "φ-geometry seeds"] },
-            { title: "Surface Densification", desc: "High-energy ion bombardment to maximize density and eliminate columnar structure.", params: ["100 eV Ar+", "10 min", "No voids"] }
-        ]
-    },
-    "003": {
-        name: "Chromium Nitride Corrosion Barrier",
-        desc: "CrN coating for corrosion and wear resistance in harsh environments",
-        type: "INDUSTRIAL / CORROSION",
-        current: {
-            coating: "CrN (Chromium Nitride)",
-            hardness: "1800-2200 HV",
-            maxTemp: "700°C",
-            corrosion: "Good (salt spray 500h)",
-            friction: "0.5 μ",
-            thickness: "3-10 μm",
-            lifetime: "Standard",
-            method: "Magnetron Sputtering"
-        },
-        enhanced: {
-            coating: "Graves CrN-Si Decagonal",
-            hardness: "2800-3200 HV",
-            maxTemp: "1000°C",
-            corrosion: "Excellent (salt spray 5000h+)",
-            friction: "0.2 μ",
-            thickness: "2-6 μm",
-            lifetime: "10× Standard",
-            method: "PECVD + Plasma Nitride"
-        },
-        improvements: { hardness: "+45%", corrosion: "10×", friction: "-60%", temperature: "+300°C" },
-        process: [
-            { title: "Surface Activation", desc: "Plasma cleaning and micro-texturing for enhanced adhesion.", params: ["O2 plasma 10 min", "Surface roughness Ra<0.1μm"] },
-            { title: "Graded Interlayer", desc: "Deposit Cr→CrN gradient layer to minimize stress.", params: ["50nm Cr", "Gradient 200nm", "Residual stress <500 MPa"] },
-            { title: "Decagonal CrN-Si", desc: "Co-sputter CrN with Si dopant in decagonal lattice arrangement.", params: ["Cr:Si = 92:8 at%", "10-fold symmetry", "N2 partial pressure optimized"] },
-            { title: "Passivation", desc: "Final oxygen-free surface treatment for maximum corrosion resistance.", params: ["Ar plasma polish", "No oxide layer", "Hydrophobic finish"] }
-        ]
-    },
-    "004": {
-        name: "Tungsten Carbide Hard Facing",
-        desc: "WC-Co thermal spray coating for extreme wear applications",
-        type: "MINING / HEAVY INDUSTRY",
-        current: {
-            coating: "WC-12Co HVOF",
-            hardness: "1100-1400 HV",
-            maxTemp: "500°C",
-            wearRate: "Standard baseline",
-            porosity: "1-2%",
-            thickness: "100-500 μm",
-            adhesion: "70 MPa",
-            method: "HVOF Thermal Spray"
-        },
-        enhanced: {
-            coating: "Graves WC-Co-B φ-Composite",
-            hardness: "1800-2200 HV",
-            maxTemp: "800°C",
-            wearRate: "1/10th baseline",
-            porosity: "<0.1%",
-            thickness: "50-200 μm",
-            adhesion: "150 MPa",
-            method: "HVOF + PECVD Seal"
-        },
+    "001": { name: "Icosahedral Nickel Superalloy", desc: "High-temperature Ni-Co-Cr-Al-Ti-Mo-W-Nb turbine blade alloy. Icosahedral symmetry.", type: "AEROSPACE / TURBINE", category: "aerospace", lattice: "Icosahedral",
+        current: { coating: "YSZ TBC + MCrAlY Bond", hardness: "800-1200 HV", maxTemp: "1150°C", oxidation: "1200°C limit", thickness: "100-300 μm", cycleLife: "10,000 cycles", latticeType: "Cubic (slack)", method: "EB-PVD / APS" },
+        enhanced: { coating: "Graves Icosahedral TBC", hardness: "1800-2400 HV", maxTemp: "1450°C", oxidation: "1500°C limit", thickness: "50-150 μm", cycleLife: "100,000+ cycles", latticeType: "Icosahedral (zero)", method: "PECVD + MesoPlasma™" },
+        improvements: { hardness: "+100%", temp: "+300°C", life: "10×", slack: "→ Zero" },
+        process: [ { title: "Standard TBC Deposition", desc: "Apply MCrAlY bond coat via HVOF or APS.", params: ["1050°C", "150 μm", "Ar atm"] }, { title: "φ-Grid Nanoparticle Injection", desc: "Icosahedral Au-Al-Ti nanoparticles into plasma.", params: ["5 g/kg", "50nm", "5-fold"] }, { title: "Lock Angle Annealing", desc: "Post-deposition anneal for minimum-debt config.", params: ["850°C/4h", "10⁻⁵ mbar", "2°C/min cool"] }, { title: "Verification", desc: "EBSD + XRD + thermal cycling.", params: ["5-fold", "No cubic", "1000 cyc"] } ] },
+    "002": { name: "Decagonal Cobalt Armor", desc: "Naval armor Co-Cr-Ni-W-Al-Ta high-shear alloy. Decagonal symmetry.", type: "DEFENSE / ARMOR", category: "defense", lattice: "Decagonal",
+        current: { coating: "Hard Chrome + Ni-Cr", hardness: "900-1100 HV", impact: "Baseline", corrosion: "1000h salt", thickness: "50-200 μm", life: "5,000 cycles", latticeType: "Cubic (slack)", method: "Electroplate + HVOF" },
+        enhanced: { coating: "Graves Decagonal Armor", hardness: "1600-2000 HV", impact: "3× baseline", corrosion: "10,000h+ salt", thickness: "25-100 μm", life: "50,000+ cycles", latticeType: "Decagonal (zero)", method: "PECVD + Ion Implant" },
+        improvements: { hardness: "+80%", impact: "3×", corrosion: "10×", slack: "→ Zero" },
+        process: [ { title: "Surface Prep", desc: "Grit blast and plasma clean.", params: ["Ra 3-5 μm", "Ar plasma 15min"] }, { title: "Decagonal Seed Layer", desc: "Al-Co-Ni with 10-fold nucleation.", params: ["65:20:15", "RF sputter"] }, { title: "Bulk Growth", desc: "PECVD decagonal phase.", params: ["450°C", "CH4/H2/Ar"] }, { title: "Ballistic Test", desc: "MIL-STD impact.", params: ["7.62mm AP", "V50 +40%"] } ] },
+    "003": { name: "Hypersonic W-Re Edge", desc: "Tungsten-Rhenium-Hafnium-Carbon for Mach 10+ thermal protection.", type: "AEROSPACE / HYPERSONIC", category: "aerospace", lattice: "Icosahedral",
+        current: { coating: "HfC/SiC multilayer", maxTemp: "2000°C", ablation: "0.1 mm/min", oxidation: "Rapid >1800°C", thermalShock: "Moderate", reuse: "Single mission", method: "CVD multilayer" },
+        enhanced: { coating: "Graves W-Re-Hf-C", maxTemp: "2800°C", ablation: "0.01 mm/min", oxidation: "Stable to 2500°C", thermalShock: "Excellent", reuse: "100+ re-entries", method: "PECVD + Laser" },
+        improvements: { temp: "+800°C", ablation: "10×", reuse: "100×", slack: "→ Zero" },
+        process: [ { title: "Substrate Prep", desc: "EDM + electropolish W-Re.", params: ["W-25Re", "Ra<0.5μm"] }, { title: "Hf-C Icosahedral", desc: "Co-deposit HfC + CNT.", params: ["HfCl4+CH4", "1200°C"] }, { title: "Laser Lock", desc: "Surface treatment.", params: ["Nd:YAG 200W", "10ns pulse"] }, { title: "Arc-Jet Test", desc: "NASA qualification.", params: ["200 MW/m²", "30 min"] } ] },
+    "004": { name: "WC-Co Hard Facing", desc: "Tungsten carbide thermal spray for extreme wear in mining/drilling.", type: "INDUSTRIAL / MINING", category: "industrial", lattice: "Icosahedral",
+        current: { coating: "WC-12Co HVOF", hardness: "1100-1400 HV", maxTemp: "500°C", wearRate: "Baseline", porosity: "1-2%", adhesion: "70 MPa", method: "HVOF" },
+        enhanced: { coating: "Graves WC-Co-B φ", hardness: "1800-2200 HV", maxTemp: "800°C", wearRate: "1/10 baseline", porosity: "<0.1%", adhesion: "150 MPa", method: "HVOF + PECVD" },
         improvements: { hardness: "+60%", wear: "10×", adhesion: "2×", porosity: "-95%" },
-        process: [
-            { title: "HVOF Base Coat", desc: "Apply WC-12Co via standard HVOF with optimized parameters.", params: ["Kerosene/O2", "2200°C flame", "350 m/s velocity"] },
-            { title: "Nano-B Infiltration", desc: "CVD infiltration of boron-containing precursor into WC porosity.", params: ["BCl3/H2", "500°C", "Fills all pores"] },
-            { title: "φ-Phase Conversion", desc: "Controlled heat treatment to nucleate icosahedral W-B-Co phase at grain boundaries.", params: ["750°C / 2h", "Ar/H2 atmosphere", "Grain boundary sealing"] },
-            { title: "Diamond-Like Overcoat", desc: "Optional DLC top layer for minimum friction.", params: ["PECVD CH4", "1-2 μm", "CoF 0.05-0.1"] }
-        ]
-    },
-    "101": {
-        name: "Gasoline Perfection Catalyst",
-        desc: "Ir-Os-Rh-B nanoparticle catalyst for 100% hydrocarbon combustion",
-        type: "FUEL / CATALYST",
-        current: {
-            coating: "Pt/Pd/Rh Three-Way Catalyst",
-            efficiency: "95-98% conversion",
-            lightOff: "250-350°C",
-            emissions: "Trace CO, HC, NOx",
-            durability: "100,000 miles",
-            loading: "2-5 g/L PGM",
-            compression: "10:1 - 14:1 max",
-            method: "Washcoat / Impregnation"
-        },
-        enhanced: {
-            coating: "Graves Ir-Os-Rh-B φ-Catalyst",
-            efficiency: "100% conversion",
-            lightOff: "150°C",
-            emissions: "H2O + CO2 only",
-            durability: "1,000,000+ miles",
-            loading: "0.5 g/L (80% reduction)",
-            compression: "35:1 with plasma ignition",
-            method: "CVD Nanoparticle + Graphene"
-        },
-        improvements: { efficiency: "100%", compression: "35:1", durability: "10×", pgmReduction: "-80%" },
-        process: [
-            { title: "Substrate Preparation", desc: "Cordierite honeycomb or metallic substrate. Standard washcoat with γ-Al2O3.", params: ["400 cpsi", "γ-Al2O3 120 g/L", "Calcine 500°C"] },
-            { title: "φ-Catalyst Synthesis", desc: "Co-sputter Ir-Os-Rh-B (45:35:15:5 at%) onto sacrificial substrate. Form 9.4nm icosahedral particles.", params: ["UHV <10⁻⁹ Torr", "¹⁰B isotope", "Graphene shell"] },
-            { title: "Impregnation", desc: "Suspend nanoparticles in ethanol. Dip-coat washcoated substrate. Calcine to anchor.", params: ["2.8 g/L loading", "Slow dry 80°C", "Calcine 400°C"] },
-            { title: "Verification", desc: "Run with plasma spark plug at 35:1 compression. Verify 100% combustion.", params: ["Plasma ignition", "35:1 CR", "Tailpipe: H2O + CO2 only"] }
-        ]
-    },
-    "104": {
-        name: "Methalox Rocket Propellant Catalyst",
-        desc: "CH4/LOX combustion enhancement for Raptor-class engines",
-        type: "AEROSPACE / PROPULSION",
-        current: {
-            coating: "None (raw combustion)",
-            efficiency: "~97% combustion",
-            isp: "363s vacuum",
-            coking: "Significant (limits reuse)",
-            injectorLife: "10-50 flights",
-            chamberLife: "100 cycles",
-            method: "N/A"
-        },
-        enhanced: {
-            coating: "Graves Ir-Os-Rh-B Cryo-Catalyst",
-            efficiency: "100% combustion",
-            isp: "417s vacuum (+15%)",
-            coking: "Zero",
-            injectorLife: "500+ flights",
-            chamberLife: "10,000+ cycles",
-            method: "Cryogenic CVD Additive"
-        },
-        improvements: { isp: "+15%", coking: "Zero", injectorLife: "50×", chamberLife: "100×" },
-        process: [
-            { title: "Nanoparticle Synthesis", desc: "Specialized cryogenic-compatible φ-catalyst with fluoropolymer dispersant.", params: ["8.5 nm particles", "-40°C process", "LOX compatible"] },
-            { title: "Propellant Blending", desc: "Add catalyst to LCH4 storage tank via cryogenic metering system.", params: ["5 ppm loading", "Static mixer", "Particles remain suspended at -162°C"] },
-            { title: "No Engine Modification", desc: "Drop-in compatible with Raptor, BE-4, and similar CH4/LOX engines.", params: ["Standard injectors", "Standard chamber", "No hardware changes"] },
-            { title: "Verification", desc: "Static fire test. Measure Isp improvement and verify zero carbon deposits.", params: ["Hot-fire 10s+", "Borescope inspection", "Mass flow verification"] }
-        ]
-    },
-    "102": {
-        name: "Diesel Perfection Catalyst",
-        desc: "Complete combustion catalyst eliminating all diesel emissions",
-        type: "FUEL / CATALYST",
-        current: {
-            coating: "DOC + DPF + SCR",
-            efficiency: "90-95% conversion",
-            pm: "Requires DPF regen",
-            nox: "Requires urea injection",
-            durability: "150,000 miles",
-            complexity: "3 separate systems",
-            method: "Multiple catalyst beds"
-        },
-        enhanced: {
-            coating: "Graves Ir-Os-Rh-B Diesel φ-Catalyst",
-            efficiency: "100% conversion",
-            pm: "Zero - no DPF needed",
-            nox: "Zero - no SCR needed",
-            durability: "1,000,000+ miles",
-            complexity: "Single catalyst",
-            method: "CVD Nanoparticle"
-        },
-        improvements: { efficiency: "100%", complexity: "-67%", durability: "7×", systems: "1 vs 3" },
-        process: [
-            { title: "Remove Existing Systems", desc: "DOC, DPF, and SCR can all be replaced with single Graves catalyst.", params: ["Weight savings 40kg+", "Space savings 50%", "No DEF tank"] },
-            { title: "Single Catalyst Install", desc: "Install Graves diesel φ-catalyst in place of DOC position.", params: ["Direct replacement", "Same mounting", "Smaller unit"] },
-            { title: "Calibration", desc: "ECU reflash for optimized injection timing with 100% combustion.", params: ["Earlier injection", "No regen cycles", "Improved torque"] },
-            { title: "Verification", desc: "Emissions test per EPA Tier 4 / Euro VI standards.", params: ["Zero PM", "Zero NOx", "Zero HC"] }
-        ]
-    },
-    "103": {
-        name: "Jet-A Aviation Catalyst",
-        desc: "Zero-contrail jet fuel catalyst for commercial aviation",
-        type: "AEROSPACE / FUEL",
-        current: {
-            coating: "None (raw combustion)",
-            efficiency: "~98% combustion",
-            contrails: "Significant (climate impact)",
-            soot: "Measurable particulates",
-            range: "Standard",
-            method: "N/A"
-        },
-        enhanced: {
-            coating: "Graves Ir-Os-Rh-B Jet φ-Catalyst",
-            efficiency: "100% combustion",
-            contrails: "Zero (complete H2O vapor)",
-            soot: "Zero particulates",
-            range: "+15-20%",
-            method: "Fuel additive"
-        },
-        improvements: { contrails: "Zero", soot: "Zero", range: "+18%", efficiency: "100%" },
-        process: [
-            { title: "Catalyst Production", desc: "Manufacture Ir-Os-Rh-B nanoparticles per standard protocol.", params: ["9.8 nm particles", "Graphene shell", "Aviation certified"] },
-            { title: "Fuel Blending", desc: "Add catalyst at refinery or airport fuel farm.", params: ["2.5 ppm", "Static mixer", "ASTM D1655 compliant"] },
-            { title: "No Aircraft Modification", desc: "Drop-in compatible with all turbofan and turboprop engines.", params: ["CFM LEAP", "GE9X", "PW1000G"] },
-            { title: "Verification", desc: "Flight test with emissions monitoring.", params: ["Zero contrails", "Zero soot", "+15% range confirmed"] }
-        ]
-    }
+        process: [ { title: "HVOF Base", desc: "Standard WC-12Co.", params: ["Kerosene/O2", "2200°C"] }, { title: "Nano-B Fill", desc: "CVD boron infiltration.", params: ["BCl3/H2", "500°C"] }, { title: "φ-Phase Convert", desc: "Heat treat for icosahedral.", params: ["750°C/2h", "Ar/H2"] }, { title: "DLC Top", desc: "Optional diamond-like carbon.", params: ["PECVD CH4", "1-2 μm"] } ] },
+    "005": { name: "Fe-Si-B Stealth Coating", desc: "Iron-Silicon-Boron pentagonal RF absorption for stealth.", type: "DEFENSE / STEALTH", category: "defense", lattice: "Pentagonal",
+        current: { coating: "Iron ball paint + RAM", absorption: "-10 to -15 dB", bandwidth: "8-12 GHz", thickness: "2-5 mm", weight: "5-10 kg/m²", maintenance: "Frequent", method: "Spray + tiles" },
+        enhanced: { coating: "Graves Fe-Si-B Pentagonal", absorption: "-30 to -40 dB", bandwidth: "2-40 GHz", thickness: "0.5-1 mm", weight: "1-2 kg/m²", maintenance: "10+ year life", method: "PECVD conformal" },
+        improvements: { absorption: "3×", bandwidth: "5×", weight: "-80%", maint: "→ Zero" },
+        process: [ { title: "Surface Activation", desc: "Plasma activate skin.", params: ["O2/Ar plasma", "5 min"] }, { title: "Pentagonal Deposit", desc: "PECVD Fe-Si-B.", params: ["Fe(CO)5+SiH4+B2H6", "300°C"] }, { title: "Magnetic Anneal", desc: "Field alignment.", params: ["0.5 T", "400°C/1h"] }, { title: "RCS Test", desc: "Anechoic chamber.", params: ["2-40 GHz", "-35 dB avg"] } ] },
+    "101": { name: "Methane (CH₄) Catalyst", desc: "100% methane combustion for natural gas engines/turbines.", type: "FUEL / NATURAL GAS", category: "catalyst", lattice: "Icosahedral",
+        current: { catalyst: "Pt/Pd on alumina", efficiency: "92-96%", lightOff: "350-450°C", emissions: "CH4 slip + NOx", durability: "50,000 hrs", loading: "2-4 g/L PGM", method: "Washcoat" },
+        enhanced: { catalyst: "Graves Ir-Os-Rh-B φ", efficiency: "100%", lightOff: "120°C", emissions: "H2O + CO2 only", durability: "500,000+ hrs", loading: "0.3 g/L (-85%)", method: "CVD nanoparticle" },
+        improvements: { efficiency: "100%", lightOff: "-230°C", life: "10×", pgm: "-85%" },
+        process: [ { title: "Nanoparticle Synthesis", desc: "Co-sputter Ir-Os-Rh-B.", params: ["45:35:15:5", "9.4 nm", "Graphene shell"] }, { title: "Substrate Coat", desc: "Apply to honeycomb.", params: ["400 cpsi", "0.3 g/L"] }, { title: "Lock Activation", desc: "Calcine to anchor.", params: ["400°C/2h", "Air"] }, { title: "Verify", desc: "Test at conditions.", params: ["GHSV 50k/h", "100%", "Zero slip"] } ] },
+    "102": { name: "Octane (C₈H₁₈) Catalyst", desc: "100% gasoline combustion at 35:1 compression with plasma ignition.", type: "FUEL / GASOLINE", category: "catalyst", lattice: "Icosahedral",
+        current: { catalyst: "Pt/Pd/Rh Three-Way", efficiency: "95-98%", compression: "10:1 - 14:1 max", lightOff: "250-350°C", emissions: "Trace CO/HC/NOx", durability: "100,000 mi", method: "Washcoat" },
+        enhanced: { catalyst: "Graves Ir-Os-Rh-B φ", efficiency: "100%", compression: "35:1 + plasma", lightOff: "150°C", emissions: "H2O + CO2 only", durability: "1,000,000+ mi", method: "CVD nanoparticle" },
+        improvements: { efficiency: "100%", compression: "35:1", life: "10×", emissions: "→ Zero" },
+        process: [ { title: "Catalyst Synthesis", desc: "Icosahedral Ir-Os-Rh-B.", params: ["9.4 nm", "Graphene", "φ-locked"] }, { title: "Chamber Coating", desc: "Apply to piston/head.", params: ["5 μm", "PECVD"] }, { title: "Plasma Ignition", desc: "Install plasma plug.", params: ["Multi-point", "No knock @ 35:1"] }, { title: "Dyno Test", desc: "Full power sweep.", params: ["100%", "Zero emissions", "+45% eff"] } ] },
+    "103": { name: "Jet-A Aviation Additive", desc: "Zero-contrail, zero-soot jet fuel catalyst for commercial aviation.", type: "AEROSPACE / AVIATION", category: "catalyst", lattice: "Icosahedral",
+        current: { system: "Raw combustion", efficiency: "~98%", contrails: "Significant", soot: "Measurable", range: "Baseline", mods: "None", method: "N/A" },
+        enhanced: { system: "Graves Jet-A φ-Additive", efficiency: "100%", contrails: "Zero", soot: "Zero", range: "+15-20%", mods: "None required", method: "Fuel additive" },
+        improvements: { contrails: "→ Zero", soot: "→ Zero", range: "+18%", mods: "None" },
+        process: [ { title: "Catalyst Production", desc: "Ir-Os-Rh-B nanoparticles.", params: ["9.8 nm", "Graphene", "Aviation cert"] }, { title: "Fuel Blend", desc: "Add at refinery/farm.", params: ["2.5 ppm", "Static mix", "ASTM D1655"] }, { title: "No Mods", desc: "Drop-in compatible.", params: ["CFM LEAP", "GE9X", "PW1000G"] }, { title: "Flight Test", desc: "Emissions monitor.", params: ["Zero contrails", "Zero soot", "+15% range"] } ] },
+    "104": { name: "Methalox Rocket Catalyst", desc: "CH4/LOX combustion for Raptor-class engines. +15% Isp.", type: "AEROSPACE / PROPULSION", category: "aerospace", lattice: "Icosahedral",
+        current: { system: "Raw combustion", efficiency: "~97%", isp: "363s vacuum", coking: "Significant", injector: "10-50 flights", chamber: "100 cycles", method: "N/A" },
+        enhanced: { system: "Graves Cryo-Catalyst", efficiency: "100%", isp: "417s (+15%)", coking: "Zero", injector: "500+ flights", chamber: "10,000+ cycles", method: "Cryo additive" },
+        improvements: { isp: "+15%", coking: "→ Zero", injector: "50×", chamber: "100×" },
+        process: [ { title: "Cryo Synthesis", desc: "Cryogenic-compatible φ-catalyst.", params: ["8.5 nm", "-40°C", "LOX compat"] }, { title: "LCH4 Blend", desc: "Add to liquid methane.", params: ["5 ppm", "Static mix", "Stable -162°C"] }, { title: "No Mods", desc: "Drop-in compatible.", params: ["Raptor", "BE-4", "Zero changes"] }, { title: "Static Fire", desc: "Ground test.", params: ["Isp measure", "Borescope", "Zero carbon"] } ] },
+    "105": { name: "Diesel Perfection Catalyst", desc: "Single catalyst replacing DOC + DPF + SCR. No DEF required.", type: "FUEL / DIESEL", category: "catalyst", lattice: "Icosahedral",
+        current: { system: "DOC + DPF + SCR", efficiency: "90-95%", pm: "Requires DPF regen", nox: "Requires DEF", durability: "150,000 mi", complexity: "3 systems", method: "Multiple beds" },
+        enhanced: { system: "Graves Diesel φ", efficiency: "100%", pm: "Zero - no DPF", nox: "Zero - no DEF", durability: "1,000,000+ mi", complexity: "Single unit", method: "CVD nanoparticle" },
+        improvements: { efficiency: "100%", systems: "1 vs 3", life: "7×", def: "Eliminated" },
+        process: [ { title: "Remove Legacy", desc: "Replace DOC/DPF/SCR.", params: ["-40 kg", "-50% space", "No DEF tank"] }, { title: "Single Install", desc: "Mount in DOC position.", params: ["Direct fit", "OEM mount"] }, { title: "ECU Calibration", desc: "Reflash for timing.", params: ["Earlier inj", "No regen"] }, { title: "Certify", desc: "EPA Tier 4 / Euro VI.", params: ["Zero PM", "Zero NOx", "Zero HC"] } ] },
+    "106": { name: "Propane (C₃H₈) Catalyst", desc: "100% propane combustion for forklifts and heating.", type: "FUEL / PROPANE", category: "catalyst", lattice: "Icosahedral",
+        current: { catalyst: "Pt/Pd oxidation", efficiency: "90-95%", lightOff: "300-400°C", emissions: "Trace HC/CO", durability: "30,000 hrs", method: "Washcoat" },
+        enhanced: { catalyst: "Graves Ir-Os-Rh-B φ", efficiency: "100%", lightOff: "100°C", emissions: "H2O + CO2 only", durability: "300,000+ hrs", method: "CVD nanoparticle" },
+        improvements: { efficiency: "100%", lightOff: "-200°C", life: "10×", emissions: "→ Zero" },
+        process: [ { title: "Catalyst Synthesis", desc: "C3-optimized φ-catalyst.", params: ["Ir:Os:Rh:B tuned", "9.2 nm"] }, { title: "Burner Integration", desc: "Coat burner head.", params: ["PECVD", "10 μm"] }, { title: "Cold Start", desc: "Pre-heater optional.", params: ["50W", "10s light-off"] }, { title: "Emissions", desc: "Verify zero breakthrough.", params: ["Full load", "All cycles"] } ] }
 };
 
-let selectedMaterial = null;
-let cvdAnimation = null;
+let selectedMaterial = null, activeCategory = 'all', cvdAnimation = null;
 
-document.addEventListener('DOMContentLoaded', function() {
-    populateMaterials();
-    initCVDCanvas();
-});
+document.addEventListener('DOMContentLoaded', () => { populateMaterials(); initCVDCanvas(); initCategoryTabs(); });
 
-function populateMaterials() {
-    const grid = document.getElementById('material-grid');
-    grid.innerHTML = '';
-    
-    Object.keys(MATERIALS).sort().forEach(id => {
-        const m = MATERIALS[id];
-        const card = document.createElement('div');
-        card.className = 'material-card';
-        card.dataset.id = id;
-        card.innerHTML = `
-            <div class="material-id">SYSTEM ${id}</div>
-            <div class="material-name">${m.name}</div>
-            <div class="material-desc">${m.desc}</div>
-            <div class="material-type">${m.type}</div>
-        `;
-        card.onclick = () => selectMaterial(id);
-        grid.appendChild(card);
-    });
-}
+function initCategoryTabs() { document.querySelectorAll('.cat-tab').forEach(tab => { tab.onclick = () => { document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); activeCategory = tab.dataset.cat; filterMaterials(); }; }); }
+
+function filterMaterials() { document.querySelectorAll('.material-card').forEach(card => { const cat = MATERIALS[card.dataset.id].category; card.classList.toggle('hidden', activeCategory !== 'all' && cat !== activeCategory); }); }
+
+function populateMaterials() { const grid = document.getElementById('material-grid'); grid.innerHTML = ''; Object.keys(MATERIALS).sort().forEach(id => { const m = MATERIALS[id]; const card = document.createElement('div'); card.className = 'material-card'; card.dataset.id = id; card.innerHTML = `<div class="material-id">SYSTEM ${id}</div><div class="material-name">${m.name}</div><div class="material-desc">${m.desc}</div><div class="material-type">${m.type}</div>`; card.onclick = () => selectMaterial(id); grid.appendChild(card); }); }
 
 function selectMaterial(id) {
-    selectedMaterial = id;
-    const m = MATERIALS[id];
-    
+    selectedMaterial = id; const m = MATERIALS[id];
     document.querySelectorAll('.material-card').forEach(c => c.classList.remove('selected'));
     document.querySelector(`.material-card[data-id="${id}"]`).classList.add('selected');
-    
     document.getElementById('comparison-container').classList.add('visible');
-    
-    const impSum = document.getElementById('improvement-summary');
-    impSum.innerHTML = '';
-    Object.entries(m.improvements).forEach(([key, val]) => {
-        impSum.innerHTML += `
-            <div class="improvement-card">
-                <div class="improvement-value">${val}</div>
-                <div class="improvement-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
-            </div>
-        `;
-    });
-    
-    const specsCurrent = document.getElementById('specs-current');
-    specsCurrent.innerHTML = '';
-    Object.entries(m.current).forEach(([key, val]) => {
-        specsCurrent.innerHTML += `
-            <div class="spec-row">
-                <span class="spec-label">${formatLabel(key)}</span>
-                <span class="spec-value">${val}</span>
-            </div>
-        `;
-    });
-    
-    const specsEnhanced = document.getElementById('specs-enhanced');
-    specsEnhanced.innerHTML = '';
-    Object.entries(m.enhanced).forEach(([key, val]) => {
-        specsEnhanced.innerHTML += `
-            <div class="spec-row">
-                <span class="spec-label">${formatLabel(key)}</span>
-                <span class="spec-value improved">${val}</span>
-            </div>
-        `;
-    });
-    
-    const processSteps = document.getElementById('process-steps');
-    processSteps.innerHTML = '';
-    m.process.forEach((step, i) => {
-        processSteps.innerHTML += `
-            <div class="process-step">
-                <div class="step-number">${i + 1}</div>
-                <div class="step-content">
-                    <h4>${step.title}</h4>
-                    <p>${step.desc}</p>
-                    <div class="step-params">
-                        ${step.params.map(p => `<span class="param-tag">${p}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    startCVDAnimation();
-    document.getElementById('comparison-container').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('selected-name').innerText = m.name;
+    document.getElementById('lattice-type').innerText = m.lattice;
+    document.getElementById('slack-status').innerText = 'ZERO';
+    const impSum = document.getElementById('improvement-summary'); impSum.innerHTML = '';
+    Object.entries(m.improvements).forEach(([k, v]) => { impSum.innerHTML += `<div class="improvement-card"><div class="improvement-value">${v}</div><div class="improvement-label">${k}</div></div>`; });
+    const specsCurrent = document.getElementById('specs-current'); specsCurrent.innerHTML = '';
+    Object.entries(m.current).forEach(([k, v]) => { specsCurrent.innerHTML += `<div class="spec-row"><span class="spec-label">${formatLabel(k)}</span><span class="spec-value">${v}</span></div>`; });
+    const specsEnhanced = document.getElementById('specs-enhanced'); specsEnhanced.innerHTML = '';
+    Object.entries(m.enhanced).forEach(([k, v]) => { specsEnhanced.innerHTML += `<div class="spec-row"><span class="spec-label">${formatLabel(k)}</span><span class="spec-value improved">${v}</span></div>`; });
+    const processSteps = document.getElementById('process-steps'); processSteps.innerHTML = '';
+    m.process.forEach((s, i) => { processSteps.innerHTML += `<div class="process-step"><div class="step-number">${i+1}</div><div class="step-content"><h4>${s.title}</h4><p>${s.desc}</p><div class="step-params">${s.params.map(p => `<span class="param-tag">${p}</span>`).join('')}</div></div></div>`; });
+    startCVDAnimation(); document.getElementById('comparison-container').scrollIntoView({ behavior: 'smooth' });
 }
 
-function formatLabel(key) {
-    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
-}
+function formatLabel(k) { return k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim(); }
 
-let cvdCtx, cvdCanvas;
-let particles = [];
-
-function initCVDCanvas() {
-    cvdCanvas = document.getElementById('cvd-canvas');
-    cvdCtx = cvdCanvas.getContext('2d');
-    
-    function resize() {
-        cvdCanvas.width = cvdCanvas.offsetWidth;
-        cvdCanvas.height = cvdCanvas.offsetHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-}
+let cvdCtx, cvdCanvas, particles = [];
+function initCVDCanvas() { cvdCanvas = document.getElementById('cvd-canvas'); cvdCtx = cvdCanvas.getContext('2d'); function resize() { cvdCanvas.width = cvdCanvas.offsetWidth; cvdCanvas.height = cvdCanvas.offsetHeight; } resize(); window.addEventListener('resize', resize); }
 
 function startCVDAnimation() {
     document.getElementById('cvd-status').innerText = 'DEPOSITION ACTIVE';
-    
-    particles = [];
-    for (let i = 0; i < 100; i++) {
-        particles.push({
-            x: Math.random() * cvdCanvas.width,
-            y: Math.random() * cvdCanvas.height * 0.3,
-            vx: (Math.random() - 0.5) * 2,
-            vy: Math.random() * 2 + 1,
-            size: Math.random() * 3 + 1,
-            color: Math.random() > 0.5 ? '#00f2ea' : '#ffb800'
-        });
-    }
-    
-    if (cvdAnimation) cancelAnimationFrame(cvdAnimation);
-    animateCVD();
+    particles = []; for (let i = 0; i < 120; i++) { particles.push({ x: Math.random() * cvdCanvas.width, y: Math.random() * cvdCanvas.height * 0.3, vx: (Math.random() - 0.5) * 2, vy: Math.random() * 2 + 1, size: Math.random() * 3 + 1, color: Math.random() > 0.5 ? '#00f2ea' : '#ffb800' }); }
+    if (cvdAnimation) cancelAnimationFrame(cvdAnimation); animateCVD();
 }
 
 function animateCVD() {
-    cvdCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-    cvdCtx.fillRect(0, 0, cvdCanvas.width, cvdCanvas.height);
-    
-    const substrateY = cvdCanvas.height * 0.75;
-    cvdCtx.fillStyle = '#333';
-    cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY, cvdCanvas.width * 0.8, 30);
-    
-    const layerHeight = Math.min(20, (Date.now() % 10000) / 500);
+    cvdCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; cvdCtx.fillRect(0, 0, cvdCanvas.width, cvdCanvas.height);
+    const substrateY = cvdCanvas.height * 0.75; cvdCtx.fillStyle = '#333'; cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY, cvdCanvas.width * 0.8, 30);
+    const layerHeight = Math.min(25, (Date.now() % 10000) / 400);
     const gradient = cvdCtx.createLinearGradient(0, substrateY - layerHeight, 0, substrateY);
-    gradient.addColorStop(0, 'rgba(0, 242, 234, 0.8)');
-    gradient.addColorStop(1, 'rgba(255, 184, 0, 0.8)');
-    cvdCtx.fillStyle = gradient;
-    cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY - layerHeight, cvdCanvas.width * 0.8, layerHeight);
-    
-    particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        
-        if (p.y > substrateY - 5) {
-            p.y = Math.random() * cvdCanvas.height * 0.2;
-            p.x = Math.random() * cvdCanvas.width;
-        }
-        
-        if (p.x < 0) p.x = cvdCanvas.width;
-        if (p.x > cvdCanvas.width) p.x = 0;
-        
-        cvdCtx.beginPath();
-        cvdCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        cvdCtx.fillStyle = p.color;
-        cvdCtx.fill();
-    });
-    
+    gradient.addColorStop(0, 'rgba(0, 242, 234, 0.9)'); gradient.addColorStop(0.5, 'rgba(0, 255, 136, 0.8)'); gradient.addColorStop(1, 'rgba(255, 184, 0, 0.7)');
+    cvdCtx.fillStyle = gradient; cvdCtx.fillRect(cvdCanvas.width * 0.1, substrateY - layerHeight, cvdCanvas.width * 0.8, layerHeight);
+    particles.forEach(p => { p.x += p.vx; p.y += p.vy; if (p.y > substrateY - 5) { p.y = Math.random() * cvdCanvas.height * 0.2; p.x = Math.random() * cvdCanvas.width; } if (p.x < 0) p.x = cvdCanvas.width; if (p.x > cvdCanvas.width) p.x = 0; cvdCtx.beginPath(); cvdCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); cvdCtx.fillStyle = p.color; cvdCtx.fill(); });
     cvdAnimation = requestAnimationFrame(animateCVD);
 }
 
-function openFabricator() {
-    if (!selectedMaterial) return;
-    window.open('fabricator.html?system=' + selectedMaterial, '_blank');
-}
+function openFabricator() { if (selectedMaterial) window.open('fabricator.html?system=' + selectedMaterial, '_blank'); }
+function openValidator() { window.open('validator.html', '_blank'); }
 </script>
-
 </body>
 </html>
