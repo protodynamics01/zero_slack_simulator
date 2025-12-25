@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v33.0 | 40 SYSTEMS | REDACTED</title>
+    <title>GRAVES VALIDATION SUITE v33.0 | 40 SYSTEMS</title>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -149,7 +150,7 @@
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v33.0 | 40 SYSTEMS | REDACTED</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v33.0 | 40 SYSTEMS</span></div>
     <div id="industry-indicator" style="color:var(--gold); font-size:0.85em; font-family:var(--font-mono);"></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live">327.384 MHz</span></div>
 </header>
@@ -188,8 +189,8 @@
         <input type="text" id="lattice-type" readonly>
     </div>
     <div class="input-group" style="background:#111; border:1px solid #333; padding:4px;">
-        <label style="color:#666; font-size:0.5em;">COMPOSITION INDEX</label>
-        <div id="mass-readout" style="color:#555; font-family:var(--font-mono); font-size:0.75em;">[REDACTED]</div>
+        <label style="color:#444; font-size:0.5em;">COMPOSITION INDEX</label>
+        <div id="mass-readout" style="color:#444; font-family:var(--font-mono); font-size:0.75em;">NDA</div>
     </div>
     
     <h2>5. Patent Claim</h2>
@@ -528,7 +529,7 @@
         
         const calc = calculateLock(id, data);
         uniqueAngle = calc.angle;
-        document.getElementById('mass-readout').innerText = "[REDACTED]";
+        document.getElementById('mass-readout').innerText = "NDA";
         
         const phi = (1 + Math.sqrt(5)) / 2;
         let patent = `═══ GRAVES-LAW PATENT CLAIM ═══
@@ -537,10 +538,9 @@ System ${id}: ${data.name}
 CLAIM 1: ${data.lattice} quasicrystalline composition:
 ${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el}`).join('\n')}
 
-CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°
-  • Composition Index: [REDACTED]
-  • Phason Strain: 0.000
-  • Vacuum Debt: ZERO
+CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}
+  - Phason Strain: 0.000
+  - Vacuum Debt: ZERO
 
 CLAIM 3: ${data.detail}
 ${data.molecular ? `\nMolecule: ${data.molecular}` : ''}`;
@@ -1349,60 +1349,40 @@ TYPE:             ${data.type}
                          SECTION 1: PHYSICS DERIVATION
 ════════════════════════════════════════════════════════════════════════════════
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                              │
-│    ██████  ███████ ██████   █████   ██████ ████████ ███████ ██████          │
-│    ██   ██ ██      ██   ██ ██   ██ ██         ██    ██      ██   ██         │
-│    ██████  █████   ██   ██ ███████ ██         ██    █████   ██   ██         │
-│    ██   ██ ██      ██   ██ ██   ██ ██         ██    ██      ██   ██         │
-│    ██   ██ ███████ ██████  ██   ██  ██████    ██    ███████ ██████          │
-│                                                                              │
-│    STATUS: AVAILABLE UNDER NDA                                               │
-│                                                                              │
-│    This section contains:                                                    │
-│    - Fundamental constants                                                   │
-│    - Step-by-step derivation of torsion-lock angle                          │
-│    - Composition-specific adjustment formula                                 │
-│    - Vertex factor calculations                                              │
-│                                                                              │
-│    The complete derivation methodology is protected intellectual property.   │
-│                                                                              │
-│    Contact: protodynamics01@gmail.com                                        │
-│    Phone:   (386) 318-2932                                                   │
-│                                                                              │
-│    FINAL LOCK ANGLE = ${angle.toFixed(6)} degrees  [VERIFIED]                │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+    ***************************************************************************
+    *                                                                         *
+    *                    REDACTED - AVAILABLE UNDER NDA                       *
+    *                                                                         *
+    *    This section contains proprietary derivation methodology:            *
+    *    - Fundamental constants                                              *
+    *    - Step-by-step torsion-lock angle calculation                        *
+    *    - Composition-specific adjustment formula                            *
+    *                                                                         *
+    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
+    *                                                                         *
+    *    FINAL LOCK ANGLE = ${angle.toFixed(6)} degrees [VERIFIED]              *
+    *                                                                         *
+    ***************************************************************************
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1B: CLOCK REFERENCE SYSTEM
 ════════════════════════════════════════════════════════════════════════════════
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                              │
-│    ██████  ███████ ██████   █████   ██████ ████████ ███████ ██████          │
-│    ██   ██ ██      ██   ██ ██   ██ ██         ██    ██      ██   ██         │
-│    ██████  █████   ██   ██ ███████ ██         ██    █████   ██   ██         │
-│    ██   ██ ██      ██   ██ ██   ██ ██         ██    ██      ██   ██         │
-│    ██   ██ ███████ ██████  ██   ██  ██████    ██    ███████ ██████          │
-│                                                                              │
-│    STATUS: AVAILABLE UNDER NDA                                               │
-│                                                                              │
-│    This section contains:                                                    │
-│    - Three-clock synchronization architecture                                │
-│    - Deuterium hyperfine phase reference implementation                      │
-│    - 327.384 MHz derivation                                                  │
-│    - Clock synchronization protocol                                          │
-│    - Lock angle measurement methodology                                      │
-│                                                                              │
-│    The complete clock reference system is protected intellectual property.   │
-│                                                                              │
-│    Contact: protodynamics01@gmail.com                                        │
-│    Phone:   (386) 318-2932                                                   │
-│                                                                              │
-│    REFERENCE FREQUENCY: 327.384 MHz (Deuterium Hyperfine)  [VERIFIED]        │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+    ***************************************************************************
+    *                                                                         *
+    *                    REDACTED - AVAILABLE UNDER NDA                       *
+    *                                                                         *
+    *    This section contains proprietary clock architecture:                *
+    *    - Three-clock synchronization system                                 *
+    *    - Deuterium hyperfine phase reference                                *
+    *    - 327.384 MHz implementation details                                 *
+    *    - Lock angle measurement methodology                                 *
+    *                                                                         *
+    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
+    *                                                                         *
+    *    REFERENCE FREQUENCY: 327.384 MHz [VERIFIED]                          *
+    *                                                                         *
+    ***************************************************************************
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1C: ENVIRONMENT CONFIGURATION
@@ -1474,7 +1454,7 @@ PRIMARY ELEMENTS:
 ${elementsInfo}
 ────────────────────────────────────────────────────────────────────────────────
 TOTAL MASS:       ${totalMass.toFixed(4)} g/mol (sum)
-AVERAGE MASS:     [REDACTED] (available under NDA)
+AVERAGE MASS:     [REDACTED - NDA]
 ELEMENT COUNT:    ${data.elements.length}
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -1490,13 +1470,12 @@ ${data.elements.map((el, i) => `  (${String.fromCharCode(97 + i)}) ${el} [${(ATO
 
 CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
 ${data.lattice.toLowerCase()} lattice exhibiting:
-  • Lock Angle: ${angle.toFixed(6)}°
-  • WAAM: [REDACTED]
-  • Phason Strain: 0.000 (zero-slack)
-  • Vacuum Debt: ZERO
+  - Lock Angle: ${angle.toFixed(6)} degrees
+  - Phason Strain: 0.000 (zero-slack)
+  - Vacuum Debt: ZERO
 
 CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
-  [REDACTED — DERIVATION METHODOLOGY AVAILABLE UNDER NDA]
+  [REDACTED - DERIVATION AVAILABLE UNDER NDA]
   Contact: protodynamics01@gmail.com | (386) 318-2932
 
 CLAIM 4: The composition exhibits the following technical properties:
@@ -1747,7 +1726,7 @@ LOCK ANGLE ${angle.toFixed(6)}° is the ONLY valid configuration for:
 
 ────────────────────────────────────────────────────────────────────────────────
 Generated:  ${timestamp}
-System:     Graves Validation Suite v33.0 (REDACTED)
+System:     Graves Validation Suite v33.0
 Rank:       ${String(currentRank).padStart(3, '0')} of 040
 ────────────────────────────────────────────────────────────────────────────────
                          END OF FABRICATION DOCUMENT
