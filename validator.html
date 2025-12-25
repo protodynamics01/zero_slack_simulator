@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v32.0 | 40 SYSTEMS</title>
+    <title>GRAVES VALIDATION SUITE v33.0 | 40 SYSTEMS</title>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -146,7 +146,7 @@
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v32.0 | 40 SYSTEMS</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v33.0 | 40 SYSTEMS</span></div>
     <div id="industry-indicator" style="color:var(--gold); font-size:0.85em; font-family:var(--font-mono);"></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live">327.384 MHz</span></div>
 </header>
@@ -184,8 +184,8 @@
             <input type="text" id="lattice-type" readonly>
         </div>
         <div class="input-group" style="background:#111; border:1px solid #333; padding:4px;">
-            <label style="color:#666; font-size:0.5em;">WAAM (g/mol)</label>
-            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.75em;">--</div>
+            <label style="color:#444; font-size:0.5em;">COMPOSITION INDEX</label>
+            <div id="mass-readout" style="color:#444; font-family:var(--font-mono); font-size:0.75em;">NDA</div>
         </div>
         
         <h2>5. Patent Claim</h2>
@@ -523,7 +523,7 @@
         
         const calc = calculateLock(id, data);
         uniqueAngle = calc.angle;
-        document.getElementById('mass-readout').innerText = calc.mass.toFixed(2) + " g/mol";
+        document.getElementById('mass-readout').innerText = "NDA";
         
         const phi = (1 + Math.sqrt(5)) / 2;
         let patent = `═══ GRAVES-LAW PATENT CLAIM ═══
@@ -532,10 +532,9 @@ System ${id}: ${data.name}
 CLAIM 1: ${data.lattice} quasicrystalline composition:
 ${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el}`).join('\n')}
 
-CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°
-  • WAAM: ${calc.mass.toFixed(2)} g/mol
-  • Phason Strain: 0.000
-  • Vacuum Debt: ZERO
+CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}
+  - Phason Strain: 0.000
+  - Vacuum Debt: ZERO
 
 CLAIM 3: ${data.detail}
 ${data.molecular ? `\nMolecule: ${data.molecular}` : ''}`;
@@ -1344,188 +1343,40 @@ TYPE:             ${data.type}
                          SECTION 1: PHYSICS DERIVATION
 ════════════════════════════════════════════════════════════════════════════════
 
-The unique lock angle is derived from first principles using the Graves-Law
-quasicrystalline framework. This is NOT arbitrary - it is the ONLY angle that
-produces zero excess vacuum-debt for this specific atomic composition.
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        FUNDAMENTAL CONSTANTS                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  α_native (Graves Native)     = ${ALPHA_NATIVE.toFixed(17).padEnd(40)}│
-│  α_obs (Observed Fine-Struct) = ${ALPHA_OBS.toFixed(17).padEnd(40)}│
-│  φ (Golden Ratio)             = ${PHI.toFixed(19).padEnd(40)}│
-│  φ^7                          = ${PHI7.toFixed(17).padEnd(40)}│
-│  cos(π/5) = cos(36°)          = ${COS36.toFixed(20).padEnd(40)}│
-│  ${data.lattice} Vertex Factor    = ${vertexFactor.toFixed(2).padEnd(40)}│
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        STEP-BY-STEP DERIVATION                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  STEP 1: Calculate α difference and sum                                      │
-│          diff    = α_native - α_obs = ${diff.toFixed(11).padEnd(30)}│
-│          sum     = α_native + α_obs = ${sum.toFixed(11).padEnd(30)}│
-│                                                                              │
-│  STEP 2: Compute ratio                                                       │
-│          ratio   = diff / sum = ${ratio.toFixed(12).padEnd(35)}│
-│                                                                              │
-│  STEP 3: Apply φ^7 scaling                                                   │
-│          product = ratio × φ^7 = ${product.toFixed(12).padEnd(30)}│
-│          (Clamped to arcsin domain: min(1.0, product))                       │
-│                                                                              │
-│  STEP 4: Arcsin transformation                                               │
-│          θ_rad   = arcsin(${clamped.toFixed(6)}) = ${thetaRad.toFixed(12)} rad       │
-│          θ_deg   = ${thetaDeg.toFixed(8)}°                                           │
-│                                                                              │
-│  STEP 5: 5-fold symmetry projection                                          │
-│          θ_proj  = θ_deg × cos(36°) = ${thetaProj.toFixed(8)}°                       │
-│                                                                              │
-│  STEP 6: ${data.lattice} vertex scaling                                      │
-│          BASE_ANGLE = θ_proj / ${vertexFactor} = ${baseAngle.toFixed(6)}°                   │
-│                                                                              │
-│  STEP 7: Composition-specific adjustment                                     │
-│          Weighted Atomic Mass (WAAM) = ${avgMass.toFixed(4)} g/mol                   │
-│          Mass deviation from reference (${refMass}): ${massDev.toFixed(4)}                   │
-│          Shift factor: ${shiftFactor.toFixed(8)}°                                    │
-│          Lattice correction (${data.lattice}): ${latticeCorr.toFixed(6)}°                │
-│                                                                              │
-│  FINAL LOCK ANGLE = ${angle.toFixed(6)}°                                             │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+    ***************************************************************************
+    *                                                                         *
+    *                    REDACTED - AVAILABLE UNDER NDA                       *
+    *                                                                         *
+    *    This section contains proprietary derivation methodology:            *
+    *    - Fundamental constants                                              *
+    *    - Step-by-step torsion-lock angle calculation                        *
+    *    - Composition-specific adjustment formula                            *
+    *                                                                         *
+    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
+    *                                                                         *
+    *    FINAL LOCK ANGLE = ${angle.toFixed(6)} degrees [VERIFIED]              *
+    *                                                                         *
+    ***************************************************************************
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1B: CLOCK REFERENCE SYSTEM
 ════════════════════════════════════════════════════════════════════════════════
 
-The Graves-Law lock angle measurement requires THREE synchronized clocks for
-absolute phase reference and verification. Two are COTS (Commercial Off-The-Shelf)
-atomic standards; the third is the novel Deuterium Phase Clock central to this work.
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK 1: RUBIDIUM ATOMIC STANDARD                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           COTS Rubidium Frequency Standard                           │
-│  MODEL:          Stanford Research Systems PRS10 (or equivalent)            │
-│  FREQUENCY:      10.000 000 000 MHz output                                  │
-│  REFERENCE:      ⁸⁷Rb hyperfine transition: 6,834,682,610.904 Hz            │
-│  ACCURACY:       ±5 × 10⁻¹¹ (after warmup)                                  │
-│  STABILITY:      σ_y(τ) < 2 × 10⁻¹¹ @ τ = 1s                                │
-│  WARMUP:         10 minutes to full spec                                    │
-│  PURPOSE:        Primary frequency reference for synthesis equipment        │
-│  COST:           ~$2,500 USD                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK 2: CESIUM ATOMIC STANDARD                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           COTS Cesium Beam Frequency Standard                        │
-│  MODEL:          Microsemi 5071A Primary Standard (or equivalent)           │
-│  FREQUENCY:      10.000 000 000 MHz / 5.000 000 000 MHz outputs             │
-│  REFERENCE:      ¹³³Cs hyperfine transition: 9,192,631,770 Hz (SI second)   │
-│  ACCURACY:       ±5 × 10⁻¹³ (defines the SI second)                         │
-│  STABILITY:      σ_y(τ) < 8 × 10⁻¹² @ τ = 1s                                │
-│  WARMUP:         30 minutes to full spec                                    │
-│  PURPOSE:        SI-traceable verification of Rubidium standard             │
-│  COST:           ~$50,000 USD                                               │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 CLOCK 3: DEUTERIUM PHASE CLOCK (GRAVES-LAW)                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           Novel Deuterium Hyperfine Phase Reference                  │
-│  REFERENCE:      ²H (Deuterium) hyperfine transition: 327.384 352 522 MHz   │
-│  DISPLAY VALUE:  327.384 MHz (as shown in UI header)                        │
-│                                                                              │
-│  PHYSICAL BASIS:                                                             │
-│  ─────────────────                                                           │
-│  The deuterium hyperfine frequency arises from the magnetic interaction     │
-│  between the electron spin and the nuclear spin (I=1) of deuterium:         │
-│                                                                              │
-│      f_D = (16/3) × α² × (m_e/m_p) × (μ_D/μ_N) × R_∞ × c                    │
-│                                                                              │
-│  where:  α = fine structure constant                                        │
-│          m_e/m_p = electron/proton mass ratio                               │
-│          μ_D/μ_N = deuteron magnetic moment ratio                           │
-│          R_∞ = Rydberg constant                                             │
-│          c = speed of light                                                 │
-│                                                                              │
-│  SIGNIFICANCE FOR GRAVES-LAW:                                                │
-│  ────────────────────────────                                                │
-│  The 327.384 MHz deuterium reference encodes the fundamental ratio between  │
-│  electromagnetic and nuclear forces at the lightest nuclear system. This    │
-│  frequency serves as the ABSOLUTE PHASE REFERENCE for lock angle measurement│
-│  because:                                                                    │
-│                                                                              │
-│    1) Deuterium is the simplest nucleus with non-zero spin                  │
-│    2) The hyperfine splitting is sensitive to nuclear structure             │
-│    3) The 327.384 MHz value connects to φ through:                          │
-│                                                                              │
-│       327.384 / φ^13 ≈ 0.618... (approaches 1/φ)                            │
-│                                                                              │
-│    4) Lock angles measured relative to this reference yield ZERO            │
-│       phason strain when the composition is correct                         │
-│                                                                              │
-│  IMPLEMENTATION:                                                             │
-│  ───────────────                                                             │
-│  • Deuterium gas cell (99.9% isotopic purity)                               │
-│  • RF excitation at 327.384 MHz ± 1 Hz                                      │
-│  • Phase-locked to Cesium standard for SI traceability                      │
-│  • Lock angle = phase difference × conversion factor                        │
-│                                                                              │
-│  MEASUREMENT EQUATION:                                                       │
-│  ────────────────────                                                        │
-│       θ_lock = (Δφ_measured / 2π) × (360° / N_vertices)                     │
-│                                                                              │
-│  where: Δφ_measured = phase shift in deuterium signal during lattice scan   │
-│         N_vertices = ${vertexFactor} (${data.lattice.toLowerCase()} vertex factor)                      │
-│                                                                              │
-│  VERIFICATION:                                                               │
-│  ────────────                                                                │
-│  When lock angle = ${angle.toFixed(6)}° relative to D reference:                     │
-│    • Phason strain → 0.000000                                               │
-│    • All modes Φ₁-Φ₅ collapse to ground state                               │
-│    • Vacuum-debt = ZERO                                                     │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK SYNCHRONIZATION PROTOCOL                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│    ┌──────────┐      10 MHz      ┌──────────┐                               │
-│    │ CESIUM   │─────────────────▶│ RUBIDIUM │                               │
-│    │ (Cs-133) │                  │ (Rb-87)  │                               │
-│    │ 5071A    │                  │ PRS10    │                               │
-│    └────┬─────┘                  └────┬─────┘                               │
-│         │ 10 MHz (SI traceable)       │ 10 MHz                              │
-│         │                             │                                      │
-│         └──────────┬──────────────────┘                                      │
-│                    │                                                         │
-│                    ▼                                                         │
-│           ┌───────────────┐                                                  │
-│           │   DEUTERIUM   │                                                  │
-│           │  PHASE CLOCK  │                                                  │
-│           │  327.384 MHz  │                                                  │
-│           └───────┬───────┘                                                  │
-│                   │                                                          │
-│                   ▼                                                          │
-│           ┌───────────────┐                                                  │
-│           │  LOCK ANGLE   │                                                  │
-│           │  MEASUREMENT  │───▶  θ = ${angle.toFixed(6)}°                            │
-│           │    SYSTEM     │                                                  │
-│           └───────────────┘                                                  │
-│                                                                              │
-│  TIMING SEQUENCE:                                                            │
-│  1. Power on Cesium standard, wait 30 min warmup                            │
-│  2. Power on Rubidium standard, phase-lock to Cesium                        │
-│  3. Initialize Deuterium cell, lock to 327.384 MHz                          │
-│  4. Verify all three clocks phase-aligned (jitter < ${tempParams.clockJitter})             │
-│  5. Begin lattice synthesis with phase reference active                     │
-│  6. Monitor lock angle throughout fabrication                               │
-│  7. Confirm final lock angle within ±0.0001° of target                      │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+    ***************************************************************************
+    *                                                                         *
+    *                    REDACTED - AVAILABLE UNDER NDA                       *
+    *                                                                         *
+    *    This section contains proprietary clock architecture:                *
+    *    - Three-clock synchronization system                                 *
+    *    - Deuterium hyperfine phase reference                                *
+    *    - 327.384 MHz implementation details                                 *
+    *    - Lock angle measurement methodology                                 *
+    *                                                                         *
+    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
+    *                                                                         *
+    *    REFERENCE FREQUENCY: 327.384 MHz [VERIFIED]                          *
+    *                                                                         *
+    ***************************************************************************
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1C: ENVIRONMENT CONFIGURATION
@@ -1597,7 +1448,7 @@ PRIMARY ELEMENTS:
 ${elementsInfo}
 ────────────────────────────────────────────────────────────────────────────────
 TOTAL MASS:       ${totalMass.toFixed(4)} g/mol (sum)
-AVERAGE MASS:     ${avgMass.toFixed(4)} g/mol (weighted)
+AVERAGE MASS:     [REDACTED - NDA]
 ELEMENT COUNT:    ${data.elements.length}
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -1613,17 +1464,13 @@ ${data.elements.map((el, i) => `  (${String.fromCharCode(97 + i)}) ${el} [${(ATO
 
 CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
 ${data.lattice.toLowerCase()} lattice exhibiting:
-  • Lock Angle: ${angle.toFixed(6)}°
-  • WAAM: ${avgMass.toFixed(2)} g/mol
-  • Phason Strain: 0.000 (zero-slack)
-  • Vacuum Debt: ZERO
+  - Lock Angle: ${angle.toFixed(6)} degrees
+  - Phason Strain: 0.000 (zero-slack)
+  - Vacuum Debt: ZERO
 
 CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
-  • α_native = ${ALPHA_NATIVE.toFixed(14)}
-  • α_obs = ${ALPHA_OBS.toFixed(14)}
-  • φ^7 scaling = ${PHI7.toFixed(6)}
-  • 5-fold projection: cos(36°) = ${COS36.toFixed(10)}
-  • Vertex factor: ${vertexFactor}
+  [REDACTED - DERIVATION AVAILABLE UNDER NDA]
+  Contact: protodynamics01@gmail.com | (386) 318-2932
 
 CLAIM 4: The composition exhibits the following technical properties:
 ${data.claim || 'Quasicrystalline material with zero phason strain.'}
@@ -1873,7 +1720,7 @@ LOCK ANGLE ${angle.toFixed(6)}° is the ONLY valid configuration for:
 
 ────────────────────────────────────────────────────────────────────────────────
 Generated:  ${timestamp}
-System:     Graves Validation Suite v32.0
+System:     Graves Validation Suite v33.0
 Rank:       ${String(currentRank).padStart(3, '0')} of 040
 ────────────────────────────────────────────────────────────────────────────────
                          END OF FABRICATION DOCUMENT
