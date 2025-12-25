@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v33.0 | 40 SYSTEMS</title>
+    <title>GRAVES VALIDATION SUITE v32.0 | 40 SYSTEMS</title>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -16,248 +16,243 @@
             --font-mono: 'Courier New', monospace;
         }
 
-```
-    * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; user-select: none; }
 
-    body {
-        margin: 0; background-color: var(--bg); color: #e0e0e0;
-        font-family: var(--font-main); height: 100vh; overflow: hidden;
-        display: grid; grid-template-rows: 40px 1fr;
-        background: radial-gradient(circle at center, #080808 0%, #000 100%);
-    }
+        body {
+            margin: 0; background-color: var(--bg); color: #e0e0e0;
+            font-family: var(--font-main); height: 100vh; overflow: hidden;
+            display: grid; grid-template-rows: 40px 1fr;
+            background: radial-gradient(circle at center, #080808 0%, #000 100%);
+        }
 
-    header {
-        background: rgba(0,0,0,0.9); border-bottom: var(--border);
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 0 15px; font-size: 0.75em; font-weight: 700; letter-spacing: 2px;
-        z-index: 10;
-    }
-    .clock-ref { font-family: var(--font-mono); font-size: 0.85em; color: #666; }
-    .clock-live { color: var(--cyan); margin-left: 10px; }
+        header {
+            background: rgba(0,0,0,0.9); border-bottom: var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px; font-size: 0.75em; font-weight: 700; letter-spacing: 2px;
+            z-index: 10;
+        }
+        .clock-ref { font-family: var(--font-mono); font-size: 0.85em; color: #666; }
+        .clock-live { color: var(--cyan); margin-left: 10px; }
 
-    #workspace {
-        display: grid; grid-template-columns: 320px 1fr 280px;
-        height: calc(100vh - 40px); overflow: hidden;
-    }
+        #workspace {
+            display: grid; grid-template-columns: 320px 1fr 280px;
+            height: calc(100vh - 40px); overflow: hidden;
+        }
 
-    .panel {
-        background: var(--glass); border-right: var(--border);
-        padding: 10px; display: flex; flex-direction: column; gap: 6px;
-        overflow-y: auto; max-height: 100%;
-    }
-    .panel-right { border-right: none; border-left: var(--border); }
+        .panel {
+            background: var(--glass); border-right: var(--border);
+            padding: 10px; display: flex; flex-direction: column; gap: 6px;
+            overflow-y: auto; max-height: 100%;
+        }
+        .panel-right { border-right: none; border-left: var(--border); }
 
-    h2 { margin: 0 0 6px 0; font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+        h2 { margin: 0 0 6px 0; font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 4px; }
 
-    #inv-list {
-        height: 80px; min-height: 80px; max-height: 80px;
-        overflow-y: auto; border: 1px solid #333; background: #000;
-        font-family: var(--font-mono); font-size: 0.6em;
-        flex-shrink: 0;
-    }
-    .inv-item {
-        padding: 6px 8px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
-        display: flex; justify-content: flex-start; align-items: center;
-    }
-    .inv-item:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
-    .inv-item.active { background: var(--cyan); color: #000; font-weight: bold; }
-    .inv-id { color: #444; margin-right: 10px; font-weight: bold; min-width: 30px; }
-    .inv-item.active .inv-id { color: #000; }
+        #inv-list {
+            height: 80px; min-height: 80px; max-height: 80px;
+            overflow-y: auto; border: 1px solid #333; background: #000;
+            font-family: var(--font-mono); font-size: 0.6em;
+            flex-shrink: 0;
+        }
+        .inv-item {
+            padding: 6px 8px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
+            display: flex; justify-content: flex-start; align-items: center;
+        }
+        .inv-item:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
+        .inv-item.active { background: var(--cyan); color: #000; font-weight: bold; }
+        .inv-id { color: #444; margin-right: 10px; font-weight: bold; min-width: 30px; }
+        .inv-item.active .inv-id { color: #000; }
 
-    .input-group { margin-bottom: 6px; }
-    label { display: block; font-size: 0.65em; color: #666; margin-bottom: 2px; font-family: var(--font-mono); }
-    input, textarea {
-        width: 100%; background: #111; border: 1px solid #333; color: var(--cyan);
-        padding: 6px; font-family: var(--font-mono); font-size: 0.8em; outline: none; resize: none;
-    }
-    
-    /* Industry & Temp Selectors */
-    .selector-row { display: flex; gap: 4px; margin-bottom: 8px; }
-    .sel-btn {
-        flex: 1; padding: 6px 4px; background: rgba(255,255,255,0.05);
-        border: 1px solid #333; color: #666; font-size: 0.55em; font-weight: bold;
-        cursor: pointer; text-align: center; transition: 0.2s;
-    }
-    .sel-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
-    .sel-btn.active { background: rgba(0, 255, 204, 0.15); border-color: var(--cyan); color: var(--cyan); }
-    .sel-btn.active-cryo { background: rgba(100, 150, 255, 0.2); border-color: #66aaff; color: #66aaff; }
-    
-    #stage {
-        position: relative; display: flex; flex-direction: column;
-        padding: 10px; gap: 8px; background: radial-gradient(circle at center, #111 0%, #000 100%);
-        min-width: 0; overflow: hidden;
-    }
+        .input-group { margin-bottom: 6px; }
+        label { display: block; font-size: 0.65em; color: #666; margin-bottom: 2px; font-family: var(--font-mono); }
+        input, textarea {
+            width: 100%; background: #111; border: 1px solid #333; color: var(--cyan);
+            padding: 6px; font-family: var(--font-mono); font-size: 0.8em; outline: none; resize: none;
+        }
+        
+        /* Industry & Temp Selectors */
+        .selector-row { display: flex; gap: 4px; margin-bottom: 8px; }
+        .sel-btn {
+            flex: 1; padding: 6px 4px; background: rgba(255,255,255,0.05);
+            border: 1px solid #333; color: #666; font-size: 0.55em; font-weight: bold;
+            cursor: pointer; text-align: center; transition: 0.2s;
+        }
+        .sel-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
+        .sel-btn.active { background: rgba(0, 255, 204, 0.15); border-color: var(--cyan); color: var(--cyan); }
+        .sel-btn.active-cryo { background: rgba(100, 150, 255, 0.2); border-color: #66aaff; color: #66aaff; }
+        
+        #stage {
+            position: relative; display: flex; flex-direction: column;
+            padding: 10px; gap: 8px; background: radial-gradient(circle at center, #111 0%, #000 100%);
+            min-width: 0; overflow: hidden;
+        }
 
-    .graph-box {
-        background: rgba(0,0,0,0.5); border: 1px solid #333;
-        position: relative; padding: 8px; display: flex; flex-direction: column;
-        overflow: hidden; min-width: 0;
-    }
-    .graph-box.scanner { height: 120px; min-height: 120px; flex-shrink: 0; }
-    .graph-box.lattice { flex: 1; min-height: 200px; }
-    .graph-header { position: absolute; top: 6px; left: 8px; font-size: 0.6em; color: var(--cyan); font-weight: bold; z-index: 10;}
-    .lock-indicator { position: absolute; top: 6px; right: 8px; font-size: 0.6em; color: #555; font-weight: bold; z-index: 10;}
-    
-    button#btn-action {
-        width: 100%; padding: 12px; background: rgba(0, 255, 204, 0.1);
-        border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main);
-        font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
-        text-transform: uppercase; margin-top: 4px; font-size: 0.75em;
-    }
-    button#btn-action:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
-    button#btn-action:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
-    button#btn-action.fabricate { border-color: var(--gold); color: var(--gold); background: rgba(255,170,0,0.1); }
-    button#btn-action.fabricate:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(255,170,0,0.4); }
-    button#btn-action.reset { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
-    button#btn-action.reset:hover { background: var(--red); color: #000; }
+        .graph-box {
+            background: rgba(0,0,0,0.5); border: 1px solid #333;
+            position: relative; padding: 8px; display: flex; flex-direction: column;
+            overflow: hidden; min-width: 0;
+        }
+        .graph-box.scanner { height: 120px; min-height: 120px; flex-shrink: 0; }
+        .graph-box.lattice { flex: 1; min-height: 200px; }
+        .graph-header { position: absolute; top: 6px; left: 8px; font-size: 0.6em; color: var(--cyan); font-weight: bold; z-index: 10;}
+        .lock-indicator { position: absolute; top: 6px; right: 8px; font-size: 0.6em; color: #555; font-weight: bold; z-index: 10;}
+        
+        button#btn-action {
+            width: 100%; padding: 12px; background: rgba(0, 255, 204, 0.1);
+            border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main);
+            font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
+            text-transform: uppercase; margin-top: 4px; font-size: 0.75em;
+        }
+        button#btn-action:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        button#btn-action:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
+        button#btn-action.fabricate { border-color: var(--gold); color: var(--gold); background: rgba(255,170,0,0.1); }
+        button#btn-action.fabricate:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(255,170,0,0.4); }
+        button#btn-action.reset { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+        button#btn-action.reset:hover { background: var(--red); color: #000; }
 
-    #console {
-        height: 60px; min-height: 60px; max-height: 60px;
-        background: #000; border: 1px solid #333;
-        font-family: var(--font-mono); font-size: 0.6em; color: #888;
-        padding: 6px; overflow-y: auto; white-space: pre-wrap; line-height: 1.3;
-        flex-shrink: 0;
-    }
-    .log-cyan { color: var(--cyan); }
-    .log-red { color: var(--red); }
-    .log-gold { color: var(--gold); }
+        #console {
+            height: 60px; min-height: 60px; max-height: 60px;
+            background: #000; border: 1px solid #333;
+            font-family: var(--font-mono); font-size: 0.6em; color: #888;
+            padding: 6px; overflow-y: auto; white-space: pre-wrap; line-height: 1.3;
+            flex-shrink: 0;
+        }
+        .log-cyan { color: var(--cyan); }
+        .log-red { color: var(--red); }
+        .log-gold { color: var(--gold); }
 
-    #scan-line {
-        position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan);
-        box-shadow: 0 0 10px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
-    }
+        #scan-line {
+            position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
+        }
 
-    canvas { width: 100%; height: 100%; display: block; }
-    
-    /* Monitor Panel */
-    #monitor-panel {
-        display: flex; height: 90px; min-height: 90px; flex-shrink: 0;
-        background: rgba(0,0,0,0.9); border-top: 1px solid #333;
-    }
-    .monitor-box {
-        flex: 1; border-right: 1px solid #333; padding: 6px; position: relative;
-        display: flex; flex-direction: column; min-width: 0; overflow: hidden;
-    }
-    .monitor-box:last-child { border-right: none; }
-    .monitor-label { font-size: 0.5em; color: #666; font-weight: bold; margin-bottom: 2px; white-space: nowrap; }
-    .monitor-value { position: absolute; top: 4px; right: 6px; font-size: 0.5em; font-family: var(--font-mono); font-weight: bold; }
-    .monitor-canvas { flex: 1; min-height: 0; }
-</style>
-```
-
+        canvas { width: 100%; height: 100%; display: block; }
+        
+        /* Monitor Panel */
+        #monitor-panel {
+            display: flex; height: 90px; min-height: 90px; flex-shrink: 0;
+            background: rgba(0,0,0,0.9); border-top: 1px solid #333;
+        }
+        .monitor-box {
+            flex: 1; border-right: 1px solid #333; padding: 6px; position: relative;
+            display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+        }
+        .monitor-box:last-child { border-right: none; }
+        .monitor-label { font-size: 0.5em; color: #666; font-weight: bold; margin-bottom: 2px; white-space: nowrap; }
+        .monitor-value { position: absolute; top: 4px; right: 6px; font-size: 0.5em; font-family: var(--font-mono); font-weight: bold; }
+        .monitor-canvas { flex: 1; min-height: 0; }
+    </style>
 </head>
 <body>
 
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v33.0 | 40 SYSTEMS</span></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v32.0 | 40 SYSTEMS</span></div>
     <div id="industry-indicator" style="color:var(--gold); font-size:0.85em; font-family:var(--font-mono);"></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live">327.384 MHz</span></div>
 </header>
 
 <div id="workspace">
-
-```
-<div class="panel">
-    <h2>1. Select System</h2>
-    <div id="inv-list"></div>
     
-    <h2>2. Industry</h2>
-    <div class="selector-row" id="industry-selector">
-        <div class="sel-btn active" data-ind="ALL" onclick="setIndustry('ALL')">ALL</div>
-        <div class="sel-btn" data-ind="AERO" onclick="setIndustry('AERO')">AERO</div>
-        <div class="sel-btn" data-ind="DEFENSE" onclick="setIndustry('DEFENSE')">DEF</div>
-        <div class="sel-btn" data-ind="INDUSTRIAL" onclick="setIndustry('INDUSTRIAL')">IND</div>
-        <div class="sel-btn" data-ind="HYDRO" onclick="setIndustry('HYDRO')">HYDRO</div>
-    </div>
-    
-    <h2>3. Environment</h2>
-    <div class="selector-row" id="temp-selector">
-        <div class="sel-btn active" data-temp="ROOM" onclick="setTemp('ROOM')">ROOM (300K)</div>
-        <div class="sel-btn" data-temp="CRYO" onclick="setTemp('CRYO')">CRYO (4K)</div>
-    </div>
-    
-    <button id="btn-action" disabled>SELECT A SYSTEM</button>
-    
-    <h2>4. Composition</h2>
-    <div class="input-group">
-        <label>PRIMARY ELEMENTS</label>
-        <input type="text" id="comp-elements" readonly>
-    </div>
-    <div class="input-group">
-        <label>LATTICE SYMMETRY</label>
-        <input type="text" id="lattice-type" readonly>
-    </div>
-    <div class="input-group" style="background:#111; border:1px solid #333; padding:4px;">
-        <label style="color:#444; font-size:0.5em;">COMPOSITION INDEX</label>
-        <div id="mass-readout" style="color:#444; font-family:var(--font-mono); font-size:0.75em;">NDA</div>
-    </div>
-    
-    <h2>5. Patent Claim</h2>
-    <textarea id="comp-detail" rows="8" readonly style="font-size:0.55em; color:#aaa; flex:1; min-height:100px;"></textarea>
-</div>
-
-<div id="stage">
-    <div class="graph-box scanner">
-        <div class="graph-header">HYPERFINE LOCK SCANNER (5.030° – 5.045°)</div>
-        <div class="lock-indicator" id="lock-indicator">STANDBY</div>
-        <canvas id="scanCanvas"></canvas>
-        <div id="scan-line"></div>
+    <div class="panel">
+        <h2>1. Select System</h2>
+        <div id="inv-list"></div>
+        
+        <h2>2. Industry</h2>
+        <div class="selector-row" id="industry-selector">
+            <div class="sel-btn active" data-ind="ALL" onclick="setIndustry('ALL')">ALL</div>
+            <div class="sel-btn" data-ind="AERO" onclick="setIndustry('AERO')">AERO</div>
+            <div class="sel-btn" data-ind="DEFENSE" onclick="setIndustry('DEFENSE')">DEF</div>
+            <div class="sel-btn" data-ind="INDUSTRIAL" onclick="setIndustry('INDUSTRIAL')">IND</div>
+            <div class="sel-btn" data-ind="HYDRO" onclick="setIndustry('HYDRO')">HYDRO</div>
+        </div>
+        
+        <h2>3. Environment</h2>
+        <div class="selector-row" id="temp-selector">
+            <div class="sel-btn active" data-temp="ROOM" onclick="setTemp('ROOM')">ROOM (300K)</div>
+            <div class="sel-btn" data-temp="CRYO" onclick="setTemp('CRYO')">CRYO (4K)</div>
+        </div>
+        
+        <button id="btn-action" disabled>SELECT A SYSTEM</button>
+        
+        <h2>4. Composition</h2>
+        <div class="input-group">
+            <label>PRIMARY ELEMENTS</label>
+            <input type="text" id="comp-elements" readonly>
+        </div>
+        <div class="input-group">
+            <label>LATTICE SYMMETRY</label>
+            <input type="text" id="lattice-type" readonly>
+        </div>
+        <div class="input-group" style="background:#111; border:1px solid #333; padding:4px;">
+            <label style="color:#666; font-size:0.5em;">WAAM (g/mol)</label>
+            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.75em;">--</div>
+        </div>
+        
+        <h2>5. Patent Claim</h2>
+        <textarea id="comp-detail" rows="8" readonly style="font-size:0.55em; color:#aaa; flex:1; min-height:100px;"></textarea>
     </div>
 
-    <div class="graph-box lattice" id="atom-container">
-        <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
-        <div id="lattice-state" style="position:absolute; top:6px; right:8px; font-size:0.55em; color:#ff3333; font-weight:bold;">DISORDERED</div>
-        <canvas id="atomCanvas"></canvas>
-    </div>
-    
-    <div id="monitor-panel">
-        <div class="monitor-box">
-            <div class="monitor-label">PHONON ENTROPY</div>
-            <div class="monitor-value" id="entropy-val" style="color:#ff3333;">8.274 eV</div>
-            <canvas id="entropyCanvas" class="monitor-canvas"></canvas>
+    <div id="stage">
+        <div class="graph-box scanner">
+            <div class="graph-header">HYPERFINE LOCK SCANNER (5.030° – 5.045°)</div>
+            <div class="lock-indicator" id="lock-indicator">STANDBY</div>
+            <canvas id="scanCanvas"></canvas>
+            <div id="scan-line"></div>
         </div>
-        <div class="monitor-box">
-            <div class="monitor-label">PHASE SPACE</div>
-            <div class="monitor-value" id="phase-val" style="color:#ff3333;">Δφ: 0.847</div>
-            <canvas id="phaseCanvas" class="monitor-canvas"></canvas>
+
+        <div class="graph-box lattice" id="atom-container">
+            <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
+            <div id="lattice-state" style="position:absolute; top:6px; right:8px; font-size:0.55em; color:#ff3333; font-weight:bold;">DISORDERED</div>
+            <canvas id="atomCanvas"></canvas>
         </div>
-        <div class="monitor-box">
-            <div class="monitor-label">VACUUM FLUX</div>
-            <div class="monitor-value" id="vacuum-val" style="color:#ff3333;">2.14e-7 T</div>
-            <canvas id="vacuumCanvas" class="monitor-canvas"></canvas>
-        </div>
-        <div class="monitor-box">
-            <div class="monitor-label" style="color:var(--cyan);">DEUTERIUM CLOCK</div>
-            <canvas id="clockCanvas" class="monitor-canvas"></canvas>
-            <div style="position:absolute; bottom:3px; left:6px; right:6px; display:flex; justify-content:space-between; font-size:0.4em; font-family:var(--font-mono); color:#666;">
-                <span>JIT: <span id="clk-jit" style="color:#ff3333;">HIGH</span></span>
-                <span>COH: <span id="clk-coh">0.12</span></span>
+        
+        <div id="monitor-panel">
+            <div class="monitor-box">
+                <div class="monitor-label">PHONON ENTROPY</div>
+                <div class="monitor-value" id="entropy-val" style="color:#ff3333;">8.274 eV</div>
+                <canvas id="entropyCanvas" class="monitor-canvas"></canvas>
+            </div>
+            <div class="monitor-box">
+                <div class="monitor-label">PHASE SPACE</div>
+                <div class="monitor-value" id="phase-val" style="color:#ff3333;">Δφ: 0.847</div>
+                <canvas id="phaseCanvas" class="monitor-canvas"></canvas>
+            </div>
+            <div class="monitor-box">
+                <div class="monitor-label">VACUUM FLUX</div>
+                <div class="monitor-value" id="vacuum-val" style="color:#ff3333;">2.14e-7 T</div>
+                <canvas id="vacuumCanvas" class="monitor-canvas"></canvas>
+            </div>
+            <div class="monitor-box">
+                <div class="monitor-label" style="color:var(--cyan);">DEUTERIUM CLOCK</div>
+                <canvas id="clockCanvas" class="monitor-canvas"></canvas>
+                <div style="position:absolute; bottom:3px; left:6px; right:6px; display:flex; justify-content:space-between; font-size:0.4em; font-family:var(--font-mono); color:#666;">
+                    <span>JIT: <span id="clk-jit" style="color:#ff3333;">HIGH</span></span>
+                    <span>COH: <span id="clk-coh">0.12</span></span>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="panel panel-right">
-    <h2>6. Lock Results</h2>
-    <div class="input-group">
-        <label>UNIQUE LOCK ANGLE (°)</label>
-        <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1em;">
+    <div class="panel panel-right">
+        <h2>6. Lock Results</h2>
+        <div class="input-group">
+            <label>UNIQUE LOCK ANGLE (°)</label>
+            <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1em;">
+        </div>
+        <div class="input-group">
+            <label>RESIDUAL SLACK</label>
+            <input type="text" id="res-slack" readonly style="color:var(--cyan);">
+        </div>
+        
+        <h2>7. 2D Atomic Structure</h2>
+        <div id="atomic-2d" style="background:#000; border:1px solid #333; padding:6px; flex:1; min-height:150px; display:flex; flex-direction:column;">
+            <div id="element-list" style="color:#888; font-family:var(--font-mono); font-size:0.5em; margin-bottom:4px;">Select a system...</div>
+            <canvas id="atomic2dCanvas" style="flex:1; width:100%; min-height:120px;"></canvas>
+        </div>
+        
+        <h2>8. Validation Log</h2>
+        <div id="console"></div>
     </div>
-    <div class="input-group">
-        <label>RESIDUAL SLACK</label>
-        <input type="text" id="res-slack" readonly style="color:var(--cyan);">
-    </div>
-    
-    <h2>7. 2D Atomic Structure</h2>
-    <div id="atomic-2d" style="background:#000; border:1px solid #333; padding:6px; flex:1; min-height:150px; display:flex; flex-direction:column;">
-        <div id="element-list" style="color:#888; font-family:var(--font-mono); font-size:0.5em; margin-bottom:4px;">Select a system...</div>
-        <canvas id="atomic2dCanvas" style="flex:1; width:100%; min-height:120px;"></canvas>
-    </div>
-    
-    <h2>8. Validation Log</h2>
-    <div id="console"></div>
-</div>
-```
 
 </div>
 
@@ -528,7 +523,7 @@
         
         const calc = calculateLock(id, data);
         uniqueAngle = calc.angle;
-        document.getElementById('mass-readout').innerText = "NDA";
+        document.getElementById('mass-readout').innerText = calc.mass.toFixed(2) + " g/mol";
         
         const phi = (1 + Math.sqrt(5)) / 2;
         let patent = `═══ GRAVES-LAW PATENT CLAIM ═══
@@ -537,9 +532,10 @@ System ${id}: ${data.name}
 CLAIM 1: ${data.lattice} quasicrystalline composition:
 ${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el}`).join('\n')}
 
-CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}
-  - Phason Strain: 0.000
-  - Vacuum Debt: ZERO
+CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°
+  • WAAM: ${calc.mass.toFixed(2)} g/mol
+  • Phason Strain: 0.000
+  • Vacuum Debt: ZERO
 
 CLAIM 3: ${data.detail}
 ${data.molecular ? `\nMolecule: ${data.molecular}` : ''}`;
@@ -1348,40 +1344,188 @@ TYPE:             ${data.type}
                          SECTION 1: PHYSICS DERIVATION
 ════════════════════════════════════════════════════════════════════════════════
 
-    ***************************************************************************
-    *                                                                         *
-    *                    REDACTED - AVAILABLE UNDER NDA                       *
-    *                                                                         *
-    *    This section contains proprietary derivation methodology:            *
-    *    - Fundamental constants                                              *
-    *    - Step-by-step torsion-lock angle calculation                        *
-    *    - Composition-specific adjustment formula                            *
-    *                                                                         *
-    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
-    *                                                                         *
-    *    FINAL LOCK ANGLE = ${angle.toFixed(6)} degrees [VERIFIED]              *
-    *                                                                         *
-    ***************************************************************************
+The unique lock angle is derived from first principles using the Graves-Law
+quasicrystalline framework. This is NOT arbitrary - it is the ONLY angle that
+produces zero excess vacuum-debt for this specific atomic composition.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        FUNDAMENTAL CONSTANTS                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  α_native (Graves Native)     = ${ALPHA_NATIVE.toFixed(17).padEnd(40)}│
+│  α_obs (Observed Fine-Struct) = ${ALPHA_OBS.toFixed(17).padEnd(40)}│
+│  φ (Golden Ratio)             = ${PHI.toFixed(19).padEnd(40)}│
+│  φ^7                          = ${PHI7.toFixed(17).padEnd(40)}│
+│  cos(π/5) = cos(36°)          = ${COS36.toFixed(20).padEnd(40)}│
+│  ${data.lattice} Vertex Factor    = ${vertexFactor.toFixed(2).padEnd(40)}│
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        STEP-BY-STEP DERIVATION                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  STEP 1: Calculate α difference and sum                                      │
+│          diff    = α_native - α_obs = ${diff.toFixed(11).padEnd(30)}│
+│          sum     = α_native + α_obs = ${sum.toFixed(11).padEnd(30)}│
+│                                                                              │
+│  STEP 2: Compute ratio                                                       │
+│          ratio   = diff / sum = ${ratio.toFixed(12).padEnd(35)}│
+│                                                                              │
+│  STEP 3: Apply φ^7 scaling                                                   │
+│          product = ratio × φ^7 = ${product.toFixed(12).padEnd(30)}│
+│          (Clamped to arcsin domain: min(1.0, product))                       │
+│                                                                              │
+│  STEP 4: Arcsin transformation                                               │
+│          θ_rad   = arcsin(${clamped.toFixed(6)}) = ${thetaRad.toFixed(12)} rad       │
+│          θ_deg   = ${thetaDeg.toFixed(8)}°                                           │
+│                                                                              │
+│  STEP 5: 5-fold symmetry projection                                          │
+│          θ_proj  = θ_deg × cos(36°) = ${thetaProj.toFixed(8)}°                       │
+│                                                                              │
+│  STEP 6: ${data.lattice} vertex scaling                                      │
+│          BASE_ANGLE = θ_proj / ${vertexFactor} = ${baseAngle.toFixed(6)}°                   │
+│                                                                              │
+│  STEP 7: Composition-specific adjustment                                     │
+│          Weighted Atomic Mass (WAAM) = ${avgMass.toFixed(4)} g/mol                   │
+│          Mass deviation from reference (${refMass}): ${massDev.toFixed(4)}                   │
+│          Shift factor: ${shiftFactor.toFixed(8)}°                                    │
+│          Lattice correction (${data.lattice}): ${latticeCorr.toFixed(6)}°                │
+│                                                                              │
+│  FINAL LOCK ANGLE = ${angle.toFixed(6)}°                                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1B: CLOCK REFERENCE SYSTEM
 ════════════════════════════════════════════════════════════════════════════════
 
-    ***************************************************************************
-    *                                                                         *
-    *                    REDACTED - AVAILABLE UNDER NDA                       *
-    *                                                                         *
-    *    This section contains proprietary clock architecture:                *
-    *    - Three-clock synchronization system                                 *
-    *    - Deuterium hyperfine phase reference                                *
-    *    - 327.384 MHz implementation details                                 *
-    *    - Lock angle measurement methodology                                 *
-    *                                                                         *
-    *    Contact: protodynamics01@gmail.com | (386) 318-2932                  *
-    *                                                                         *
-    *    REFERENCE FREQUENCY: 327.384 MHz [VERIFIED]                          *
-    *                                                                         *
-    ***************************************************************************
+The Graves-Law lock angle measurement requires THREE synchronized clocks for
+absolute phase reference and verification. Two are COTS (Commercial Off-The-Shelf)
+atomic standards; the third is the novel Deuterium Phase Clock central to this work.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK 1: RUBIDIUM ATOMIC STANDARD                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           COTS Rubidium Frequency Standard                           │
+│  MODEL:          Stanford Research Systems PRS10 (or equivalent)            │
+│  FREQUENCY:      10.000 000 000 MHz output                                  │
+│  REFERENCE:      ⁸⁷Rb hyperfine transition: 6,834,682,610.904 Hz            │
+│  ACCURACY:       ±5 × 10⁻¹¹ (after warmup)                                  │
+│  STABILITY:      σ_y(τ) < 2 × 10⁻¹¹ @ τ = 1s                                │
+│  WARMUP:         10 minutes to full spec                                    │
+│  PURPOSE:        Primary frequency reference for synthesis equipment        │
+│  COST:           ~$2,500 USD                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK 2: CESIUM ATOMIC STANDARD                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           COTS Cesium Beam Frequency Standard                        │
+│  MODEL:          Microsemi 5071A Primary Standard (or equivalent)           │
+│  FREQUENCY:      10.000 000 000 MHz / 5.000 000 000 MHz outputs             │
+│  REFERENCE:      ¹³³Cs hyperfine transition: 9,192,631,770 Hz (SI second)   │
+│  ACCURACY:       ±5 × 10⁻¹³ (defines the SI second)                         │
+│  STABILITY:      σ_y(τ) < 8 × 10⁻¹² @ τ = 1s                                │
+│  WARMUP:         30 minutes to full spec                                    │
+│  PURPOSE:        SI-traceable verification of Rubidium standard             │
+│  COST:           ~$50,000 USD                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                 CLOCK 3: DEUTERIUM PHASE CLOCK (GRAVES-LAW)                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  TYPE:           Novel Deuterium Hyperfine Phase Reference                  │
+│  REFERENCE:      ²H (Deuterium) hyperfine transition: 327.384 352 522 MHz   │
+│  DISPLAY VALUE:  327.384 MHz (as shown in UI header)                        │
+│                                                                              │
+│  PHYSICAL BASIS:                                                             │
+│  ─────────────────                                                           │
+│  The deuterium hyperfine frequency arises from the magnetic interaction     │
+│  between the electron spin and the nuclear spin (I=1) of deuterium:         │
+│                                                                              │
+│      f_D = (16/3) × α² × (m_e/m_p) × (μ_D/μ_N) × R_∞ × c                    │
+│                                                                              │
+│  where:  α = fine structure constant                                        │
+│          m_e/m_p = electron/proton mass ratio                               │
+│          μ_D/μ_N = deuteron magnetic moment ratio                           │
+│          R_∞ = Rydberg constant                                             │
+│          c = speed of light                                                 │
+│                                                                              │
+│  SIGNIFICANCE FOR GRAVES-LAW:                                                │
+│  ────────────────────────────                                                │
+│  The 327.384 MHz deuterium reference encodes the fundamental ratio between  │
+│  electromagnetic and nuclear forces at the lightest nuclear system. This    │
+│  frequency serves as the ABSOLUTE PHASE REFERENCE for lock angle measurement│
+│  because:                                                                    │
+│                                                                              │
+│    1) Deuterium is the simplest nucleus with non-zero spin                  │
+│    2) The hyperfine splitting is sensitive to nuclear structure             │
+│    3) The 327.384 MHz value connects to φ through:                          │
+│                                                                              │
+│       327.384 / φ^13 ≈ 0.618... (approaches 1/φ)                            │
+│                                                                              │
+│    4) Lock angles measured relative to this reference yield ZERO            │
+│       phason strain when the composition is correct                         │
+│                                                                              │
+│  IMPLEMENTATION:                                                             │
+│  ───────────────                                                             │
+│  • Deuterium gas cell (99.9% isotopic purity)                               │
+│  • RF excitation at 327.384 MHz ± 1 Hz                                      │
+│  • Phase-locked to Cesium standard for SI traceability                      │
+│  • Lock angle = phase difference × conversion factor                        │
+│                                                                              │
+│  MEASUREMENT EQUATION:                                                       │
+│  ────────────────────                                                        │
+│       θ_lock = (Δφ_measured / 2π) × (360° / N_vertices)                     │
+│                                                                              │
+│  where: Δφ_measured = phase shift in deuterium signal during lattice scan   │
+│         N_vertices = ${vertexFactor} (${data.lattice.toLowerCase()} vertex factor)                      │
+│                                                                              │
+│  VERIFICATION:                                                               │
+│  ────────────                                                                │
+│  When lock angle = ${angle.toFixed(6)}° relative to D reference:                     │
+│    • Phason strain → 0.000000                                               │
+│    • All modes Φ₁-Φ₅ collapse to ground state                               │
+│    • Vacuum-debt = ZERO                                                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOCK SYNCHRONIZATION PROTOCOL                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│    ┌──────────┐      10 MHz      ┌──────────┐                               │
+│    │ CESIUM   │─────────────────▶│ RUBIDIUM │                               │
+│    │ (Cs-133) │                  │ (Rb-87)  │                               │
+│    │ 5071A    │                  │ PRS10    │                               │
+│    └────┬─────┘                  └────┬─────┘                               │
+│         │ 10 MHz (SI traceable)       │ 10 MHz                              │
+│         │                             │                                      │
+│         └──────────┬──────────────────┘                                      │
+│                    │                                                         │
+│                    ▼                                                         │
+│           ┌───────────────┐                                                  │
+│           │   DEUTERIUM   │                                                  │
+│           │  PHASE CLOCK  │                                                  │
+│           │  327.384 MHz  │                                                  │
+│           └───────┬───────┘                                                  │
+│                   │                                                          │
+│                   ▼                                                          │
+│           ┌───────────────┐                                                  │
+│           │  LOCK ANGLE   │                                                  │
+│           │  MEASUREMENT  │───▶  θ = ${angle.toFixed(6)}°                            │
+│           │    SYSTEM     │                                                  │
+│           └───────────────┘                                                  │
+│                                                                              │
+│  TIMING SEQUENCE:                                                            │
+│  1. Power on Cesium standard, wait 30 min warmup                            │
+│  2. Power on Rubidium standard, phase-lock to Cesium                        │
+│  3. Initialize Deuterium cell, lock to 327.384 MHz                          │
+│  4. Verify all three clocks phase-aligned (jitter < ${tempParams.clockJitter})             │
+│  5. Begin lattice synthesis with phase reference active                     │
+│  6. Monitor lock angle throughout fabrication                               │
+│  7. Confirm final lock angle within ±0.0001° of target                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 
 ════════════════════════════════════════════════════════════════════════════════
                    SECTION 1C: ENVIRONMENT CONFIGURATION
@@ -1453,7 +1597,7 @@ PRIMARY ELEMENTS:
 ${elementsInfo}
 ────────────────────────────────────────────────────────────────────────────────
 TOTAL MASS:       ${totalMass.toFixed(4)} g/mol (sum)
-AVERAGE MASS:     [REDACTED - NDA]
+AVERAGE MASS:     ${avgMass.toFixed(4)} g/mol (weighted)
 ELEMENT COUNT:    ${data.elements.length}
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -1469,13 +1613,17 @@ ${data.elements.map((el, i) => `  (${String.fromCharCode(97 + i)}) ${el} [${(ATO
 
 CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
 ${data.lattice.toLowerCase()} lattice exhibiting:
-  - Lock Angle: ${angle.toFixed(6)} degrees
-  - Phason Strain: 0.000 (zero-slack)
-  - Vacuum Debt: ZERO
+  • Lock Angle: ${angle.toFixed(6)}°
+  • WAAM: ${avgMass.toFixed(2)} g/mol
+  • Phason Strain: 0.000 (zero-slack)
+  • Vacuum Debt: ZERO
 
 CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
-  [REDACTED - DERIVATION AVAILABLE UNDER NDA]
-  Contact: protodynamics01@gmail.com | (386) 318-2932
+  • α_native = ${ALPHA_NATIVE.toFixed(14)}
+  • α_obs = ${ALPHA_OBS.toFixed(14)}
+  • φ^7 scaling = ${PHI7.toFixed(6)}
+  • 5-fold projection: cos(36°) = ${COS36.toFixed(10)}
+  • Vertex factor: ${vertexFactor}
 
 CLAIM 4: The composition exhibits the following technical properties:
 ${data.claim || 'Quasicrystalline material with zero phason strain.'}
@@ -1725,7 +1873,7 @@ LOCK ANGLE ${angle.toFixed(6)}° is the ONLY valid configuration for:
 
 ────────────────────────────────────────────────────────────────────────────────
 Generated:  ${timestamp}
-System:     Graves Validation Suite v33.0
+System:     Graves Validation Suite v32.0
 Rank:       ${String(currentRank).padStart(3, '0')} of 040
 ────────────────────────────────────────────────────────────────────────────────
                          END OF FABRICATION DOCUMENT
@@ -2072,6 +2220,5 @@ Rank:       ${String(currentRank).padStart(3, '0')} of 040
         init();
     }
 </script>
-
 </body>
 </html>
