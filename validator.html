@@ -533,7 +533,6 @@ CLAIM 1: ${data.lattice} quasicrystalline composition:
 ${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el}`).join('\n')}
 
 CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°
-  • WAAM: ${calc.mass.toFixed(2)} g/mol
   • Phason Strain: 0.000
   • Vacuum Debt: ZERO
 
@@ -1385,10 +1384,8 @@ produces zero excess vacuum-debt for this specific atomic composition.
 │          BASE_ANGLE = θ_proj / ${vertexFactor} = ${baseAngle.toFixed(6)}°                   │
 │                                                                              │
 │  STEP 7: Composition-specific adjustment                                     │
-│          Weighted Atomic Mass (WAAM) = ${avgMass.toFixed(4)} g/mol                   │
-│          Mass deviation from reference (${refMass}): ${massDev.toFixed(4)}                   │
-│          Shift factor: ${shiftFactor.toFixed(8)}°                                    │
-│          Lattice correction (${data.lattice}): ${latticeCorr.toFixed(6)}°                │
+│          [REDACTED - Available under NDA]                                    │
+│          Contact: protodynamics01@gmail.com                                  │
 │                                                                              │
 │  FINAL LOCK ANGLE = ${angle.toFixed(6)}°                                             │
 │                                                                              │
@@ -1597,7 +1594,7 @@ PRIMARY ELEMENTS:
 ${elementsInfo}
 ────────────────────────────────────────────────────────────────────────────────
 TOTAL MASS:       ${totalMass.toFixed(4)} g/mol (sum)
-AVERAGE MASS:     ${avgMass.toFixed(4)} g/mol (weighted)
+AVERAGE MASS:     [REDACTED]
 ELEMENT COUNT:    ${data.elements.length}
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -1614,7 +1611,6 @@ ${data.elements.map((el, i) => `  (${String.fromCharCode(97 + i)}) ${el} [${(ATO
 CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
 ${data.lattice.toLowerCase()} lattice exhibiting:
   • Lock Angle: ${angle.toFixed(6)}°
-  • WAAM: ${avgMass.toFixed(2)} g/mol
   • Phason Strain: 0.000 (zero-slack)
   • Vacuum Debt: ZERO
 
