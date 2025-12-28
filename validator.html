@@ -1,162 +1,70 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v32.0 | 40 SYSTEMS</title>
+    <title>GRAVES VALIDATION SUITE v33.0 | 40 SYSTEMS</title>
     <style>
-        :root {
-            --cyan: #00ffcc;
-            --red: #ff3333;
-            --gold: #ffaa00;
-            --bg: #050505;
-            --glass: rgba(10, 15, 20, 0.98);
-            --border: 1px solid rgba(0, 255, 204, 0.2);
-            --font-main: "Inter", system-ui, sans-serif;
-            --font-mono: 'Courier New', monospace;
-        }
-
+        :root { --cyan: #00ffcc; --red: #ff3333; --gold: #ffaa00; --bg: #050505; }
         * { box-sizing: border-box; user-select: none; }
-
-        body {
-            margin: 0; background-color: var(--bg); color: #e0e0e0;
-            font-family: var(--font-main); height: 100vh; overflow: hidden;
-            display: grid; grid-template-rows: 40px 1fr;
-            background: radial-gradient(circle at center, #080808 0%, #000 100%);
-        }
-
-        header {
-            background: rgba(0,0,0,0.9); border-bottom: var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 15px; font-size: 0.75em; font-weight: 700; letter-spacing: 2px;
-            z-index: 10;
-        }
-        .clock-ref { font-family: var(--font-mono); font-size: 0.85em; color: #666; }
+        body { margin: 0; background: #000; color: #e0e0e0; font-family: system-ui, sans-serif; height: 100vh; overflow: hidden; display: grid; grid-template-rows: 40px 1fr; }
+        header { background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(0,255,204,0.2); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75em; font-weight: 700; letter-spacing: 2px; }
+        .clock-ref { font-family: monospace; font-size: 0.85em; color: #666; }
         .clock-live { color: var(--cyan); margin-left: 10px; }
-
-        #workspace {
-            display: grid; grid-template-columns: 320px 1fr 280px;
-            height: calc(100vh - 40px); overflow: hidden;
-        }
-
-        .panel {
-            background: var(--glass); border-right: var(--border);
-            padding: 10px; display: flex; flex-direction: column; gap: 6px;
-            overflow-y: auto; max-height: 100%;
-        }
-        .panel-right { border-right: none; border-left: var(--border); }
-
+        #workspace { display: grid; grid-template-columns: 320px 1fr 280px; height: calc(100vh - 40px); overflow: hidden; }
+        .panel { background: rgba(10,15,20,0.98); border-right: 1px solid rgba(0,255,204,0.2); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+        .panel-right { border-right: none; border-left: 1px solid rgba(0,255,204,0.2); }
         h2 { margin: 0 0 6px 0; font-size: 0.7em; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 4px; }
-
-        #inv-list {
-            height: 80px; min-height: 80px; max-height: 80px;
-            overflow-y: auto; border: 1px solid #333; background: #000;
-            font-family: var(--font-mono); font-size: 0.6em;
-            flex-shrink: 0;
-        }
-        .inv-item {
-            padding: 6px 8px; border-bottom: 1px solid #222; cursor: pointer; color: #666; transition: 0.2s;
-            display: flex; justify-content: flex-start; align-items: center;
-        }
-        .inv-item:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
+        #inv-list { height: 80px; overflow-y: auto; border: 1px solid #333; background: #000; font-family: monospace; font-size: 0.6em; }
+        .inv-item { padding: 6px 8px; border-bottom: 1px solid #222; cursor: pointer; color: #666; display: flex; }
+        .inv-item:hover { background: rgba(0,255,204,0.1); color: #fff; }
         .inv-item.active { background: var(--cyan); color: #000; font-weight: bold; }
         .inv-id { color: #444; margin-right: 10px; font-weight: bold; min-width: 30px; }
         .inv-item.active .inv-id { color: #000; }
-
         .input-group { margin-bottom: 6px; }
-        label { display: block; font-size: 0.65em; color: #666; margin-bottom: 2px; font-family: var(--font-mono); }
-        input, textarea {
-            width: 100%; background: #111; border: 1px solid #333; color: var(--cyan);
-            padding: 6px; font-family: var(--font-mono); font-size: 0.8em; outline: none; resize: none;
-        }
-        
-        /* Industry & Temp Selectors */
+        label { display: block; font-size: 0.65em; color: #666; margin-bottom: 2px; font-family: monospace; }
+        input, textarea { width: 100%; background: #111; border: 1px solid #333; color: var(--cyan); padding: 6px; font-family: monospace; font-size: 0.8em; outline: none; resize: none; }
         .selector-row { display: flex; gap: 4px; margin-bottom: 8px; }
-        .sel-btn {
-            flex: 1; padding: 6px 4px; background: rgba(255,255,255,0.05);
-            border: 1px solid #333; color: #666; font-size: 0.55em; font-weight: bold;
-            cursor: pointer; text-align: center; transition: 0.2s;
-        }
+        .sel-btn { flex: 1; padding: 6px 4px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #666; font-size: 0.55em; font-weight: bold; cursor: pointer; text-align: center; }
         .sel-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
-        .sel-btn.active { background: rgba(0, 255, 204, 0.15); border-color: var(--cyan); color: var(--cyan); }
-        .sel-btn.active-cryo { background: rgba(100, 150, 255, 0.2); border-color: #66aaff; color: #66aaff; }
-        
-        #stage {
-            position: relative; display: flex; flex-direction: column;
-            padding: 10px; gap: 8px; background: radial-gradient(circle at center, #111 0%, #000 100%);
-            min-width: 0; overflow: hidden;
-        }
-
-        .graph-box {
-            background: rgba(0,0,0,0.5); border: 1px solid #333;
-            position: relative; padding: 8px; display: flex; flex-direction: column;
-            overflow: hidden; min-width: 0;
-        }
-        .graph-box.scanner { height: 120px; min-height: 120px; flex-shrink: 0; }
+        .sel-btn.active { background: rgba(0,255,204,0.15); border-color: var(--cyan); color: var(--cyan); }
+        #stage { position: relative; display: flex; flex-direction: column; padding: 10px; gap: 8px; background: radial-gradient(circle at center, #111 0%, #000 100%); }
+        .graph-box { background: rgba(0,0,0,0.5); border: 1px solid #333; position: relative; padding: 8px; display: flex; flex-direction: column; }
+        .graph-box.scanner { height: 120px; }
         .graph-box.lattice { flex: 1; min-height: 200px; }
-        .graph-header { position: absolute; top: 6px; left: 8px; font-size: 0.6em; color: var(--cyan); font-weight: bold; z-index: 10;}
-        .lock-indicator { position: absolute; top: 6px; right: 8px; font-size: 0.6em; color: #555; font-weight: bold; z-index: 10;}
-        
-        button#btn-action {
-            width: 100%; padding: 12px; background: rgba(0, 255, 204, 0.1);
-            border: 1px solid var(--cyan); color: var(--cyan); font-family: var(--font-main);
-            font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
-            text-transform: uppercase; margin-top: 4px; font-size: 0.75em;
-        }
-        button#btn-action:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,255,204,0.4); }
-        button#btn-action:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
+        .graph-header { position: absolute; top: 6px; left: 8px; font-size: 0.6em; color: var(--cyan); font-weight: bold; z-index: 10; }
+        .lock-indicator { position: absolute; top: 6px; right: 8px; font-size: 0.6em; color: #555; font-weight: bold; z-index: 10; }
+        button#btn-action { width: 100%; padding: 12px; background: rgba(0,255,204,0.1); border: 1px solid var(--cyan); color: var(--cyan); font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; margin-top: 4px; font-size: 0.75em; }
+        button#btn-action:hover { background: var(--cyan); color: #000; }
+        button#btn-action:disabled { border-color: #333; color: #555; background: transparent; cursor: not-allowed; }
         button#btn-action.fabricate { border-color: var(--gold); color: var(--gold); background: rgba(255,170,0,0.1); }
-        button#btn-action.fabricate:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(255,170,0,0.4); }
+        button#btn-action.fabricate:hover { background: var(--gold); color: #000; }
         button#btn-action.reset { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
-        button#btn-action.reset:hover { background: var(--red); color: #000; }
-
-        #console {
-            height: 60px; min-height: 60px; max-height: 60px;
-            background: #000; border: 1px solid #333;
-            font-family: var(--font-mono); font-size: 0.6em; color: #888;
-            padding: 6px; overflow-y: auto; white-space: pre-wrap; line-height: 1.3;
-            flex-shrink: 0;
-        }
+        #console { height: 60px; background: #000; border: 1px solid #333; font-family: monospace; font-size: 0.6em; color: #888; padding: 6px; overflow-y: auto; white-space: pre-wrap; }
         .log-cyan { color: var(--cyan); }
         .log-red { color: var(--red); }
         .log-gold { color: var(--gold); }
-
-        #scan-line {
-            position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan);
-            box-shadow: 0 0 10px var(--cyan); opacity: 0; pointer-events: none; z-index: 5;
-        }
-
+        #scan-line { position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); opacity: 0; pointer-events: none; z-index: 5; }
         canvas { width: 100%; height: 100%; display: block; }
-        
-        /* Monitor Panel */
-        #monitor-panel {
-            display: flex; height: 90px; min-height: 90px; flex-shrink: 0;
-            background: rgba(0,0,0,0.9); border-top: 1px solid #333;
-        }
-        .monitor-box {
-            flex: 1; border-right: 1px solid #333; padding: 6px; position: relative;
-            display: flex; flex-direction: column; min-width: 0; overflow: hidden;
-        }
+        #monitor-panel { display: flex; height: 90px; background: rgba(0,0,0,0.9); border-top: 1px solid #333; }
+        .monitor-box { flex: 1; border-right: 1px solid #333; padding: 6px; position: relative; display: flex; flex-direction: column; }
         .monitor-box:last-child { border-right: none; }
-        .monitor-label { font-size: 0.5em; color: #666; font-weight: bold; margin-bottom: 2px; white-space: nowrap; }
-        .monitor-value { position: absolute; top: 4px; right: 6px; font-size: 0.5em; font-family: var(--font-mono); font-weight: bold; }
-        .monitor-canvas { flex: 1; min-height: 0; }
+        .monitor-label { font-size: 0.5em; color: #666; font-weight: bold; margin-bottom: 2px; }
+        .monitor-value { position: absolute; top: 4px; right: 6px; font-size: 0.5em; font-family: monospace; font-weight: bold; }
+        .monitor-canvas { flex: 1; }
     </style>
 </head>
 <body>
-
 <header>
-    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v32.0 | 40 SYSTEMS</span></div>
-    <div id="industry-indicator" style="color:var(--gold); font-size:0.85em; font-family:var(--font-mono);"></div>
+    <div>GRAVES VALIDATION SUITE <span style="color:#666">// v33.0 | 40 SYSTEMS</span></div>
+    <div id="industry-indicator" style="color:var(--gold); font-size:0.85em; font-family:monospace;"></div>
     <div class="clock-ref">DEUTERIUM REF: <span class="clock-live">327.384 MHz</span></div>
 </header>
-
 <div id="workspace">
-    
     <div class="panel">
         <h2>1. Select System</h2>
         <div id="inv-list"></div>
-        
         <h2>2. Industry</h2>
         <div class="selector-row" id="industry-selector">
             <div class="sel-btn active" data-ind="ALL" onclick="setIndustry('ALL')">ALL</div>
@@ -165,33 +73,19 @@
             <div class="sel-btn" data-ind="INDUSTRIAL" onclick="setIndustry('INDUSTRIAL')">IND</div>
             <div class="sel-btn" data-ind="HYDRO" onclick="setIndustry('HYDRO')">HYDRO</div>
         </div>
-        
         <h2>3. Environment</h2>
         <div class="selector-row" id="temp-selector">
             <div class="sel-btn active" data-temp="ROOM" onclick="setTemp('ROOM')">ROOM (300K)</div>
             <div class="sel-btn" data-temp="CRYO" onclick="setTemp('CRYO')">CRYO (4K)</div>
         </div>
-        
         <button id="btn-action" disabled>SELECT A SYSTEM</button>
-        
         <h2>4. Composition</h2>
-        <div class="input-group">
-            <label>PRIMARY ELEMENTS</label>
-            <input type="text" id="comp-elements" readonly>
-        </div>
-        <div class="input-group">
-            <label>LATTICE SYMMETRY</label>
-            <input type="text" id="lattice-type" readonly>
-        </div>
-        <div class="input-group" style="background:#111; border:1px solid #333; padding:4px; visibility:hidden; height:0; margin:0; padding:0; overflow:hidden;">
-            <label style="color:#666; font-size:0.5em;">WAAM (g/mol)</label>
-            <div id="mass-readout" style="color:#fff; font-family:var(--font-mono); font-size:0.75em;">--</div>
-        </div>
-        
+        <div class="input-group"><label>PRIMARY ELEMENTS</label><input type="text" id="comp-elements" readonly></div>
+        <div class="input-group"><label>LATTICE SYMMETRY</label><input type="text" id="lattice-type" readonly></div>
+        <div class="input-group"><label>WAAM (g/mol)</label><div id="mass-readout" style="color:#fff; font-family:monospace; font-size:0.75em; padding:4px; background:#111; border:1px solid #333;">--</div></div>
         <h2>5. Patent Claim</h2>
         <textarea id="comp-detail" rows="8" readonly style="font-size:0.55em; color:#aaa; flex:1; min-height:100px;"></textarea>
     </div>
-
     <div id="stage">
         <div class="graph-box scanner">
             <div class="graph-header">HYPERFINE LOCK SCANNER (5.030° – 5.045°)</div>
@@ -199,2041 +93,535 @@
             <canvas id="scanCanvas"></canvas>
             <div id="scan-line"></div>
         </div>
-
         <div class="graph-box lattice" id="atom-container">
             <div class="graph-header">3D ATOMIC LATTICE (LIVE RENDER)</div>
             <div id="lattice-state" style="position:absolute; top:6px; right:8px; font-size:0.55em; color:#ff3333; font-weight:bold;">DISORDERED</div>
             <canvas id="atomCanvas"></canvas>
         </div>
-        
         <div id="monitor-panel">
-            <div class="monitor-box">
-                <div class="monitor-label">PHONON ENTROPY</div>
-                <div class="monitor-value" id="entropy-val" style="color:#ff3333;">8.274 eV</div>
-                <canvas id="entropyCanvas" class="monitor-canvas"></canvas>
-            </div>
-            <div class="monitor-box">
-                <div class="monitor-label">PHASE SPACE</div>
-                <div class="monitor-value" id="phase-val" style="color:#ff3333;">Δφ: 0.847</div>
-                <canvas id="phaseCanvas" class="monitor-canvas"></canvas>
-            </div>
-            <div class="monitor-box">
-                <div class="monitor-label">VACUUM FLUX</div>
-                <div class="monitor-value" id="vacuum-val" style="color:#ff3333;">2.14e-7 T</div>
-                <canvas id="vacuumCanvas" class="monitor-canvas"></canvas>
-            </div>
-            <div class="monitor-box">
-                <div class="monitor-label" style="color:var(--cyan);">DEUTERIUM CLOCK</div>
-                <canvas id="clockCanvas" class="monitor-canvas"></canvas>
-                <div style="position:absolute; bottom:3px; left:6px; right:6px; display:flex; justify-content:space-between; font-size:0.4em; font-family:var(--font-mono); color:#666;">
-                    <span>JIT: <span id="clk-jit" style="color:#ff3333;">HIGH</span></span>
-                    <span>COH: <span id="clk-coh">0.12</span></span>
-                </div>
-            </div>
+            <div class="monitor-box"><div class="monitor-label">PHONON ENTROPY</div><div class="monitor-value" id="entropy-val" style="color:#ff3333;">8.274 eV</div><canvas id="entropyCanvas" class="monitor-canvas"></canvas></div>
+            <div class="monitor-box"><div class="monitor-label">PHASE SPACE</div><div class="monitor-value" id="phase-val" style="color:#ff3333;">Δφ: 0.847</div><canvas id="phaseCanvas" class="monitor-canvas"></canvas></div>
+            <div class="monitor-box"><div class="monitor-label">VACUUM FLUX</div><div class="monitor-value" id="vacuum-val" style="color:#ff3333;">2.14e-7 T</div><canvas id="vacuumCanvas" class="monitor-canvas"></canvas></div>
+            <div class="monitor-box"><div class="monitor-label" style="color:var(--cyan);">DEUTERIUM CLOCK</div><canvas id="clockCanvas" class="monitor-canvas"></canvas><div style="position:absolute; bottom:3px; left:6px; right:6px; display:flex; justify-content:space-between; font-size:0.4em; font-family:monospace; color:#666;"><span>JIT: <span id="clk-jit" style="color:#ff3333;">HIGH</span></span><span>COH: <span id="clk-coh">0.12</span></span></div></div>
         </div>
     </div>
-
     <div class="panel panel-right">
         <h2>6. Lock Results</h2>
-        <div class="input-group">
-            <label>UNIQUE LOCK ANGLE (°)</label>
-            <input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1em;">
-        </div>
-        <div class="input-group">
-            <label>RESIDUAL SLACK</label>
-            <input type="text" id="res-slack" readonly style="color:var(--cyan);">
-        </div>
-        
+        <div class="input-group"><label>UNIQUE LOCK ANGLE (°)</label><input type="text" id="res-angle" readonly style="color:var(--gold); font-weight:bold; font-size:1em;"></div>
+        <div class="input-group"><label>RESIDUAL SLACK</label><input type="text" id="res-slack" readonly style="color:var(--cyan);"></div>
         <h2>7. 2D Atomic Structure</h2>
         <div id="atomic-2d" style="background:#000; border:1px solid #333; padding:6px; flex:1; min-height:150px; display:flex; flex-direction:column;">
-            <div id="element-list" style="color:#888; font-family:var(--font-mono); font-size:0.5em; margin-bottom:4px;">Select a system...</div>
+            <div id="element-list" style="color:#888; font-family:monospace; font-size:0.5em; margin-bottom:4px;">Select a system...</div>
             <canvas id="atomic2dCanvas" style="flex:1; width:100%; min-height:120px;"></canvas>
         </div>
-        
         <h2>8. Validation Log</h2>
         <div id="console"></div>
     </div>
-
 </div>
-
 <script>
-    // === ATOMIC MASS TABLE ===
-    const ATOMIC_MASS = {
-        "H": 1.008, "He": 4.002, "Li": 6.94, "Be": 9.012, "B": 10.81, "C": 12.01, "N": 14.007, "O": 15.999, "F": 18.998,
-        "Na": 22.99, "Mg": 24.305, "Al": 26.98, "Si": 28.085, "P": 30.97, "S": 32.06, "Cl": 35.45, "K": 39.098, "Ca": 40.078,
-        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, 
-        "Cu": 63.546, "Zn": 65.38, "Ga": 69.723, "Ge": 72.63, "As": 74.92, "Se": 78.96, "Br": 79.904, "Kr": 83.798, 
-        "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224, "Nb": 92.906, "Mo": 95.95, "Ru": 101.07, 
-        "Rh": 102.91, "Pd": 106.42, "Ag": 107.868, "Cd": 112.41, "In": 114.818, "Sn": 118.71, "Sb": 121.76, "Te": 127.6, 
-        "I": 126.9, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Hf": 178.49, "Ta": 180.948, 
-        "W": 183.84, "Re": 186.207, "Os": 190.23, "Ir": 192.217, "Pt": 195.084, "Au": 196.967, "Pb": 207.2, "U": 238.029,
-        "Gd": 157.25
-    };
+const PHI = 1.61803398874989484820458683436563811772030917980576;
+const K_RAT = 686 / 461;
+const ALPHA_OBS = 137.035999206;
+const ALPHA_NATIVE = 166.083676989207;
+const G_PHI = Math.pow(PHI, -12) * (Math.pow(PHI, 5) / 3) / K_RAT;
+const THETA_BASE = Math.asin(Math.sqrt(G_PHI)) * (180 / Math.PI);
+const WAAM_REF = 73.717;
+const WAAM_SLOPE = 0.0000589;
+const HYDRO_BASE = 5.039684;
+const HYDRO_SLOPE = 0.0002655;
 
-    // === 60 SYSTEM DATABASE ===
-    const DB = {
-        "001": { name: "Ni Superalloy Turbine Blade", elements: ["Ni","Co","Cr","Al","Ti","Mo","W","Nb"], detail: "Ni-based single crystal superalloy for high-pressure turbine blades.", lattice: "Icosahedral", type: "metal", industry: "AERO" },
-        "002": { name: "Co Superalloy Turbine Disk", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Co-based superalloy for turbine disks.", lattice: "Decagonal", type: "metal", industry: "AERO" },
-        "003": { name: "Ti-Al Compressor Blade", elements: ["Ti","Al","Nb","Cr"], detail: "Gamma titanium aluminide for compressor stages.", lattice: "Pentagonal", type: "metal", industry: "AERO" },
-        "004": { name: "W-Re Hypersonic Leading Edge", elements: ["W","Re","Hf","C"], detail: "Tungsten-rhenium for Mach 10+ thermal protection.", lattice: "Icosahedral", type: "metal", industry: "AERO" },
-        "005": { name: "Ti-6Al-4V Structural", elements: ["Ti","Al","V"], detail: "Aerospace-grade titanium alloy.", lattice: "Decagonal", type: "metal", industry: "AERO" },
-        "006": { name: "Inconel 718 Fastener", elements: ["Ni","Cr","Fe","Nb","Mo","Ti","Al"], detail: "Precipitation-hardened superalloy for critical fasteners.", lattice: "Pentagonal", type: "metal", industry: "AERO" },
-        "007": { name: "Co-Cr Naval Armor", elements: ["Co","Cr","Ni","W","Al","Ta"], detail: "Naval armor plate with superior impact resistance.", lattice: "Decagonal", type: "metal", industry: "DEFENSE" },
-        "008": { name: "Fe-Si-B Stealth Coating", elements: ["Fe","Si","B"], detail: "RF absorption coating for stealth applications.", lattice: "Pentagonal", type: "metal", industry: "DEFENSE" },
-        "009": { name: "B4C Ceramic Armor", elements: ["B","C"], detail: "Boron carbide armor insert.", lattice: "Icosahedral", type: "ceramic", industry: "DEFENSE" },
-        "010": { name: "SiC Armor Plate", elements: ["Si","C"], detail: "Silicon carbide armor.", lattice: "Decagonal", type: "ceramic", industry: "DEFENSE" },
-        "011": { name: "Al2O3 Ballistic Ceramic", elements: ["Al","O"], detail: "Alumina armor ceramic.", lattice: "Pentagonal", type: "ceramic", industry: "DEFENSE" },
-        "012": { name: "TiB2 Ultra-Hard Armor", elements: ["Ti","B"], detail: "Titanium diboride armor.", lattice: "Icosahedral", type: "ceramic", industry: "DEFENSE" },
-        "013": { name: "WC-Co Hard Facing", elements: ["W","C","Co"], detail: "Tungsten carbide coating for wear surfaces.", lattice: "Icosahedral", type: "metal", industry: "INDUSTRIAL" },
-        "014": { name: "TiN Tool Coating", elements: ["Ti","N"], detail: "Titanium nitride PVD coating.", lattice: "Decagonal", type: "metal", industry: "INDUSTRIAL" },
-        "015": { name: "TiAlN High-Temp Coating", elements: ["Ti","Al","N"], detail: "Titanium aluminum nitride.", lattice: "Pentagonal", type: "metal", industry: "INDUSTRIAL" },
-        "016": { name: "CrN Corrosion Barrier", elements: ["Cr","N"], detail: "Chromium nitride coating.", lattice: "Icosahedral", type: "metal", industry: "INDUSTRIAL" },
-        "017": { name: "DLC Diamond-Like Carbon", elements: ["C","H"], detail: "Hydrogenated DLC coating.", lattice: "Decagonal", type: "metal", industry: "INDUSTRIAL" },
-        "018": { name: "Al2O3 CVD Coating", elements: ["Al","O"], detail: "Alumina CVD for cutting tools.", lattice: "Pentagonal", type: "ceramic", industry: "INDUSTRIAL" },
-        "019": { name: "SiC-SiC CMC", elements: ["Si","C"], detail: "Ceramic matrix composite for hot sections.", lattice: "Decagonal", type: "ceramic", industry: "INDUSTRIAL" },
-        "020": { name: "YSZ Thermal Barrier", elements: ["Zr","Y","O"], detail: "Yttria-stabilized zirconia TBC.", lattice: "Pentagonal", type: "ceramic", industry: "INDUSTRIAL" },
-        "101": { name: "C1 Methane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "CH4 natural gas. 100% combustion.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "CH4", mw: 16.04 },
-        "102": { name: "C2 Ethane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C2H6 ethane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C2H6", mw: 30.07 },
-        "103": { name: "C3 Propane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C3H8 LPG propane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C3H8", mw: 44.10 },
-        "104": { name: "C4 Butane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C4H10 butane/isobutane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C4H10", mw: 58.12 },
-        "105": { name: "C5 Pentane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C5H12 pentane isomers.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C5H12", mw: 72.15 },
-        "106": { name: "C6 Hexane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C6H14 hexane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C6H14", mw: 86.18 },
-        "107": { name: "C7 Heptane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C7H16 heptane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C7H16", mw: 100.20 },
-        "108": { name: "C8 Octane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C8H18 isooctane. 35:1 compression.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C8H18", mw: 114.23 },
-        "109": { name: "C9 Nonane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C9H20 nonane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C9H20", mw: 128.26 },
-        "110": { name: "C10 Decane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C10H22 decane. Jet fuel.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C10H22", mw: 142.29 },
-        "111": { name: "C11 Undecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C11H24 undecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C11H24", mw: 156.31 },
-        "112": { name: "C12 Dodecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C12H26 dodecane. Diesel/jet.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C12H26", mw: 170.33 },
-        "113": { name: "C13 Tridecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C13H28 tridecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C13H28", mw: 184.36 },
-        "114": { name: "C14 Tetradecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C14H30 tetradecane. Jet-A.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C14H30", mw: 198.39 },
-        "115": { name: "C15 Pentadecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C15H32 pentadecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C15H32", mw: 212.42 },
-        "116": { name: "C16 Cetane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C16H34 cetane. Diesel ref.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C16H34", mw: 226.44 },
-        "117": { name: "C17 Heptadecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C17H36 heptadecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C17H36", mw: 240.47 },
-        "118": { name: "C18 Octadecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C18H38 octadecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C18H38", mw: 254.49 },
-        "119": { name: "C19 Nonadecane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C19H40 nonadecane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C19H40", mw: 268.52 },
-        "120": { name: "C20 Icosane Catalyst", elements: ["Ir","Os","Rh","B"], detail: "C20H42 icosane.", lattice: "Icosahedral", type: "catalyst", industry: "HYDRO", molecular: "C20H42", mw: 282.55 }
-    };
+const ATOMIC_MASS = {“H”:1.00794,“He”:4.0026,“Li”:6.941,“Be”:9.0122,“B”:10.811,“C”:12.0107,“N”:14.0067,“O”:15.9994,“F”:18.9984,“Na”:22.9897,“Mg”:24.305,“Al”:26.9815,“Si”:28.0855,“P”:30.9738,“S”:32.065,“Cl”:35.453,“K”:39.0983,“Ca”:40.078,“Ti”:47.867,“V”:50.9415,“Cr”:51.9961,“Mn”:54.938,“Fe”:55.845,“Co”:58.9332,“Ni”:58.6934,“Cu”:63.546,“Zn”:65.38,“Zr”:91.224,“Nb”:92.9064,“Mo”:95.96,“Rh”:102.9055,“Ta”:180.9479,“W”:183.84,“Re”:186.207,“Os”:190.23,“Ir”:192.217,“Hf”:178.49,“Y”:88.9059,“Gd”:157.25};
 
-    // Element colors
-    const ELEMENT_COLORS = {
-        "H": "#FFFFFF", "He": "#D9FFFF", "Li": "#CC80FF", "Be": "#C2FF00", "B": "#FFB5B5",
-        "C": "#909090", "N": "#3050F8", "O": "#FF0D0D", "F": "#90E050", "Na": "#AB5CF2",
-        "Mg": "#8AFF00", "Al": "#BFA6A6", "Si": "#F0C8A0", "P": "#FF8000", "S": "#FFFF30",
-        "Cl": "#1FF01F", "K": "#8F40D4", "Ca": "#3DFF00", "Ti": "#BFC2C7", "V": "#A6A6AB",
-        "Cr": "#8A99C7", "Mn": "#9C7AC7", "Fe": "#E06633", "Co": "#F090A0", "Ni": "#50D050",
-        "Cu": "#C88033", "Zn": "#7D80B0", "Zr": "#94E0E0", "Nb": "#73C2C9", "Mo": "#54B5B5",
-        "Rh": "#0A7D8C", "Ta": "#4DA6FF", "W": "#2194D6", "Re": "#267DAB",
-        "Os": "#266696", "Ir": "#175487", "Hf": "#4DC2FF", "Y": "#94FFFF"
-    };
+const DB = {
+“001”: {name:“Ni Superalloy Turbine Blade”,elements:[“Ni”,“Co”,“Cr”,“Al”,“Ti”,“Mo”,“W”,“Nb”],detail:“Ni-based single crystal superalloy for high-pressure turbine blades.”,lattice:“Icosahedral”,type:“metal”,industry:“AERO”},
+“002”: {name:“Co Superalloy Turbine Disk”,elements:[“Co”,“Cr”,“Ni”,“W”,“Al”,“Ta”],detail:“Co-based superalloy for turbine disks.”,lattice:“Decagonal”,type:“metal”,industry:“AERO”},
+“003”: {name:“Ti-Al Compressor Blade”,elements:[“Ti”,“Al”,“Nb”,“Cr”],detail:“Gamma titanium aluminide for compressor stages.”,lattice:“Pentagonal”,type:“metal”,industry:“AERO”},
+“004”: {name:“W-Re Hypersonic Leading Edge”,elements:[“W”,“Re”,“Hf”,“C”],detail:“Tungsten-rhenium for Mach 10+ thermal protection.”,lattice:“Icosahedral”,type:“metal”,industry:“AERO”},
+“005”: {name:“Ti-6Al-4V Structural”,elements:[“Ti”,“Al”,“V”],detail:“Aerospace-grade titanium alloy.”,lattice:“Decagonal”,type:“metal”,industry:“AERO”},
+“006”: {name:“YSZ Thermal Barrier Coating”,elements:[“Zr”,“Y”,“Gd”,“O”],detail:“Yttria-stabilized zirconia with Gd doping.”,lattice:“Pentagonal”,type:“ceramic”,industry:“AERO”},
+“007”: {name:“Co-Cr Naval Armor”,elements:[“Co”,“Cr”,“Ni”,“W”,“Al”,“Ta”],detail:“Naval armor plate with superior impact resistance.”,lattice:“Decagonal”,type:“metal”,industry:“DEFENSE”},
+“008”: {name:“Fe-Si-B Stealth Coating”,elements:[“Fe”,“Si”,“B”],detail:“RF absorption coating for stealth.”,lattice:“Pentagonal”,type:“metal”,industry:“DEFENSE”},
+“009”: {name:“B4C Ceramic Armor”,elements:[“B”,“C”],detail:“Boron carbide armor insert.”,lattice:“Icosahedral”,type:“ceramic”,industry:“DEFENSE”},
+“010”: {name:“SiC Armor Plate”,elements:[“Si”,“C”],detail:“Silicon carbide armor.”,lattice:“Decagonal”,type:“ceramic”,industry:“DEFENSE”},
+“011”: {name:“Al2O3 Ballistic Ceramic”,elements:[“Al”,“O”],detail:“Alumina armor ceramic.”,lattice:“Pentagonal”,type:“ceramic”,industry:“DEFENSE”},
+“012”: {name:“TiB2 Ultra-Hard Armor”,elements:[“Ti”,“B”],detail:“Titanium diboride armor.”,lattice:“Icosahedral”,type:“ceramic”,industry:“DEFENSE”},
+“013”: {name:“WC-Co Hard Facing”,elements:[“W”,“C”,“Co”],detail:“Tungsten carbide coating.”,lattice:“Icosahedral”,type:“metal”,industry:“INDUSTRIAL”},
+“014”: {name:“TiN Tool Coating”,elements:[“Ti”,“N”],detail:“Titanium nitride PVD coating.”,lattice:“Decagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“015”: {name:“TiAlN High-Temp Coating”,elements:[“Ti”,“Al”,“N”],detail:“Titanium aluminum nitride.”,lattice:“Pentagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“016”: {name:“CrN Corrosion Barrier”,elements:[“Cr”,“N”],detail:“Chromium nitride coating.”,lattice:“Icosahedral”,type:“ceramic”,industry:“INDUSTRIAL”},
+“017”: {name:“DLC Diamond-Like Carbon”,elements:[“C”,“H”],detail:“Hydrogenated DLC coating.”,lattice:“Decagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“018”: {name:“Al2O3 CVD Coating”,elements:[“Al”,“O”],detail:“Alumina CVD for cutting tools.”,lattice:“Pentagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“019”: {name:“SiC-SiC CMC”,elements:[“Si”,“C”],detail:“Ceramic matrix composite.”,lattice:“Decagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“020”: {name:“YSZ Thermal Barrier”,elements:[“Zr”,“Y”,“O”],detail:“Yttria-stabilized zirconia TBC.”,lattice:“Pentagonal”,type:“ceramic”,industry:“INDUSTRIAL”},
+“101”: {name:“C1 Methane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“CH4 natural gas. 100% combustion.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“CH₄”,carbonNum:1},
+“102”: {name:“C2 Ethane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C2H6 ethane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₂H₆”,carbonNum:2},
+“103”: {name:“C3 Propane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C3H8 LPG propane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₃H₈”,carbonNum:3},
+“104”: {name:“C4 Butane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C4H10 butane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₄H₁₀”,carbonNum:4},
+“105”: {name:“C5 Pentane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C5H12 pentane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₅H₁₂”,carbonNum:5},
+“106”: {name:“C6 Hexane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C6H14 hexane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₆H₁₄”,carbonNum:6},
+“107”: {name:“C7 Heptane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C7H16 heptane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₇H₁₆”,carbonNum:7},
+“108”: {name:“C8 Octane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C8H18 isooctane. 35:1 compression.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₈H₁₈”,carbonNum:8},
+“109”: {name:“C9 Nonane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C9H20 nonane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₉H₂₀”,carbonNum:9},
+“110”: {name:“C10 Decane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C10H22 decane. Jet fuel.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₀H₂₂”,carbonNum:10},
+“111”: {name:“C11 Undecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C11H24 undecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₁H₂₄”,carbonNum:11},
+“112”: {name:“C12 Dodecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C12H26 dodecane. RP-1.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₂H₂₆”,carbonNum:12},
+“113”: {name:“C13 Tridecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C13H28 tridecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₃H₂₈”,carbonNum:13},
+“114”: {name:“C14 Tetradecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C14H30 tetradecane. Jet-A.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₄H₃₀”,carbonNum:14},
+“115”: {name:“C15 Pentadecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C15H32 pentadecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₅H₃₂”,carbonNum:15},
+“116”: {name:“C16 Cetane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C16H34 cetane. Diesel ref.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₆H₃₄”,carbonNum:16},
+“117”: {name:“C17 Heptadecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C17H36 heptadecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₇H₃₆”,carbonNum:17},
+“118”: {name:“C18 Octadecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C18H38 octadecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₈H₃₈”,carbonNum:18},
+“119”: {name:“C19 Nonadecane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C19H40 nonadecane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₁₉H₄₀”,carbonNum:19},
+“120”: {name:“C20 Icosane Catalyst”,elements:[“Ir”,“Os”,“Rh”,“B”],detail:“C20H42 icosane.”,lattice:“Icosahedral”,type:“catalyst”,industry:“HYDRO”,molecular:“C₂₀H₄₂”,carbonNum:20}
+};
 
-    // === STATE ===
-    let currentRank = null;
-    let isScanning = false;
-    let isLocked = false;
-    let uniqueAngle = 0;
-    let atoms = [];
-    let chaosMode = true;
-    let transitionProgress = 0;
-    let orderedPositions = [];
-    let currentIndustry = 'ALL';
-    let currentTemp = 'ROOM'; // ROOM or CRYO
-    let tempK = 300;
-    
-    const invList = document.getElementById('inv-list');
-    const scanCtx = document.getElementById('scanCanvas').getContext('2d');
-    const atomCtx = document.getElementById('atomCanvas').getContext('2d');
-    const consoleDiv = document.getElementById('console');
+const ELEMENT_COLORS = {“H”:”#FFFFFF”,“B”:”#FFB5B5”,“C”:”#909090”,“N”:”#3050F8”,“O”:”#FF0D0D”,“Al”:”#BFA6A6”,“Si”:”#F0C8A0”,“Ti”:”#BFC2C7”,“V”:”#A6A6AB”,“Cr”:”#8A99C7”,“Fe”:”#E06633”,“Co”:”#F090A0”,“Ni”:”#50D050”,“Zr”:”#94E0E0”,“Nb”:”#73C2C9”,“Mo”:”#54B5B5”,“Rh”:”#0A7D8C”,“Ta”:”#4DA6FF”,“W”:”#2194D6”,“Re”:”#267DAB”,“Os”:”#266696”,“Ir”:”#175487”,“Hf”:”#4DC2FF”,“Y”:”#94FFFF”,“Gd”:”#45FFC7”};
 
-    // Monitor contexts
-    let entropyCtx, phaseCtx, vacuumCtx, clockCtx;
-    let waveData = { entropy: [], vacuum: [] };
+function calculateWAAM(elements) {
+let total = 0, count = 0;
+elements.forEach(el => { if(ATOMIC_MASS[el]) { total += ATOMIC_MASS[el]; count++; } });
+return count > 0 ? total / count : 0;
+}
 
-    // === INDUSTRY SELECTOR ===
-    function setIndustry(ind) {
-        currentIndustry = ind;
-        document.querySelectorAll('#industry-selector .sel-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`#industry-selector .sel-btn[data-ind="${ind}"]`).classList.add('active');
-        document.getElementById('industry-indicator').innerText = ind === 'ALL' ? '' : ind;
-        populateList();
-    }
+function calculateLockAngle(id, data) {
+let angle, waam, formula;
+if (data.type === “catalyst” && data.carbonNum !== undefined) {
+const n = data.carbonNum;
+angle = HYDRO_BASE - (HYDRO_SLOPE * n);
+waam = 12.0107 * n + 1.00794 * (2 * n + 2);
+formula = `θ = ${HYDRO_BASE} - ${HYDRO_SLOPE} × ${n}`;
+} else {
+waam = calculateWAAM(data.elements);
+angle = THETA_BASE + (waam - WAAM_REF) * WAAM_SLOPE;
+formula = `θ = ${THETA_BASE.toFixed(6)}° + (${waam.toFixed(3)} - ${WAAM_REF}) × ${WAAM_SLOPE}`;
+}
+angle = Math.max(5.030, Math.min(5.045, angle));
+return { angle, waam, formula };
+}
 
-    function setTemp(temp) {
-        currentTemp = temp;
-        tempK = temp === 'CRYO' ? 4 : 300;
-        document.querySelectorAll('#temp-selector .sel-btn').forEach(b => {
-            b.classList.remove('active', 'active-cryo');
-        });
-        const btn = document.querySelector(`#temp-selector .sel-btn[data-temp="${temp}"]`);
-        btn.classList.add(temp === 'CRYO' ? 'active-cryo' : 'active');
-        
-        // Log temperature change
-        if (currentRank) {
-            log(`ENV: ${temp} (${tempK}K)`, temp === 'CRYO' ? 'cyan' : 'gold');
-        }
-    }
+let currentRank = null, isLocked = false, uniqueAngle = 0, atoms = [], chaosMode = true, transitionProgress = 0, orderedPositions = [], currentIndustry = ‘ALL’, currentTemp = ‘ROOM’, tempK = 300;
+const invList = document.getElementById(‘inv-list’);
+const scanCtx = document.getElementById(‘scanCanvas’).getContext(‘2d’);
+const atomCtx = document.getElementById(‘atomCanvas’).getContext(‘2d’);
+const consoleDiv = document.getElementById(‘console’);
+let entropyCtx, phaseCtx, vacuumCtx, clockCtx;
+let waveData = { entropy: [], vacuum: [] };
 
-    function populateList() {
-        invList.innerHTML = '';
-        let keys = Object.keys(DB).sort((a,b) => parseInt(a) - parseInt(b));
-        
-        keys.forEach(key => {
-            const data = DB[key];
-            if (currentIndustry !== 'ALL' && data.industry !== currentIndustry) return;
-            
-            let el = document.createElement('div');
-            el.className = 'inv-item';
-            el.dataset.id = key;
-            el.innerHTML = `<span class="inv-id">${key}</span><span>${data.name}</span>`;
-            el.onclick = () => selectRank(key);
-            invList.appendChild(el);
-        });
-    }
+function setIndustry(ind) {
+currentIndustry = ind;
+document.querySelectorAll(’#industry-selector .sel-btn’).forEach(b => b.classList.remove(‘active’));
+document.querySelector(`#industry-selector .sel-btn[data-ind="${ind}"]`).classList.add(‘active’);
+document.getElementById(‘industry-indicator’).innerText = ind === ‘ALL’ ? ‘’ : ind;
+populateList();
+}
 
-    // === PHYSICS ENGINE ===
-    function calculateLock(id, data) {
-        const BASE_ANGLE = 5.0372;
-        let shift = 0;
-        let avgMass = 0;
+function setTemp(temp) {
+currentTemp = temp; tempK = temp === ‘CRYO’ ? 4 : 300;
+document.querySelectorAll(’#temp-selector .sel-btn’).forEach(b => b.classList.remove(‘active’));
+document.querySelector(`#temp-selector .sel-btn[data-temp="${temp}"]`).classList.add(‘active’);
+if (currentRank) log(`ENV: ${temp} (${tempK}K)`, temp === ‘CRYO’ ? ‘cyan’ : ‘gold’);
+}
 
-        if (data.type === "catalyst") {
-            const mw = data.mw || 100;
-            shift = (100 - mw) * 0.00002;
-            avgMass = mw;
-        } else {
-            let total = 0, count = 0;
-            data.elements.forEach(el => {
-                let m = ATOMIC_MASS[el];
-                if(m) { total += m; count++; }
-            });
-            avgMass = count > 0 ? total/count : 50.0;
-            shift = (avgMass - 77.1) * 0.00005;
-        }
-        
-        const latticeCorr = { Icosahedral: 0, Decagonal: 0.0008, Pentagonal: -0.0005 };
-        shift += latticeCorr[data.lattice] || 0;
-        const idNum = parseInt(id);
-        shift += (idNum - 65) * 0.000015;
+function populateList() {
+invList.innerHTML = ‘’;
+Object.keys(DB).sort((a,b) => parseInt(a) - parseInt(b)).forEach(key => {
+const data = DB[key];
+if (currentIndustry !== ‘ALL’ && data.industry !== currentIndustry) return;
+let el = document.createElement(‘div’);
+el.className = ‘inv-item’; el.dataset.id = key;
+el.innerHTML = `<span class="inv-id">${key}</span><span>${data.name}</span>`;
+el.onclick = () => selectRank(key);
+invList.appendChild(el);
+});
+}
 
-        const angle = Math.max(5.030, Math.min(5.045, BASE_ANGLE + shift));
-        return { angle, mass: avgMass };
-    }
+function setButtonState(state) {
+const btn = document.getElementById(‘btn-action’);
+btn.className = ‘’;
+if(state===“disabled”) { btn.disabled = true; btn.innerText = “SELECT A SYSTEM”; btn.onclick = null; }
+else if(state===“scan”) { btn.disabled = false; btn.innerText = “▶ INITIATE TORSION SCAN”; btn.onclick = runScan; }
+else if(state===“scanning”) { btn.disabled = true; btn.innerText = “⟳ SCANNING…”; }
+else if(state===“fabricate”) { btn.disabled = false; btn.className = ‘fabricate’; btn.innerText = “⚙ EXPORT FABRICATION”; btn.onclick = exportFabrication; }
+else if(state===“reset”) { btn.disabled = false; btn.className = ‘reset’; btn.innerText = “↺ RESET”; btn.onclick = doReset; }
+}
 
-    // === BUTTON STATE ===
-    function setButtonState(state) {
-        const btn = document.getElementById('btn-action');
-        btn.className = '';
-        
-        switch(state) {
-            case "disabled":
-                btn.disabled = true;
-                btn.innerText = "SELECT A SYSTEM";
-                btn.onclick = null;
-                break;
-            case "scan":
-                btn.disabled = false;
-                btn.innerText = "▶ INITIATE TORSION SCAN";
-                btn.onclick = runScan;
-                break;
-            case "scanning":
-                btn.disabled = true;
-                btn.innerText = "⟳ SCANNING...";
-                break;
-            case "fabricate":
-                btn.disabled = false;
-                btn.className = 'fabricate';
-                btn.innerText = "⚙ EXPORT FABRICATION";
-                btn.onclick = exportFabrication;
-                break;
-            case "reset":
-                btn.disabled = false;
-                btn.className = 'reset';
-                btn.innerText = "↺ RESET";
-                btn.onclick = doReset;
-                break;
-        }
-    }
+function doReset() {
+document.getElementById(‘res-angle’).value = “–”;
+document.getElementById(‘res-slack’).value = “–”;
+document.getElementById(‘lock-indicator’).innerText = “READY”;
+document.getElementById(‘lock-indicator’).style.color = “#555”;
+document.getElementById(‘lattice-state’).innerText = “DISORDERED”;
+document.getElementById(‘lattice-state’).style.color = “#ff3333”;
+isLocked = false; chaosMode = true; transitionProgress = 0;
+waveData = { entropy: [], vacuum: [] };
+atoms.forEach(a => { a.vx = (Math.random()-0.5)*8; a.vy = (Math.random()-0.5)*8; a.vz = (Math.random()-0.5)*8; });
+drawGrid(scanCtx);
+setButtonState(“scan”);
+log(“SYSTEM RESET.”, “cyan”);
+}
 
-    function doReset() {
-        document.getElementById('res-angle').value = "--";
-        document.getElementById('res-slack').value = "--";
-        document.getElementById('lock-indicator').innerText = "READY";
-        document.getElementById('lock-indicator').style.color = "#555";
-        document.getElementById('lattice-state').innerText = "DISORDERED";
-        document.getElementById('lattice-state').style.color = "#ff3333";
-        isLocked = false;
-        chaosMode = true;
-        transitionProgress = 0;
-        
-        // Reset waveform data
-        waveData.entropy = [];
-        waveData.vacuum = [];
-        
-        atoms.forEach(a => {
-            a.vx = (Math.random() - 0.5) * 8;
-            a.vy = (Math.random() - 0.5) * 8;
-            a.vz = (Math.random() - 0.5) * 8;
-        });
-        drawGrid(scanCtx);
-        setButtonState("scan");
-        log("SYSTEM RESET.", "cyan");
-    }
+function init() {
+populateList(); resize();
+window.addEventListener(‘resize’, resize);
+initAtoms();
+requestAnimationFrame(drawLoop);
+setTimeout(() => { initMonitors(); drawMonitors(); }, 100);
+log(“GRAVES VALIDATION SUITE v33.0”, “cyan”);
+log(“40-SYSTEM DATABASE LOADED.”, “gold”);
+log(`θ_base = ${THETA_BASE.toFixed(6)}°`, “gold”);
+}
 
-    // === INIT ===
-    function init() {
-        populateList();
-        resize();
-        window.addEventListener('resize', resize);
-        initAtoms();
-        requestAnimationFrame(drawLoop);
-        setTimeout(() => {
-            initMonitors();
-            drawMonitors();
-        }, 100);
-        log("SYSTEM INITIALIZED.", "cyan");
-        log("40-SYSTEM DATABASE LOADED.", "gold");
-    }
+function resize() {
+scanCtx.canvas.width = scanCtx.canvas.offsetWidth;
+scanCtx.canvas.height = scanCtx.canvas.offsetHeight;
+atomCtx.canvas.width = atomCtx.canvas.offsetWidth;
+atomCtx.canvas.height = atomCtx.canvas.offsetHeight;
+drawGrid(scanCtx);
+const canvas2d = document.getElementById(‘atomic2dCanvas’);
+if(canvas2d && canvas2d.offsetWidth > 0) {
+canvas2d.width = canvas2d.offsetWidth;
+canvas2d.height = canvas2d.offsetHeight || 120;
+if (currentRank) draw2DStructure(DB[currentRank]);
+}
+initMonitors();
+}
 
-    function resize() {
-        scanCtx.canvas.width = scanCtx.canvas.offsetWidth;
-        scanCtx.canvas.height = scanCtx.canvas.offsetHeight;
-        atomCtx.canvas.width = atomCtx.canvas.offsetWidth;
-        atomCtx.canvas.height = atomCtx.canvas.offsetHeight;
-        drawGrid(scanCtx);
-        
-        const canvas2d = document.getElementById('atomic2dCanvas');
-        if(canvas2d && canvas2d.offsetWidth > 0) {
-            canvas2d.width = canvas2d.offsetWidth;
-            canvas2d.height = canvas2d.offsetHeight || 120;
-            if (currentRank) draw2DStructure(DB[currentRank]);
-        }
-        
-        initMonitors();
-    }
+function selectRank(id) {
+currentRank = id;
+const data = DB[id];
+document.querySelectorAll(’.inv-item’).forEach(el => el.classList.remove(‘active’));
+document.querySelector(`.inv-item[data-id="${id}"]`)?.classList.add(‘active’);
+document.getElementById(‘comp-elements’).value = data.elements.join(’ - ’);
+document.getElementById(‘lattice-type’).value = data.lattice;
+const calc = calculateLockAngle(id, data);
+uniqueAngle = calc.angle;
+document.getElementById(‘mass-readout’).innerText = calc.waam.toFixed(4) + “ g/mol”;
+let patent = `═══ GRAVES-LAW PATENT CLAIM ═══\nSystem ${id}: ${data.name}\n\nCLAIM 1: ${data.lattice} quasicrystalline composition:\n${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el} [${(ATOMIC_MASS[el]||0).toFixed(4)} g/mol]`).join('\n')}\n\nCLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°\n  • Phason Strain: 0.000\n  • Vacuum Debt: ZERO\n\nCLAIM 3: ${data.detail}\n${data.molecular ? `\nMolecule: ${data.molecular}` : ''}\n\nDERIVATION:\n${calc.formula}`;
+document.getElementById(‘comp-detail’).value = patent;
+let atomicHtml = `<span style="color:var(--cyan);">${data.lattice.toUpperCase()}</span>`;
+if(data.molecular) atomicHtml += ` <span style="color:var(--gold);">→ ${data.molecular}</span>`;
+document.getElementById(‘element-list’).innerHTML = atomicHtml;
+setTimeout(() => draw2DStructure(data), 50);
+updateAtomTargets(data.lattice);
+chaosMode = true; transitionProgress = 0; isLocked = false;
+document.getElementById(‘lattice-state’).innerText = “DISORDERED”;
+document.getElementById(‘lattice-state’).style.color = “#ff3333”;
+atoms.forEach(a => { a.vx = (Math.random()-0.5)*8; a.vy = (Math.random()-0.5)*8; a.vz = (Math.random()-0.5)*8; });
+setButtonState(“scan”);
+document.getElementById(‘res-angle’).value = “–”;
+document.getElementById(‘res-slack’).value = “–”;
+document.getElementById(‘lock-indicator’).innerText = “READY”;
+document.getElementById(‘lock-indicator’).style.color = “#555”;
+drawGrid(scanCtx);
+log(`SELECTED: ${data.name}`);
+log(`WAAM: ${calc.waam.toFixed(4)} g/mol`, “cyan”);
+log(`TARGET LOCK: ${uniqueAngle.toFixed(6)}°`, “gold”);
+}
 
-    function selectRank(id) {
-        currentRank = id;
-        const data = DB[id];
-        
-        document.querySelectorAll('.inv-item').forEach(el => el.classList.remove('active'));
-        const item = document.querySelector(`.inv-item[data-id="${id}"]`);
-        if (item) item.classList.add('active');
-        
-        document.getElementById('comp-elements').value = data.elements.join(' - ');
-        document.getElementById('lattice-type').value = data.lattice;
-        
-        const calc = calculateLock(id, data);
-        uniqueAngle = calc.angle;
-        document.getElementById('mass-readout').innerText = calc.mass.toFixed(2) + " g/mol";
-        
-        const phi = (1 + Math.sqrt(5)) / 2;
-        let patent = `═══ GRAVES-LAW PATENT CLAIM ═══
-System ${id}: ${data.name}
+function draw2DStructure(data) {
+const canvas = document.getElementById(‘atomic2dCanvas’);
+if (!canvas) return;
+const ctx = canvas.getContext(‘2d’);
+const w = canvas.width || canvas.offsetWidth, h = canvas.height || canvas.offsetHeight;
+if (w === 0 || h === 0) return;
+canvas.width = w; canvas.height = h;
+const cx = w / 2, cy = h / 2;
+ctx.fillStyle = ‘#000’; ctx.fillRect(0, 0, w, h);
+const elements = data.elements, n = elements.length;
+if(n === 0) return;
+let positions = [];
+const radius = Math.min(w, h) * 0.35;
+if(n === 1) { positions.push({x: cx, y: cy, el: elements[0]}); }
+else {
+positions.push({x: cx, y: cy, el: elements[0]});
+for(let i = 1; i < n; i++) {
+let angle = ((i-1) / (n-1)) * Math.PI * 2 - Math.PI/2;
+positions.push({ x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, el: elements[i] });
+}
+}
+ctx.strokeStyle = ‘rgba(0, 255, 204, 0.3)’; ctx.lineWidth = 1;
+for(let i = 0; i < positions.length; i++) {
+for(let j = i + 1; j < positions.length; j++) {
+let dist = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
+if(dist < radius * 1.5) { ctx.beginPath(); ctx.moveTo(positions[i].x, positions[i].y); ctx.lineTo(positions[j].x, positions[j].y); ctx.stroke(); }
+}
+}
+const atomRadius = Math.min(16, radius / 3);
+positions.forEach(pos => {
+let color = ELEMENT_COLORS[pos.el] || ‘#888888’;
+ctx.fillStyle = color; ctx.beginPath(); ctx.arc(pos.x, pos.y, atomRadius * 0.7, 0, Math.PI * 2); ctx.fill();
+ctx.fillStyle = ‘#000’; ctx.font = `bold ${Math.max(9, atomRadius * 0.6)}px monospace`; ctx.textAlign = ‘center’; ctx.textBaseline = ‘middle’; ctx.fillText(pos.el, pos.x, pos.y);
+});
+ctx.fillStyle = ‘#333’; ctx.font = ‘8px monospace’; ctx.textAlign = ‘left’; ctx.fillText(data.lattice, 3, h - 3);
+}
 
-CLAIM 1: ${data.lattice} quasicrystalline composition:
-${data.elements.map((el, i) => `  (${String.fromCharCode(97+i)}) ${el}`).join('\n')}
+function log(msg, type=’’) {
+const d = document.createElement(‘div’);
+d.innerHTML = `> ${msg}`;
+if(type===‘cyan’) d.className = ‘log-cyan’;
+if(type===‘red’) d.className = ‘log-red’;
+if(type===‘gold’) d.className = ‘log-gold’;
+consoleDiv.appendChild(d);
+consoleDiv.scrollTop = consoleDiv.scrollHeight;
+}
 
-CLAIM 2: Lock Angle: ${uniqueAngle.toFixed(6)}°
-  • Phason Strain: 0.000
-  • Vacuum Debt: ZERO
+function drawGrid(ctx) {
+const w = ctx.canvas.width, h = ctx.canvas.height;
+ctx.fillStyle = ‘#000’; ctx.fillRect(0, 0, w, h);
+ctx.strokeStyle = ‘#1a1a1a’; ctx.lineWidth = 1;
+for(let i = 0; i <= 10; i++) { let x = (i / 10) * w; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+ctx.fillStyle = ‘#444’; ctx.font = ‘9px monospace’;
+ctx.textAlign = ‘left’; ctx.fillText(‘5.030°’, 4, h - 4);
+ctx.textAlign = ‘right’; ctx.fillText(‘5.045°’, w - 4, h - 4);
+}
 
-CLAIM 3: ${data.detail}
-${data.molecular ? `\nMolecule: ${data.molecular}` : ''}`;
+function runScan() {
+if(!currentRank) return;
+setButtonState(“scanning”);
+document.getElementById(‘lock-indicator’).innerText = “SCANNING…”;
+document.getElementById(‘lock-indicator’).style.color = “var(–cyan)”;
+document.getElementById(‘scan-line’).style.opacity = 1;
+log(`SCANNING...`, “cyan”);
+let w = scanCtx.canvas.width, h = scanCtx.canvas.height, x = 0;
+const MIN_SCAN = 5.030, RANGE = 0.015;
+const lockX = ((uniqueAngle - MIN_SCAN) / RANGE) * w;
+scanCtx.fillStyle = ‘#000’; scanCtx.fillRect(0,0,w,h); drawGrid(scanCtx);
+let hasLockedDuringScan = false;
+let timer = setInterval(() => {
+x += 2;
+document.getElementById(‘scan-line’).style.left = x + “px”;
+let pct = x / w, angle = MIN_SCAN + (pct * RANGE), dist = Math.abs(angle - uniqueAngle);
+let energy = Math.min(1, Math.pow(dist * 300, 2)), y = (energy * (h * 0.65)) + (h * 0.15);
+scanCtx.fillStyle = (dist < 0.0004) ? “#ffffff” : “#ff3333”;
+scanCtx.fillRect(x, y, 2, 2);
+if (!hasLockedDuringScan && dist < 0.0004) { hasLockedDuringScan = true; triggerMonitorLock(); drawLockLine(lockX, h); }
+if(x >= w) { clearInterval(timer); finishLock(uniqueAngle); }
+}, 10);
+}
 
-        document.getElementById('comp-detail').value = patent;
-        
-        let atomicHtml = `<span style="color:var(--cyan);">${data.lattice.toUpperCase()}</span>`;
-        if(data.molecular) atomicHtml += ` <span style="color:var(--gold);">→ ${data.molecular}</span>`;
-        document.getElementById('element-list').innerHTML = atomicHtml;
-        
-        // Force 2D redraw
-        setTimeout(() => draw2DStructure(data), 50);
-        
-        updateAtomTargets(data.lattice);
-        
-        chaosMode = true;
-        transitionProgress = 0;
-        isLocked = false;
-        document.getElementById('lattice-state').innerText = "DISORDERED";
-        document.getElementById('lattice-state').style.color = "#ff3333";
-        atoms.forEach(a => {
-            a.vx = (Math.random() - 0.5) * 8;
-            a.vy = (Math.random() - 0.5) * 8;
-            a.vz = (Math.random() - 0.5) * 8;
-        });
-        
-        setButtonState("scan");
-        document.getElementById('res-angle').value = "--";
-        document.getElementById('res-slack').value = "--";
-        document.getElementById('lock-indicator').innerText = "READY";
-        document.getElementById('lock-indicator').style.color = "#555";
-        
-        drawGrid(scanCtx);
-        log(`SELECTED: ${data.name}`);
-        log(`TARGET LOCK: ${uniqueAngle.toFixed(6)}°`, "gold");
-    }
+function triggerMonitorLock() {
+chaosMode = false; waveData = { entropy: [], vacuum: [] };
+document.getElementById(‘entropy-val’).innerText = ‘0.001 eV’; document.getElementById(‘entropy-val’).style.color = ‘#00ff88’;
+document.getElementById(‘phase-val’).innerText = ‘Δφ: 0.000’; document.getElementById(‘phase-val’).style.color = ‘#00ff88’;
+document.getElementById(‘vacuum-val’).innerText = ‘0.00e-7 T’; document.getElementById(‘vacuum-val’).style.color = ‘#00ff88’;
+document.getElementById(‘clk-jit’).innerText = ‘<10fs’; document.getElementById(‘clk-jit’).style.color = ‘#00ffcc’;
+document.getElementById(‘clk-coh’).innerText = ‘1.000’;
+}
 
-    // === 2D STRUCTURE ===
-    function draw2DStructure(data) {
-        const canvas = document.getElementById('atomic2dCanvas');
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width || canvas.offsetWidth;
-        const h = canvas.height || canvas.offsetHeight;
-        
-        if (w === 0 || h === 0) return;
-        
-        canvas.width = w;
-        canvas.height = h;
-        
-        const cx = w / 2;
-        const cy = h / 2;
-        
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, w, h);
-        
-        const elements = data.elements;
-        const n = elements.length;
-        if(n === 0) return;
-        
-        let positions = [];
-        const radius = Math.min(w, h) * 0.35;
-        
-        if(n === 1) {
-            positions.push({x: cx, y: cy, el: elements[0]});
-        } else {
-            positions.push({x: cx, y: cy, el: elements[0]});
-            for(let i = 1; i < n; i++) {
-                let angle = ((i-1) / (n-1)) * Math.PI * 2 - Math.PI/2;
-                positions.push({
-                    x: cx + Math.cos(angle) * radius,
-                    y: cy + Math.sin(angle) * radius,
-                    el: elements[i]
-                });
-            }
-        }
-        
-        // Draw bonds
-        ctx.strokeStyle = 'rgba(0, 255, 204, 0.3)';
-        ctx.lineWidth = 1;
-        for(let i = 0; i < positions.length; i++) {
-            for(let j = i + 1; j < positions.length; j++) {
-                let dist = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
-                if(dist < radius * 1.5) {
-                    ctx.beginPath();
-                    ctx.moveTo(positions[i].x, positions[i].y);
-                    ctx.lineTo(positions[j].x, positions[j].y);
-                    ctx.stroke();
-                }
-            }
-        }
-        
-        // Draw atoms
-        const atomRadius = Math.min(16, radius / 3);
-        positions.forEach(pos => {
-            let color = ELEMENT_COLORS[pos.el] || '#888888';
-            
-            // Glow
-            let gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, atomRadius * 1.5);
-            gradient.addColorStop(0, color);
-            gradient.addColorStop(0.5, color + '88');
-            gradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, atomRadius * 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Solid
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, atomRadius * 0.7, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Label
-            ctx.fillStyle = '#000';
-            ctx.font = `bold ${Math.max(9, atomRadius * 0.6)}px monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(pos.el, pos.x, pos.y);
-        });
-        
-        ctx.fillStyle = '#333';
-        ctx.font = '8px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText(data.lattice, 3, h - 3);
-    }
+function drawLockLine(lockX, h) {
+scanCtx.strokeStyle = ‘#ffaa00’; scanCtx.lineWidth = 1; scanCtx.setLineDash([3, 3]);
+scanCtx.beginPath(); scanCtx.moveTo(lockX, 0); scanCtx.lineTo(lockX, h - 16); scanCtx.stroke(); scanCtx.setLineDash([]);
+scanCtx.fillStyle = ‘#ffaa00’; scanCtx.font = ‘bold 8px monospace’; scanCtx.textAlign = ‘center’; scanCtx.fillText(‘LOCK’, lockX, h - 18);
+}
 
-    function log(msg, type='') {
-        const d = document.createElement('div');
-        d.innerHTML = `> ${msg}`;
-        if(type==='cyan') d.className = 'log-cyan';
-        if(type==='red') d.className = 'log-red';
-        if(type==='gold') d.className = 'log-gold';
-        consoleDiv.appendChild(d);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
+function finishLock(angle) {
+isLocked = true;
+document.getElementById(‘scan-line’).style.opacity = 0;
+document.getElementById(‘lock-indicator’).innerText = “LOCKED”; document.getElementById(‘lock-indicator’).style.color = “var(–gold)”;
+document.getElementById(‘lattice-state’).innerText = “LOCKED”; document.getElementById(‘lattice-state’).style.color = “#00ff88”;
+document.getElementById(‘res-angle’).value = angle.toFixed(6) + “°”;
+document.getElementById(‘res-slack’).value = “0.000 nm (PERFECT)”;
+triggerLockTransition();
+log(`LOCK CONFIRMED: ${angle.toFixed(6)}°`, “gold”);
+log(`ZERO-SLACK STATE ACHIEVED.`, “cyan”);
+setButtonState(“fabricate”);
+}
 
-    // === SCANNER ===
-    function drawGrid(ctx) {
-        const w = ctx.canvas.width, h = ctx.canvas.height;
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 1;
-        for(let i = 0; i <= 10; i++) {
-            let x = (i / 10) * w;
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-        }
-        
-        ctx.fillStyle = '#444';
-        ctx.font = '9px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText('5.030°', 4, h - 4);
-        ctx.textAlign = 'right';
-        ctx.fillText('5.045°', w - 4, h - 4);
-    }
+function initAtoms() {
+atoms = []; orderedPositions = [];
+for(let i = 0; i < 45; i++) {
+atoms.push({ x: (Math.random()-0.5)*250, y: (Math.random()-0.5)*250, z: (Math.random()-0.5)*250, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, vz: (Math.random()-0.5)*8 });
+orderedPositions.push({ x: 0, y: 0, z: 0 });
+}
+updateAtomTargets(“Icosahedral”);
+}
 
-    function runScan() {
-        if(!currentRank) return;
-        isScanning = true;
-        setButtonState("scanning");
-        document.getElementById('lock-indicator').innerText = "SCANNING...";
-        document.getElementById('lock-indicator').style.color = "var(--cyan)";
-        document.getElementById('scan-line').style.opacity = 1;
-        
-        log(`SCANNING...`, "cyan");
-        
-        let w = scanCtx.canvas.width;
-        let h = scanCtx.canvas.height;
-        let x = 0;
-        
-        const MIN_SCAN = 5.030;
-        const RANGE = 0.015;
-        const lockX = ((uniqueAngle - MIN_SCAN) / RANGE) * w;
-        
-        scanCtx.fillStyle = '#000'; 
-        scanCtx.fillRect(0,0,w,h);
-        drawGrid(scanCtx);
-        
-        let hasLockedDuringScan = false;
+function updateAtomTargets(latticeType) {
+const scale = 100;
+if (latticeType === “Decagonal”) {
+for(let k = 0; k < 5; k++) { let y = (k - 2) * 35; for(let j = 0; j < 9; j++) { let idx = k * 9 + j; if(idx < 45) { let th = (j / 9) * Math.PI * 2; orderedPositions[idx] = { x: Math.cos(th) * scale, y: y, z: Math.sin(th) * scale }; } } }
+} else if (latticeType === “Pentagonal”) {
+for(let i = 0; i < 45; i++) { let r = (i / 45) * scale * 1.2, th = i * (Math.PI * 2 / 5) + (i * 0.15), y = ((i % 5) - 2) * 25; orderedPositions[i] = { x: Math.cos(th) * r, y: y, z: Math.sin(th) * r }; }
+} else {
+const icoVerts = [];
+for(let i = 0; i < 12; i++) { let lat = Math.asin(-1 + 2 * i / 11), lon = Math.sqrt(12 * Math.PI) * lat; icoVerts.push({ x: Math.cos(lat) * Math.cos(lon) * scale, y: Math.sin(lat) * scale, z: Math.cos(lat) * Math.sin(lon) * scale }); }
+for(let i = 0; i < 45; i++) { let base = icoVerts[i % 12], offset = Math.floor(i / 12) * 0.25; orderedPositions[i] = { x: base.x * (1 + offset), y: base.y * (1 + offset), z: base.z * (1 + offset) }; }
+}
+}
 
-        let timer = setInterval(() => {
-            x += 2;
-            document.getElementById('scan-line').style.left = x + "px";
-            
-            let pct = x / w;
-            let angle = MIN_SCAN + (pct * RANGE);
-            let dist = Math.abs(angle - uniqueAngle);
-            
-            let energy = Math.min(1, Math.pow(dist * 300, 2));
-            let y = (energy * (h * 0.65)) + (h * 0.15);
-            
-            // White at tip only, red elsewhere
-            scanCtx.fillStyle = (dist < 0.0004) ? "#ffffff" : "#ff3333";
-            scanCtx.fillRect(x, y, 2, 2);
-            
-            // SYNC MONITORS AT EXACT LOCK MOMENT
-            if (!hasLockedDuringScan && dist < 0.0004) {
-                hasLockedDuringScan = true;
-                // Trigger monitor lock state immediately
-                triggerMonitorLock();
-                drawLockLine(lockX, h);
-            }
-            
-            if(x >= w) {
-                clearInterval(timer);
-                finishLock(uniqueAngle);
-            }
-        }, 10);
-    }
-    
-    // Separate function to trigger monitor lock visuals
-    function triggerMonitorLock() {
-        // Set visual state for monitors immediately
-        chaosMode = false;
-        
-        // Clear waveform data for crisp transition
-        waveData.entropy = [];
-        waveData.vacuum = [];
-        
-        // Update all monitor displays immediately
-        document.getElementById('entropy-val').innerText = '0.001 eV';
-        document.getElementById('entropy-val').style.color = '#00ff88';
-        
-        document.getElementById('phase-val').innerText = 'Δφ: 0.000';
-        document.getElementById('phase-val').style.color = '#00ff88';
-        
-        document.getElementById('vacuum-val').innerText = '0.00e-7 T';
-        document.getElementById('vacuum-val').style.color = '#00ff88';
-        
-        document.getElementById('clk-jit').innerText = '<10fs';
-        document.getElementById('clk-jit').style.color = '#00ffcc';
-        document.getElementById('clk-coh').innerText = '1.000';
-    }
-    
-    function drawLockLine(lockX, h) {
-        scanCtx.strokeStyle = '#ffaa00';
-        scanCtx.lineWidth = 1;
-        scanCtx.setLineDash([3, 3]);
-        scanCtx.beginPath();
-        scanCtx.moveTo(lockX, 0);
-        scanCtx.lineTo(lockX, h - 16);
-        scanCtx.stroke();
-        scanCtx.setLineDash([]);
-        
-        scanCtx.fillStyle = '#ffaa00';
-        scanCtx.font = 'bold 8px monospace';
-        scanCtx.textAlign = 'center';
-        scanCtx.fillText('LOCK', lockX, h - 18);
-    }
+function triggerLockTransition() {
+transitionProgress = 0;
+const duration = 1500, startTime = Date.now();
+const startPositions = atoms.map(a => ({ x: a.x, y: a.y, z: a.z }));
+function animate() {
+const elapsed = Date.now() - startTime;
+transitionProgress = Math.min(1, elapsed / duration);
+const ease = 1 - Math.pow(1 - transitionProgress, 3);
+atoms.forEach((a, i) => { const s = startPositions[i], t = orderedPositions[i]; a.x = s.x + (t.x - s.x) * ease; a.y = s.y + (t.y - s.y) * ease; a.z = s.z + (t.z - s.z) * ease; a.vx = 0; a.vy = 0; a.vz = 0; });
+if (transitionProgress < 1) requestAnimationFrame(animate); else chaosMode = false;
+}
+animate();
+}
 
-    function finishLock(angle) {
-        isScanning = false;
-        isLocked = true;
-        
-        document.getElementById('scan-line').style.opacity = 0;
-        document.getElementById('lock-indicator').innerText = "LOCKED";
-        document.getElementById('lock-indicator').style.color = "var(--gold)";
-        document.getElementById('lattice-state').innerText = "LOCKED";
-        document.getElementById('lattice-state').style.color = "#00ff88";
-        
-        document.getElementById('res-angle').value = angle.toFixed(6) + "°";
-        document.getElementById('res-slack').value = "0.000 nm (PERFECT)";
-        
-        // Trigger 3D lattice transition (monitors already locked during scan)
-        triggerLockTransition();
-        
-        log(`LOCK CONFIRMED: ${angle.toFixed(6)}°`, "gold");
-        log(`ZERO-SLACK STATE ACHIEVED.`, "cyan");
-        
-        setButtonState("fabricate");
-    }
+function drawLoop() {
+const w = atomCtx.canvas.width, h = atomCtx.canvas.height;
+atomCtx.fillStyle = ‘#000’; atomCtx.fillRect(0, 0, w, h);
+const t = Date.now() * 0.0003, cosT = Math.cos(t), sinT = Math.sin(t);
+if (chaosMode && transitionProgress === 0) {
+atomCtx.strokeStyle = ‘rgba(255, 51, 51, 0.12)’; atomCtx.lineWidth = 1;
+for (let r = 0; r < Math.max(w, h); r += 35) { atomCtx.beginPath(); for (let a = 0; a <= Math.PI * 2; a += 0.1) { const z = Math.sin(r * 0.03 - t * 15) * 12; const x = w/2 + (r + z * 0.5) * Math.cos(a); const y = h/2 + (r + z * 0.5) * Math.sin(a) * 0.6; if (a === 0) atomCtx.moveTo(x, y); else atomCtx.lineTo(x, y); } atomCtx.closePath(); atomCtx.stroke(); }
+}
+const currentElems = currentRank ? DB[currentRank].elements : [‘C’];
+if (chaosMode && transitionProgress === 0) {
+atoms.forEach(a => { a.vx += (Math.random()-0.5)*5; a.vy += (Math.random()-0.5)*5; a.vz += (Math.random()-0.5)*5; a.x += a.vx; a.y += a.vy; a.z += a.vz; a.vx *= 0.9; a.vy *= 0.9; a.vz *= 0.9; const b = 120; if (Math.abs(a.x) > b) { a.x = Math.sign(a.x) * b; a.vx *= -1; } if (Math.abs(a.y) > b) { a.y = Math.sign(a.y) * b; a.vy *= -1; } if (Math.abs(a.z) > b) { a.z = Math.sign(a.z) * b; a.vz *= -1; } });
+}
+const projected = atoms.map((a, i) => {
+const x1 = a.x * cosT - a.z * sinT, z1 = a.x * sinT + a.z * cosT;
+const y1 = a.y * Math.cos(t * 0.7) - z1 * Math.sin(t * 0.7), z2 = a.y * Math.sin(t * 0.7) + z1 * Math.cos(t * 0.7);
+const scale = 280 / (280 + z2);
+const elem = currentElems[i % currentElems.length];
+return { x: w/2 + x1 * scale, y: h/2 + y1 * scale, z: z2, r: (chaosMode && transitionProgress === 0) ? 4 : 8 * scale, elem: elem, color: ELEMENT_COLORS[elem] || ‘#888888’ };
+}).sort((a, b) => a.z - b.z);
+if (!chaosMode || transitionProgress > 0) {
+atomCtx.lineWidth = 1.5;
+for (let i = 0; i < projected.length; i++) { for (let j = i + 1; j < projected.length; j++) { const dist = Math.hypot(projected[i].x - projected[j].x, projected[i].y - projected[j].y); if (dist < 55) { atomCtx.strokeStyle = `rgba(0, 255, 204, ${(chaosMode ? transitionProgress : 1) * 0.6})`; atomCtx.beginPath(); atomCtx.moveTo(projected[i].x, projected[i].y); atomCtx.lineTo(projected[j].x, projected[j].y); atomCtx.stroke(); } } }
+}
+projected.forEach(p => {
+if (chaosMode && transitionProgress === 0) { atomCtx.fillStyle = ‘#ff3333’; atomCtx.beginPath(); atomCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2); atomCtx.fill(); }
+else { atomCtx.fillStyle = p.color; atomCtx.beginPath(); atomCtx.arc(p.x, p.y, p.r * 0.75, 0, Math.PI * 2); atomCtx.fill(); atomCtx.fillStyle = ‘#000’; atomCtx.font = `bold ${Math.max(7, p.r * 0.6)}px monospace`; atomCtx.textAlign = ‘center’; atomCtx.textBaseline = ‘middle’; atomCtx.fillText(p.elem, p.x, p.y); }
+});
+requestAnimationFrame(drawLoop);
+}
 
-    // === 3D ATOMS ===
-    function initAtoms() {
-        atoms = [];
-        orderedPositions = [];
-        
-        for(let i = 0; i < 45; i++) {
-            atoms.push({
-                x: (Math.random() - 0.5) * 250,
-                y: (Math.random() - 0.5) * 250,
-                z: (Math.random() - 0.5) * 250,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                vz: (Math.random() - 0.5) * 8
-            });
-            orderedPositions.push({ x: 0, y: 0, z: 0 });
-        }
-        
-        updateAtomTargets("Icosahedral");
-    }
+function initMonitors() {
+const ec = document.getElementById(‘entropyCanvas’), pc = document.getElementById(‘phaseCanvas’), vc = document.getElementById(‘vacuumCanvas’), cc = document.getElementById(‘clockCanvas’);
+if (ec && ec.offsetWidth > 0) { ec.width = ec.offsetWidth; ec.height = ec.offsetHeight || 50; entropyCtx = ec.getContext(‘2d’); }
+if (pc && pc.offsetWidth > 0) { pc.width = pc.offsetWidth; pc.height = pc.offsetHeight || 50; phaseCtx = pc.getContext(‘2d’); }
+if (vc && vc.offsetWidth > 0) { vc.width = vc.offsetWidth; vc.height = vc.offsetHeight || 50; vacuumCtx = vc.getContext(‘2d’); }
+if (cc && cc.offsetWidth > 0) { cc.width = cc.offsetWidth; cc.height = cc.offsetHeight || 50; clockCtx = cc.getContext(‘2d’); }
+}
 
-    function updateAtomTargets(latticeType) {
-        const phi = 1.618;
-        const scale = 100;
-        
-        if (latticeType === "Decagonal") {
-            for(let k = 0; k < 5; k++) {
-                let y = (k - 2) * 35;
-                for(let j = 0; j < 9; j++) { 
-                    let idx = k * 9 + j;
-                    if(idx < 45) {
-                        let th = (j / 9) * Math.PI * 2;
-                        orderedPositions[idx] = { x: Math.cos(th) * scale, y: y, z: Math.sin(th) * scale };
-                    }
-                }
-            }
-        } else if (latticeType === "Pentagonal") {
-            for(let i = 0; i < 45; i++) {
-                let r = (i / 45) * scale * 1.2;
-                let th = i * (Math.PI * 2 / 5) + (i * 0.15);
-                let y = ((i % 5) - 2) * 25;
-                orderedPositions[i] = { x: Math.cos(th) * r, y: y, z: Math.sin(th) * r };
-            }
-        } else {
-            const icoVerts = [];
-            for(let i = 0; i < 12; i++) {
-                let lat = Math.asin(-1 + 2 * i / 11);
-                let lon = Math.sqrt(12 * Math.PI) * lat;
-                icoVerts.push({
-                    x: Math.cos(lat) * Math.cos(lon) * scale,
-                    y: Math.sin(lat) * scale,
-                    z: Math.cos(lat) * Math.sin(lon) * scale
-                });
-            }
-            for(let i = 0; i < 45; i++) {
-                let base = icoVerts[i % 12];
-                let offset = Math.floor(i / 12) * 0.25;
-                orderedPositions[i] = {
-                    x: base.x * (1 + offset) + (Math.random() - 0.5) * 15,
-                    y: base.y * (1 + offset) + (Math.random() - 0.5) * 15,
-                    z: base.z * (1 + offset) + (Math.random() - 0.5) * 15
-                };
-            }
-        }
-    }
+function drawMonitors() {
+const t = Date.now() * 0.01;
+if (entropyCtx) {
+const w = entropyCtx.canvas.width, h = entropyCtx.canvas.height;
+entropyCtx.fillStyle = ‘#000’; entropyCtx.fillRect(0, 0, w, h);
+if (chaosMode) { waveData.entropy.push(h/2 + (Math.random()-0.5)*24 + Math.sin(t * 0.5) * 12); if (waveData.entropy.length > w) waveData.entropy.shift(); entropyCtx.strokeStyle = ‘#ff3333’; entropyCtx.lineWidth = 1; entropyCtx.beginPath(); waveData.entropy.forEach((y, i) => i === 0 ? entropyCtx.moveTo(i, y) : entropyCtx.lineTo(i, y)); entropyCtx.stroke(); document.getElementById(‘entropy-val’).innerText = (8.2 + Math.random() * 0.5).toFixed(3) + ’ eV’; document.getElementById(‘entropy-val’).style.color = ‘#ff3333’; }
+else { entropyCtx.strokeStyle = ‘#00ff88’; entropyCtx.lineWidth = 1; entropyCtx.beginPath(); for (let x = 0; x < w; x++) { entropyCtx.lineTo(x, h/2 + (Math.random()-0.5)*3); } entropyCtx.stroke(); }
+}
+if (phaseCtx) {
+const w = phaseCtx.canvas.width, h = phaseCtx.canvas.height;
+if (chaosMode) { phaseCtx.fillStyle = ‘rgba(0,0,0,0.15)’; phaseCtx.fillRect(0, 0, w, h); const x = w/2 + Math.sin(t * 0.3) * (w/3) + (Math.random()-0.5)*15; const y = h/2 + Math.cos(t * 0.4) * (h/3) + (Math.random()-0.5)*15; phaseCtx.fillStyle = ‘#ff3333’; phaseCtx.beginPath(); phaseCtx.arc(x, y, 2, 0, Math.PI * 2); phaseCtx.fill(); document.getElementById(‘phase-val’).innerText = ’Δφ: ’ + (0.8 + Math.random() * 0.2).toFixed(3); document.getElementById(‘phase-val’).style.color = ‘#ff3333’; }
+else { phaseCtx.fillStyle = ‘#000’; phaseCtx.fillRect(0, 0, w, h); phaseCtx.fillStyle = ‘#00ff88’; phaseCtx.beginPath(); phaseCtx.arc(w/2, h/2, 3, 0, Math.PI * 2); phaseCtx.fill(); }
+}
+if (vacuumCtx) {
+const w = vacuumCtx.canvas.width, h = vacuumCtx.canvas.height;
+vacuumCtx.fillStyle = ‘#000’; vacuumCtx.fillRect(0, 0, w, h);
+if (chaosMode) { waveData.vacuum.push(h/2 + Math.sin(t * 0.7) * 15 + (Math.random()-0.5)*15); if (waveData.vacuum.length > w) waveData.vacuum.shift(); vacuumCtx.strokeStyle = ‘#ff6633’; vacuumCtx.lineWidth = 1; vacuumCtx.beginPath(); waveData.vacuum.forEach((y, i) => i === 0 ? vacuumCtx.moveTo(i, y) : vacuumCtx.lineTo(i, y)); vacuumCtx.stroke(); document.getElementById(‘vacuum-val’).innerText = (2.1 + Math.random() * 0.3).toFixed(2) + ‘e-7 T’; document.getElementById(‘vacuum-val’).style.color = ‘#ff3333’; }
+else { vacuumCtx.strokeStyle = ‘#00ffcc’; vacuumCtx.lineWidth = 1; vacuumCtx.beginPath(); for (let x = 0; x < w; x++) { vacuumCtx.lineTo(x, h/2 + (Math.random()-0.5)*2); } vacuumCtx.stroke(); }
+}
+if (clockCtx) {
+const w = clockCtx.canvas.width, h = clockCtx.canvas.height;
+clockCtx.clearRect(0, 0, w, h);
+const cx = w / 2, cy = h - 5, radius = Math.min(w, h) - 10;
+let grad = clockCtx.createLinearGradient(0, 0, w, 0);
+if (chaosMode) { grad.addColorStop(0, ‘#ff3333’); grad.addColorStop(0.5, ‘#ffaa00’); grad.addColorStop(1, ‘#ff3333’); }
+else { grad.addColorStop(0.4, ‘#003322’); grad.addColorStop(0.5, ‘#00ffcc’); grad.addColorStop(0.6, ‘#003322’); }
+clockCtx.fillStyle = grad; clockCtx.beginPath(); clockCtx.arc(cx, cy, radius * 0.8, Math.PI, 0); clockCtx.fill();
+let angle = -Math.PI / 2; if (chaosMode) angle += (Math.random()-0.5) * 1.5;
+clockCtx.strokeStyle = ‘#fff’; clockCtx.lineWidth = 2; clockCtx.beginPath(); clockCtx.moveTo(cx, cy); clockCtx.lineTo(cx + radius * 0.7 * Math.cos(angle), cy + radius * 0.7 * Math.sin(angle)); clockCtx.stroke();
+clockCtx.fillStyle = ‘#fff’; clockCtx.beginPath(); clockCtx.arc(cx, cy, 3, 0, Math.PI * 2); clockCtx.fill();
+if (chaosMode) { document.getElementById(‘clk-jit’).innerText = ‘HIGH’; document.getElementById(‘clk-jit’).style.color = ‘#ff3333’; document.getElementById(‘clk-coh’).innerText = (Math.random() * 0.3).toFixed(2); }
+}
+requestAnimationFrame(drawMonitors);
+}
 
-    function triggerLockTransition() {
-        transitionProgress = 0;
-        const duration = 1500;
-        const startTime = Date.now();
-        const startPositions = atoms.map(a => ({ x: a.x, y: a.y, z: a.z }));
-        
-        function animate() {
-            const elapsed = Date.now() - startTime;
-            transitionProgress = Math.min(1, elapsed / duration);
-            const ease = 1 - Math.pow(1 - transitionProgress, 3);
-            
-            atoms.forEach((a, i) => {
-                const start = startPositions[i];
-                const target = orderedPositions[i];
-                a.x = start.x + (target.x - start.x) * ease;
-                a.y = start.y + (target.y - start.y) * ease;
-                a.z = start.z + (target.z - start.z) * ease;
-                a.vx = 0; a.vy = 0; a.vz = 0;
-            });
-            
-            if (transitionProgress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                chaosMode = false;
-            }
-        }
-        animate();
-    }
-
-    function drawLoop() {
-        const w = atomCtx.canvas.width, h = atomCtx.canvas.height;
-        atomCtx.fillStyle = '#000';
-        atomCtx.fillRect(0, 0, w, h);
-
-        const t = Date.now() * 0.0003;
-        const cosT = Math.cos(t), sinT = Math.sin(t);
-        
-        // Background waves in chaos mode
-        if (chaosMode && transitionProgress === 0) {
-            atomCtx.strokeStyle = 'rgba(255, 51, 51, 0.12)';
-            atomCtx.lineWidth = 1;
-            const hatAmp = 12 + Math.sin(t * 3) * 4;
-            for (let r = 0; r < Math.max(w, h); r += 35) {
-                atomCtx.beginPath();
-                for (let a = 0; a <= Math.PI * 2; a += 0.1) {
-                    const z = Math.sin(r * 0.03 - t * 15) * hatAmp;
-                    const x = w/2 + (r + z * 0.5) * Math.cos(a);
-                    const y = h/2 + (r + z * 0.5) * Math.sin(a) * 0.6;
-                    if (a === 0) atomCtx.moveTo(x, y);
-                    else atomCtx.lineTo(x, y);
-                }
-                atomCtx.closePath();
-                atomCtx.stroke();
-            }
-        }
-        
-        const currentElems = currentRank ? DB[currentRank].elements : ['C'];
-
-        // Chaos motion
-        if (chaosMode && transitionProgress === 0) {
-            atoms.forEach(a => {
-                a.vx += (Math.random() - 0.5) * 5;
-                a.vy += (Math.random() - 0.5) * 5;
-                a.vz += (Math.random() - 0.5) * 5;
-                a.x += a.vx; a.y += a.vy; a.z += a.vz;
-                a.vx *= 0.9; a.vy *= 0.9; a.vz *= 0.9;
-                const boundary = 120;
-                if (Math.abs(a.x) > boundary) { a.x = Math.sign(a.x) * boundary; a.vx *= -1; }
-                if (Math.abs(a.y) > boundary) { a.y = Math.sign(a.y) * boundary; a.vy *= -1; }
-                if (Math.abs(a.z) > boundary) { a.z = Math.sign(a.z) * boundary; a.vz *= -1; }
-            });
-        }
-
-        const projected = atoms.map((a, i) => {
-            let jx = 0, jy = 0;
-            if (chaosMode && transitionProgress === 0) {
-                jx = (Math.random() - 0.5) * 2;
-                jy = (Math.random() - 0.5) * 2;
-            }
-            
-            const x1 = a.x * cosT - a.z * sinT;
-            const z1 = a.x * sinT + a.z * cosT;
-            const y1 = a.y * Math.cos(t * 0.7) - z1 * Math.sin(t * 0.7);
-            const z2 = a.y * Math.sin(t * 0.7) + z1 * Math.cos(t * 0.7);
-            const scale = 280 / (280 + z2);
-            
-            const elem = currentElems[i % currentElems.length];
-            const elemColor = ELEMENT_COLORS[elem] || '#888888';
-            
-            return { 
-                x: w/2 + x1 * scale + jx, 
-                y: h/2 + y1 * scale + jy, 
-                z: z2, 
-                r: (chaosMode && transitionProgress === 0) ? 4 : 8 * scale,
-                elem: elem,
-                color: elemColor,
-                scale: scale
-            };
-        }).sort((a, b) => a.z - b.z);
-
-        // Draw bonds - BRIGHTER
-        if (!chaosMode || transitionProgress > 0) {
-            atomCtx.lineWidth = 1.5;
-            for (let i = 0; i < projected.length; i++) {
-                for (let j = i + 1; j < projected.length; j++) {
-                    const dist = Math.hypot(projected[i].x - projected[j].x, projected[i].y - projected[j].y);
-                    if (dist < 55) {
-                        const alpha = (chaosMode ? transitionProgress : 1) * 0.6;
-                        atomCtx.strokeStyle = `rgba(0, 255, 204, ${alpha})`;
-                        atomCtx.beginPath();
-                        atomCtx.moveTo(projected[i].x, projected[i].y);
-                        atomCtx.lineTo(projected[j].x, projected[j].y);
-                        atomCtx.stroke();
-                    }
-                }
-            }
-        }
-
-        // Draw atoms
-        projected.forEach(p => {
-            if (chaosMode && transitionProgress === 0) {
-                atomCtx.fillStyle = '#ff3333';
-                atomCtx.beginPath();
-                atomCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                atomCtx.fill();
-            } else {
-                // Use element color, not all green
-                const color = p.color;
-                
-                const grad = atomCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 1.3);
-                grad.addColorStop(0, color);
-                grad.addColorStop(0.6, color + '88');
-                grad.addColorStop(1, 'transparent');
-                atomCtx.fillStyle = grad;
-                atomCtx.beginPath();
-                atomCtx.arc(p.x, p.y, p.r * 1.3, 0, Math.PI * 2);
-                atomCtx.fill();
-                
-                atomCtx.fillStyle = color;
-                atomCtx.beginPath();
-                atomCtx.arc(p.x, p.y, p.r * 0.75, 0, Math.PI * 2);
-                atomCtx.fill();
-                
-                atomCtx.fillStyle = '#000';
-                atomCtx.font = `bold ${Math.max(7, p.r * 0.6)}px monospace`;
-                atomCtx.textAlign = 'center';
-                atomCtx.textBaseline = 'middle';
-                atomCtx.fillText(p.elem, p.x, p.y);
-            }
-        });
-
-        requestAnimationFrame(drawLoop);
-    }
-
-    // === MONITORS ===
-    function initMonitors() {
-        const ec = document.getElementById('entropyCanvas');
-        const pc = document.getElementById('phaseCanvas');
-        const vc = document.getElementById('vacuumCanvas');
-        const cc = document.getElementById('clockCanvas');
-        
-        if (ec && ec.offsetWidth > 0) { ec.width = ec.offsetWidth; ec.height = ec.offsetHeight || 50; entropyCtx = ec.getContext('2d'); }
-        if (pc && pc.offsetWidth > 0) { pc.width = pc.offsetWidth; pc.height = pc.offsetHeight || 50; phaseCtx = pc.getContext('2d'); }
-        if (vc && vc.offsetWidth > 0) { vc.width = vc.offsetWidth; vc.height = vc.offsetHeight || 50; vacuumCtx = vc.getContext('2d'); }
-        if (cc && cc.offsetWidth > 0) { cc.width = cc.offsetWidth; cc.height = cc.offsetHeight || 50; clockCtx = cc.getContext('2d'); }
-    }
-    
-    function drawMonitors() {
-        const t = Date.now() * 0.01;
-        const isCryo = currentTemp === 'CRYO';
-        const tempFactor = isCryo ? 0.05 : 1; // Much more stable at CRYO
-        
-        // Entropy - CRISP, no glow trail
-        if (entropyCtx) {
-            const w = entropyCtx.canvas.width, h = entropyCtx.canvas.height;
-            entropyCtx.fillStyle = '#000';
-            entropyCtx.fillRect(0, 0, w, h);
-            
-            if (chaosMode) {
-                const amp = 12 * tempFactor; // Original chaos amplitude
-                waveData.entropy.push(h/2 + (Math.random() - 0.5) * amp * 2 + Math.sin(t * 0.5) * amp);
-                if (waveData.entropy.length > w) waveData.entropy.shift();
-                
-                entropyCtx.strokeStyle = '#ff3333';
-                entropyCtx.lineWidth = 1;
-                entropyCtx.beginPath();
-                waveData.entropy.forEach((y, i) => i === 0 ? entropyCtx.moveTo(i, y) : entropyCtx.lineTo(i, y));
-                entropyCtx.stroke();
-                
-                const eVal = (8.2 + Math.random() * 0.5) * tempFactor;
-                document.getElementById('entropy-val').innerText = eVal.toFixed(3) + ' eV';
-                document.getElementById('entropy-val').style.color = '#ff3333';
-            } else {
-                // Locked state - ZOOMED IN to see fine detail
-                const lockedNoise = isCryo ? 0 : 3; // Zoomed: visible noise at room temp
-                
-                entropyCtx.strokeStyle = isCryo ? '#00ffff' : '#00ff88';
-                entropyCtx.lineWidth = isCryo ? 2 : 1;
-                entropyCtx.beginPath();
-                for (let x = 0; x < w; x++) {
-                    const y = h/2 + (Math.random() - 0.5) * lockedNoise;
-                    if (x === 0) entropyCtx.moveTo(x, y);
-                    else entropyCtx.lineTo(x, y);
-                }
-                entropyCtx.stroke();
-                
-                // Digital readout changes with temp
-                const lockedVal = isCryo ? 0.000 : 0.001;
-                document.getElementById('entropy-val').innerText = lockedVal.toFixed(3) + ' eV';
-                document.getElementById('entropy-val').style.color = isCryo ? '#00ffff' : '#00ff88';
-            }
-        }
-        
-        // Phase Space - zeros out when locked
-        if (phaseCtx) {
-            const w = phaseCtx.canvas.width, h = phaseCtx.canvas.height;
-            
-            if (chaosMode) {
-                phaseCtx.fillStyle = 'rgba(0,0,0,0.15)';
-                phaseCtx.fillRect(0, 0, w, h);
-                
-                const jitter = 15 * tempFactor;
-                const x = w/2 + Math.sin(t * 0.3) * (w/3) + (Math.random() - 0.5) * jitter;
-                const y = h/2 + Math.cos(t * 0.4) * (h/3) + (Math.random() - 0.5) * jitter;
-                phaseCtx.fillStyle = '#ff3333';
-                phaseCtx.beginPath();
-                phaseCtx.arc(x, y, 2, 0, Math.PI * 2);
-                phaseCtx.fill();
-                document.getElementById('phase-val').innerText = 'Δφ: ' + (0.8 + Math.random() * 0.2).toFixed(3);
-                document.getElementById('phase-val').style.color = '#ff3333';
-            } else {
-                // Locked - center dot, brighter at CRYO
-                phaseCtx.fillStyle = '#000';
-                phaseCtx.fillRect(0, 0, w, h);
-                
-                phaseCtx.fillStyle = isCryo ? '#00ffff' : '#00ff88';
-                phaseCtx.beginPath();
-                phaseCtx.arc(w/2, h/2, isCryo ? 4 : 3, 0, Math.PI * 2);
-                phaseCtx.fill();
-                
-                document.getElementById('phase-val').innerText = 'Δφ: 0.000';
-                document.getElementById('phase-val').style.color = isCryo ? '#00ffff' : '#00ff88';
-            }
-        }
-        
-        // Vacuum Flux - CRISP, no glow trail
-        if (vacuumCtx) {
-            const w = vacuumCtx.canvas.width, h = vacuumCtx.canvas.height;
-            vacuumCtx.fillStyle = '#000';
-            vacuumCtx.fillRect(0, 0, w, h);
-            
-            if (chaosMode) {
-                const amp = 15 * tempFactor; // Original chaos amplitude
-                waveData.vacuum.push(h/2 + Math.sin(t * 0.7) * amp + (Math.random() - 0.5) * amp);
-                if (waveData.vacuum.length > w) waveData.vacuum.shift();
-                
-                vacuumCtx.strokeStyle = '#ff6633';
-                vacuumCtx.lineWidth = 1;
-                vacuumCtx.beginPath();
-                waveData.vacuum.forEach((y, i) => i === 0 ? vacuumCtx.moveTo(i, y) : vacuumCtx.lineTo(i, y));
-                vacuumCtx.stroke();
-                
-                const vVal = 2.1 + Math.random() * 0.3;
-                document.getElementById('vacuum-val').innerText = vVal.toFixed(2) + 'e-7 T';
-                document.getElementById('vacuum-val').style.color = '#ff3333';
-            } else {
-                // Locked state - ZOOMED IN to see fine detail
-                const lockedNoise = isCryo ? 0 : 2; // Zoomed: visible noise at room temp
-                
-                vacuumCtx.strokeStyle = isCryo ? '#00ffff' : '#00ffcc';
-                vacuumCtx.lineWidth = isCryo ? 2 : 1;
-                vacuumCtx.beginPath();
-                for (let x = 0; x < w; x++) {
-                    const y = h/2 + (Math.random() - 0.5) * lockedNoise;
-                    if (x === 0) vacuumCtx.moveTo(x, y);
-                    else vacuumCtx.lineTo(x, y);
-                }
-                vacuumCtx.stroke();
-                
-                // Digital readout changes with temp
-                const lockedVac = isCryo ? '0.00' : '0.01';
-                document.getElementById('vacuum-val').innerText = lockedVac + 'e-7 T';
-                document.getElementById('vacuum-val').style.color = isCryo ? '#00ffff' : '#00ff88';
-            }
-        }
-        
-        // Deuterium Clock - TACHOMETER STYLE
-        if (clockCtx) {
-            const w = clockCtx.canvas.width, h = clockCtx.canvas.height;
-            clockCtx.clearRect(0, 0, w, h);
-            
-            const cx = w / 2, cy = h - 5;
-            const radius = Math.min(w, h) - 10;
-            
-            let grad = clockCtx.createLinearGradient(0, 0, w, 0);
-            if (chaosMode) {
-                grad.addColorStop(0, '#ff3333');
-                grad.addColorStop(0.5, '#ffaa00');
-                grad.addColorStop(1, '#ff3333');
-            } else {
-                // Locked - brighter cyan at CRYO
-                if (isCryo) {
-                    grad.addColorStop(0.3, '#002233');
-                    grad.addColorStop(0.5, '#00ffff');
-                    grad.addColorStop(0.7, '#002233');
-                } else {
-                    grad.addColorStop(0.4, '#003322');
-                    grad.addColorStop(0.5, '#00ffcc');
-                    grad.addColorStop(0.6, '#003322');
-                }
-            }
-            
-            clockCtx.fillStyle = grad;
-            clockCtx.beginPath();
-            clockCtx.arc(cx, cy, radius * 0.8, Math.PI, 0);
-            clockCtx.fill();
-            
-            // Needle
-            let angle = -Math.PI / 2;
-            if (chaosMode) {
-                angle += (Math.random() - 0.5) * (tempFactor * 1.5);
-            }
-            
-            clockCtx.strokeStyle = '#fff';
-            clockCtx.lineWidth = 2;
-            clockCtx.beginPath();
-            clockCtx.moveTo(cx, cy);
-            clockCtx.lineTo(cx + radius * 0.7 * Math.cos(angle), cy + radius * 0.7 * Math.sin(angle));
-            clockCtx.stroke();
-            
-            clockCtx.fillStyle = '#fff';
-            clockCtx.beginPath();
-            clockCtx.arc(cx, cy, 3, 0, Math.PI * 2);
-            clockCtx.fill();
-            
-            if (chaosMode) {
-                document.getElementById('clk-jit').innerText = 'HIGH';
-                document.getElementById('clk-jit').style.color = '#ff3333';
-                document.getElementById('clk-coh').innerText = (Math.random() * 0.3).toFixed(2);
-            } else {
-                // Locked - even better at CRYO
-                document.getElementById('clk-jit').innerText = isCryo ? '<1fs' : '<10fs';
-                document.getElementById('clk-jit').style.color = isCryo ? '#00ffff' : '#00ffcc';
-                document.getElementById('clk-coh').innerText = isCryo ? '1.000' : '0.999';
-            }
-        }
-        
-        requestAnimationFrame(drawMonitors);
-    }
-
-    // === EXPORT ===
-    function exportFabrication() {
-        const data = DB[currentRank];
-        const angle = uniqueAngle;
-        const calc = calculateLock(currentRank, data);
-        const timestamp = new Date().toISOString();
-        
-        // Constants used in derivation
-        const ALPHA_NATIVE = 166.08367698920713463;
-        const ALPHA_OBS = 137.03599920649610842;
-        const PHI = 1.6180339887498948482;
-        const PHI7 = Math.pow(PHI, 7);
-        const COS36 = Math.cos(Math.PI / 5);
-        
-        // Lattice-specific vertex factors
-        const VERTEX_FACTORS = {
-            'Icosahedral': 11.34,
-            'Decagonal': 13.97,
-            'Octagonal': 17.22,
-            'Dodecagonal': 8.91,
-            'Penrose': 12.58
-        };
-        const vertexFactor = VERTEX_FACTORS[data.lattice] || 11.34;
-        
-        // Calculate derivation steps
-        const diff = ALPHA_NATIVE - ALPHA_OBS;
-        const sum = ALPHA_NATIVE + ALPHA_OBS;
-        const ratio = diff / sum;
-        const product = ratio * PHI7;
-        const clamped = Math.min(1.0, product);
-        const thetaRad = Math.asin(clamped);
-        const thetaDeg = thetaRad * (180 / Math.PI);
-        const thetaProj = thetaDeg * COS36;
-        const baseAngle = thetaProj / vertexFactor;
-        
-        // Element data
-        const ATOMIC_MASSES = {
-            'H': 1.008, 'He': 4.0026, 'Li': 6.94, 'Be': 9.0122, 'B': 10.81, 'C': 12.011,
-            'N': 14.007, 'O': 15.999, 'F': 18.998, 'Ne': 20.180, 'Na': 22.990, 'Mg': 24.305,
-            'Al': 26.982, 'Si': 28.085, 'P': 30.974, 'S': 32.06, 'Cl': 35.45, 'Ar': 39.948,
-            'K': 39.098, 'Ca': 40.078, 'Sc': 44.956, 'Ti': 47.867, 'V': 50.942, 'Cr': 51.996,
-            'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546, 'Zn': 65.38,
-            'Ga': 69.723, 'Ge': 72.63, 'As': 74.922, 'Se': 78.971, 'Br': 79.904, 'Kr': 83.798,
-            'Rb': 85.468, 'Sr': 87.62, 'Y': 88.906, 'Zr': 91.224, 'Nb': 92.906, 'Mo': 95.95,
-            'Ru': 101.07, 'Rh': 102.91, 'Pd': 106.42, 'Ag': 107.87, 'Cd': 112.41, 'In': 114.82,
-            'Sn': 118.71, 'Sb': 121.76, 'Te': 127.60, 'I': 126.90, 'Xe': 131.29, 'Cs': 132.91,
-            'Ba': 137.33, 'La': 138.91, 'Ce': 140.12, 'Pr': 140.91, 'Nd': 144.24, 'Sm': 150.36,
-            'Eu': 151.96, 'Gd': 157.25, 'Tb': 158.93, 'Dy': 162.50, 'Ho': 164.93, 'Er': 167.26,
-            'Tm': 168.93, 'Yb': 173.05, 'Lu': 174.97, 'Hf': 178.49, 'Ta': 180.95, 'W': 183.84,
-            'Re': 186.21, 'Os': 190.23, 'Ir': 192.22, 'Pt': 195.08, 'Au': 196.97, 'Hg': 200.59,
-            'Tl': 204.38, 'Pb': 207.2, 'Bi': 208.98, 'Th': 232.04, 'U': 238.03
-        };
-        
-        // Build element info
-        let elementsInfo = '';
-        let totalMass = 0;
-        data.elements.forEach(el => {
-            const mass = ATOMIC_MASSES[el] || 100;
-            totalMass += mass;
-            elementsInfo += `    ${el.padEnd(5)}: ${mass.toFixed(4)} g/mol\n`;
-        });
-        const avgMass = totalMass / data.elements.length;
-        
-        // Calculate mass deviation
-        const refMass = 77.1;
-        const massDev = avgMass - refMass;
-        const shiftFactor = massDev * 0.00005;
-        
-        // Lattice correction
-        const latticeCorrections = {
-            'Icosahedral': 0.0, 'Decagonal': 0.0012, 'Octagonal': -0.0008,
-            'Dodecagonal': 0.0015, 'Penrose': 0.0003
-        };
-        const latticeCorr = latticeCorrections[data.lattice] || 0;
-        
-        // Generate vertex positions at lock angle
-        const vertices = generateVertexPositions(angle, data.lattice);
-        
-        // Generate ASCII structure
-        const asciiStructure = generateASCIIStructure(data.elements, data.lattice);
-        
-        // Fabrication protocol based on system type
-        const fabProtocol = getFabricationProtocol(data);
-        
-        // Temperature-specific parameters
-        const tempParams = currentTemp === 'CRYO' ? {
-            stability: 'ULTRA-HIGH',
-            phasonDamping: '> 99.99%',
-            thermalNoise: '< 0.001 eV',
-            vacuumFlux: '< 0.01e-7 T',
-            clockJitter: '< 1 fs',
-            coherence: '1.000000',
-            recommended: 'OPTIMAL for precision fabrication'
-        } : {
-            stability: 'HIGH',
-            phasonDamping: '> 99.9%',
-            thermalNoise: '< 0.01 eV',
-            vacuumFlux: '< 0.1e-7 T',
-            clockJitter: '< 10 fs',
-            coherence: '0.999',
-            recommended: 'Suitable for standard fabrication'
-        };
-
-        let txt = `════════════════════════════════════════════════════════════════════════════════
-                    GRAVES-LAW FABRICATION INSTRUCTIONS
-                         COMPLETE ATOMIC STRUCTURE
+function exportFabrication() {
+const data = DB[currentRank];
+const calc = calculateLockAngle(currentRank, data);
+const timestamp = new Date().toISOString();
+let elementsInfo = ‘’;
+data.elements.forEach(el => { elementsInfo += `    ${el.padEnd(5)}: ${(ATOMIC_MASS[el]||0).toFixed(4)} g/mol\n`; });
+let txt = `════════════════════════════════════════════════════════════════════════════════
+GRAVES-LAW FABRICATION INSTRUCTIONS
 ════════════════════════════════════════════════════════════════════════════════
 
-SYSTEM ID:        ${String(currentRank).padStart(3, '0')}
+SYSTEM ID:        ${String(currentRank).padStart(3, ‘0’)}
 NAME:             ${data.name}
 LATTICE SYMMETRY: ${data.lattice}
 TYPE:             ${data.type}
 
+────────────────────────────────────────────────────────────────────────────────
+FUNDAMENTAL CONSTANTS
+────────────────────────────────────────────────────────────────────────────────
 
-════════════════════════════════════════════════════════════════════════════════
-                         SECTION 1: PHYSICS DERIVATION
-════════════════════════════════════════════════════════════════════════════════
+φ (Golden Ratio)             = ${PHI.toFixed(20)}
+k_rat (686/461)              = ${K_RAT.toFixed(20)}
+α_obs (Observed)             = ${ALPHA_OBS}
+α_native (Kernel)            = ${ALPHA_NATIVE}
+g(φ) = φ⁻¹² × (φ⁵/3) / k_rat = ${G_PHI.toFixed(20)}
+θ_base = arcsin(√g(φ))       = ${THETA_BASE.toFixed(6)}°
 
-The unique lock angle is derived from first principles using the Graves-Law
-quasicrystalline framework. This is NOT arbitrary - it is the ONLY angle that
-produces zero excess vacuum-debt for this specific atomic composition.
+────────────────────────────────────────────────────────────────────────────────
+LOCK ANGLE DERIVATION
+────────────────────────────────────────────────────────────────────────────────
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        FUNDAMENTAL CONSTANTS                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  α_native (Graves Native)     = ${ALPHA_NATIVE.toFixed(17).padEnd(40)}│
-│  α_obs (Observed Fine-Struct) = ${ALPHA_OBS.toFixed(17).padEnd(40)}│
-│  φ (Golden Ratio)             = ${PHI.toFixed(19).padEnd(40)}│
-│  φ^7                          = ${PHI7.toFixed(17).padEnd(40)}│
-│  cos(π/5) = cos(36°)          = ${COS36.toFixed(20).padEnd(40)}│
-│  ${data.lattice} Vertex Factor    = ${vertexFactor.toFixed(2).padEnd(40)}│
-└─────────────────────────────────────────────────────────────────────────────┘
+FORMULA: ${calc.formula}
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        STEP-BY-STEP DERIVATION                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  STEP 1: Calculate α difference and sum                                      │
-│          diff    = α_native - α_obs = ${diff.toFixed(11).padEnd(30)}│
-│          sum     = α_native + α_obs = ${sum.toFixed(11).padEnd(30)}│
-│                                                                              │
-│  STEP 2: Compute ratio                                                       │
-│          ratio   = diff / sum = ${ratio.toFixed(12).padEnd(35)}│
-│                                                                              │
-│  STEP 3: Apply φ^7 scaling                                                   │
-│          product = ratio × φ^7 = ${product.toFixed(12).padEnd(30)}│
-│          (Clamped to arcsin domain: min(1.0, product))                       │
-│                                                                              │
-│  STEP 4: Arcsin transformation                                               │
-│          θ_rad   = arcsin(${clamped.toFixed(6)}) = ${thetaRad.toFixed(12)} rad       │
-│          θ_deg   = ${thetaDeg.toFixed(8)}°                                           │
-│                                                                              │
-│  STEP 5: 5-fold symmetry projection                                          │
-│          θ_proj  = θ_deg × cos(36°) = ${thetaProj.toFixed(8)}°                       │
-│                                                                              │
-│  STEP 6: ${data.lattice} vertex scaling                                      │
-│          BASE_ANGLE = θ_proj / ${vertexFactor} = ${baseAngle.toFixed(6)}°                   │
-│                                                                              │
-│  STEP 7: Composition-specific adjustment                                     │
-│          [REDACTED - Available under NDA]                                    │
-│          Contact: protodynamics01@gmail.com                                  │
-│                                                                              │
-│  FINAL LOCK ANGLE = ${angle.toFixed(6)}°                                             │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+UNIQUE LOCK ANGLE = ${uniqueAngle.toFixed(6)}°
 
-════════════════════════════════════════════════════════════════════════════════
-                   SECTION 1B: CLOCK REFERENCE SYSTEM
-════════════════════════════════════════════════════════════════════════════════
-
-The Graves-Law lock angle measurement requires THREE synchronized clocks for
-absolute phase reference and verification. Two are COTS (Commercial Off-The-Shelf)
-atomic standards; the third is the novel Deuterium Phase Clock central to this work.
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK 1: RUBIDIUM ATOMIC STANDARD                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           COTS Rubidium Frequency Standard                           │
-│  MODEL:          Stanford Research Systems PRS10 (or equivalent)            │
-│  FREQUENCY:      10.000 000 000 MHz output                                  │
-│  REFERENCE:      ⁸⁷Rb hyperfine transition: 6,834,682,610.904 Hz            │
-│  ACCURACY:       ±5 × 10⁻¹¹ (after warmup)                                  │
-│  STABILITY:      σ_y(τ) < 2 × 10⁻¹¹ @ τ = 1s                                │
-│  WARMUP:         10 minutes to full spec                                    │
-│  PURPOSE:        Primary frequency reference for synthesis equipment        │
-│  COST:           ~$2,500 USD                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK 2: CESIUM ATOMIC STANDARD                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           COTS Cesium Beam Frequency Standard                        │
-│  MODEL:          Microsemi 5071A Primary Standard (or equivalent)           │
-│  FREQUENCY:      10.000 000 000 MHz / 5.000 000 000 MHz outputs             │
-│  REFERENCE:      ¹³³Cs hyperfine transition: 9,192,631,770 Hz (SI second)   │
-│  ACCURACY:       ±5 × 10⁻¹³ (defines the SI second)                         │
-│  STABILITY:      σ_y(τ) < 8 × 10⁻¹² @ τ = 1s                                │
-│  WARMUP:         30 minutes to full spec                                    │
-│  PURPOSE:        SI-traceable verification of Rubidium standard             │
-│  COST:           ~$50,000 USD                                               │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 CLOCK 3: DEUTERIUM PHASE CLOCK (GRAVES-LAW)                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  TYPE:           Novel Deuterium Hyperfine Phase Reference                  │
-│  REFERENCE:      ²H (Deuterium) hyperfine transition: 327.384 352 522 MHz   │
-│  DISPLAY VALUE:  327.384 MHz (as shown in UI header)                        │
-│                                                                              │
-│  PHYSICAL BASIS:                                                             │
-│  ─────────────────                                                           │
-│  The deuterium hyperfine frequency arises from the magnetic interaction     │
-│  between the electron spin and the nuclear spin (I=1) of deuterium:         │
-│                                                                              │
-│      f_D = (16/3) × α² × (m_e/m_p) × (μ_D/μ_N) × R_∞ × c                    │
-│                                                                              │
-│  where:  α = fine structure constant                                        │
-│          m_e/m_p = electron/proton mass ratio                               │
-│          μ_D/μ_N = deuteron magnetic moment ratio                           │
-│          R_∞ = Rydberg constant                                             │
-│          c = speed of light                                                 │
-│                                                                              │
-│  SIGNIFICANCE FOR GRAVES-LAW:                                                │
-│  ────────────────────────────                                                │
-│  The 327.384 MHz deuterium reference encodes the fundamental ratio between  │
-│  electromagnetic and nuclear forces at the lightest nuclear system. This    │
-│  frequency serves as the ABSOLUTE PHASE REFERENCE for lock angle measurement│
-│  because:                                                                    │
-│                                                                              │
-│    1) Deuterium is the simplest nucleus with non-zero spin                  │
-│    2) The hyperfine splitting is sensitive to nuclear structure             │
-│    3) The 327.384 MHz value connects to φ through:                          │
-│                                                                              │
-│       327.384 / φ^13 ≈ 0.618... (approaches 1/φ)                            │
-│                                                                              │
-│    4) Lock angles measured relative to this reference yield ZERO            │
-│       phason strain when the composition is correct                         │
-│                                                                              │
-│  IMPLEMENTATION:                                                             │
-│  ───────────────                                                             │
-│  • Deuterium gas cell (99.9% isotopic purity)                               │
-│  • RF excitation at 327.384 MHz ± 1 Hz                                      │
-│  • Phase-locked to Cesium standard for SI traceability                      │
-│  • Lock angle = phase difference × conversion factor                        │
-│                                                                              │
-│  MEASUREMENT EQUATION:                                                       │
-│  ────────────────────                                                        │
-│       θ_lock = (Δφ_measured / 2π) × (360° / N_vertices)                     │
-│                                                                              │
-│  where: Δφ_measured = phase shift in deuterium signal during lattice scan   │
-│         N_vertices = ${vertexFactor} (${data.lattice.toLowerCase()} vertex factor)                      │
-│                                                                              │
-│  VERIFICATION:                                                               │
-│  ────────────                                                                │
-│  When lock angle = ${angle.toFixed(6)}° relative to D reference:                     │
-│    • Phason strain → 0.000000                                               │
-│    • All modes Φ₁-Φ₅ collapse to ground state                               │
-│    • Vacuum-debt = ZERO                                                     │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CLOCK SYNCHRONIZATION PROTOCOL                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│    ┌──────────┐      10 MHz      ┌──────────┐                               │
-│    │ CESIUM   │─────────────────▶│ RUBIDIUM │                               │
-│    │ (Cs-133) │                  │ (Rb-87)  │                               │
-│    │ 5071A    │                  │ PRS10    │                               │
-│    └────┬─────┘                  └────┬─────┘                               │
-│         │ 10 MHz (SI traceable)       │ 10 MHz                              │
-│         │                             │                                      │
-│         └──────────┬──────────────────┘                                      │
-│                    │                                                         │
-│                    ▼                                                         │
-│           ┌───────────────┐                                                  │
-│           │   DEUTERIUM   │                                                  │
-│           │  PHASE CLOCK  │                                                  │
-│           │  327.384 MHz  │                                                  │
-│           └───────┬───────┘                                                  │
-│                   │                                                          │
-│                   ▼                                                          │
-│           ┌───────────────┐                                                  │
-│           │  LOCK ANGLE   │                                                  │
-│           │  MEASUREMENT  │───▶  θ = ${angle.toFixed(6)}°                            │
-│           │    SYSTEM     │                                                  │
-│           └───────────────┘                                                  │
-│                                                                              │
-│  TIMING SEQUENCE:                                                            │
-│  1. Power on Cesium standard, wait 30 min warmup                            │
-│  2. Power on Rubidium standard, phase-lock to Cesium                        │
-│  3. Initialize Deuterium cell, lock to 327.384 MHz                          │
-│  4. Verify all three clocks phase-aligned (jitter < ${tempParams.clockJitter})             │
-│  5. Begin lattice synthesis with phase reference active                     │
-│  6. Monitor lock angle throughout fabrication                               │
-│  7. Confirm final lock angle within ±0.0001° of target                      │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-════════════════════════════════════════════════════════════════════════════════
-                   SECTION 1C: ENVIRONMENT CONFIGURATION
-════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CURRENT FABRICATION ENVIRONMENT                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  TEMPERATURE MODE:    ${currentTemp.padEnd(45)}│
-│  OPERATING TEMP:      ${tempK} K${currentTemp === 'CRYO' ? ' (Liquid Helium)' : ' (Ambient)'}                                       │
-│  STABILITY CLASS:     ${tempParams.stability.padEnd(45)}│
-│  RECOMMENDATION:      ${tempParams.recommended}     │
-│                                                                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                    ENVIRONMENTAL PARAMETERS                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Phason Damping:      ${tempParams.phasonDamping.padEnd(45)}│
-│  Thermal Noise:       ${tempParams.thermalNoise.padEnd(45)}│
-│  Vacuum Flux:         ${tempParams.vacuumFlux.padEnd(45)}│
-│  Clock Jitter:        ${tempParams.clockJitter.padEnd(45)}│
-│  Phase Coherence:     ${tempParams.coherence.padEnd(45)}│
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-${currentTemp === 'CRYO' ? `
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    CRYOGENIC SYSTEM REQUIREMENTS                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  COOLANT:         Liquid Helium (LHe) - 4.2 K boiling point                 │
-│  DEWAR:           50L minimum capacity, 24-hour hold time                   │
-│  TRANSFER LINE:   Vacuum-jacketed, <0.5 L/hr loss rate                      │
-│  TEMPERATURE:     4 K ± 0.1 K stability required                            │
-│  THERMAL STAGE:   Multi-stage cooling with 77K radiation shield             │
-│  VACUUM:          < 10⁻⁶ Torr in sample chamber                             │
-│  VIBRATION:       Isolated from mechanical pumps                            │
-│                                                                              │
-│  CRYO ADVANTAGES FOR ${data.name.substring(0,30).toUpperCase()}:
-│  • Thermal phonon modes completely suppressed                               │
-│  • Phase coherence time extended by factor of 1000                          │
-│  • Vacuum fluctuations reduced to quantum limit                             │
-│  • Lock angle stability: ±0.00001° (vs ±0.0001° at room temp)              │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-` : `
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    ROOM TEMPERATURE REQUIREMENTS                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  AMBIENT:         300 K ± 2 K (climate controlled)                          │
-│  HUMIDITY:        < 40% RH (dry environment preferred)                      │
-│  VIBRATION:       Optical table isolation recommended                       │
-│  EMI SHIELDING:   Faraday cage for sensitive measurements                   │
-│  AIR FLOW:        Laminar flow hood for contamination control               │
-│                                                                              │
-│  ROOM TEMP NOTES FOR ${data.name.substring(0,30).toUpperCase()}:
-│  • Thermal phonons present but manageable                                   │
-│  • Standard lab equipment sufficient                                        │
-│  • Lock angle stability: ±0.0001°                                           │
-│  • Suitable for initial prototyping and validation                          │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-`}
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 2: ATOMIC COMPOSITION
-════════════════════════════════════════════════════════════════════════════════
+────────────────────────────────────────────────────────────────────────────────
+ATOMIC COMPOSITION
+────────────────────────────────────────────────────────────────────────────────
 
 PRIMARY ELEMENTS:
 ${elementsInfo}
-────────────────────────────────────────────────────────────────────────────────
-TOTAL MASS:       ${totalMass.toFixed(4)} g/mol (sum)
-AVERAGE MASS:     [REDACTED]
-ELEMENT COUNT:    ${data.elements.length}
-────────────────────────────────────────────────────────────────────────────────
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 2B: FULL PATENT CLAIM
-════════════════════════════════════════════════════════════════════════════════
-
-═══ GRAVES-LAW PATENT CLAIM ═══
-System ${String(currentRank).padStart(3, '0')}: ${data.name}
-
-CLAIM 1: A ${data.lattice.toLowerCase()} quasicrystalline composition comprising:
-${data.elements.map((el, i) => `  (${String.fromCharCode(97 + i)}) ${el} [${(ATOMIC_MASSES[el] || 100).toFixed(2)} g/mol]`).join('\n')}
-
-CLAIM 2: The composition of Claim 1, wherein said elements are arranged in a 
-${data.lattice.toLowerCase()} lattice exhibiting:
-  • Lock Angle: ${angle.toFixed(6)}°
-  • Phason Strain: 0.000 (zero-slack)
-  • Vacuum Debt: ZERO
-
-CLAIM 3: The composition of Claim 2, wherein said lock angle is derived from:
-  • α_native = ${ALPHA_NATIVE.toFixed(14)}
-  • α_obs = ${ALPHA_OBS.toFixed(14)}
-  • φ^7 scaling = ${PHI7.toFixed(6)}
-  • 5-fold projection: cos(36°) = ${COS36.toFixed(10)}
-  • Vertex factor: ${vertexFactor}
-
-CLAIM 4: The composition exhibits the following technical properties:
-${data.claim || 'Quasicrystalline material with zero phason strain.'}
-
-CLAIM 5: SUPERPOSITION STATES
-All phason modes Φ₁-Φ₅ are collapsed to ground state at lock angle ${angle.toFixed(6)}°.
-The wavefunction |Ψ⟩ = Σᵢ cᵢ|φᵢ⟩ reduces to c₁ = 1.000000 (ground state only).
-
-CLAIM 6: CERTIFICATION
-This structure incurs ZERO excess vacuum-debt and represents the unique 
-ground-state configuration enforced by the laws of physics.
-No other angle produces zero-slack for this specific atomic composition.
-
-APPLICATIONS:
-${fabProtocol.applications}
-
-════════════════════════════════════════════════════════════════════════════════
-                   SECTION 3: ${data.lattice.toUpperCase()} VERTEX POSITIONS
-════════════════════════════════════════════════════════════════════════════════
-
-All positions given in normalized coordinates at lock angle ${angle.toFixed(6)}°
-Reference frame: Cartesian (x, y, z) with origin at lattice center
-
-${vertices}
-
-Lattice parameter: a = 1.000 (normalized)
-Lock angle applied: ${angle.toFixed(6)}° rotation about z-axis
-τ-scaling factor: ${PHI.toFixed(10)} (golden ratio)
-
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 3B: ASCII ATOMIC STRUCTURE
-════════════════════════════════════════════════════════════════════════════════
-
-${asciiStructure}
-
-LEGEND:
-${data.elements.map((el, i) => `  (${el.padEnd(2)}) = ${el.padEnd(4)} [${(ATOMIC_MASSES[el] || 100).toFixed(2).padStart(7)} g/mol] - ${i === 0 ? 'Core' : i === 1 ? 'Primary' : 'Secondary'}`).join('\n')}
-
-Lattice: ${data.lattice} | Lock Angle: ${angle.toFixed(6)}°
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 4: SUPERPOSITION STATES
-════════════════════════════════════════════════════════════════════════════════
-
-The quasicrystalline lattice exists in a superposition of phason configurations.
-At the unique lock angle, all phason modes collapse to the ground state.
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      PHASON MODE ANALYSIS                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Mode    │ Amplitude  │ Phase (°)    │ Status at Lock                       │
-├──────────┼────────────┼──────────────┼──────────────────────────────────────┤
-│  Φ₁      │ 0.000000   │ 0.000        │ COLLAPSED - Ground State             │
-│  Φ₂      │ 0.000000   │ 72.000       │ COLLAPSED - Ground State             │
-│  Φ₃      │ 0.000000   │ 144.000      │ COLLAPSED - Ground State             │
-│  Φ₄      │ 0.000000   │ 216.000      │ COLLAPSED - Ground State             │
-│  Φ₅      │ 0.000000   │ 288.000      │ COLLAPSED - Ground State             │
-├──────────┼────────────┼──────────────┼──────────────────────────────────────┤
-│  TOTAL PHASON STRAIN: 0.000000 (ZERO-SLACK ACHIEVED)                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-SUPERPOSITION WAVEFUNCTION:
-|Ψ⟩ = Σᵢ cᵢ|φᵢ⟩  where at lock angle ${angle.toFixed(6)}°:
-      c₁ = 1.000000 (ground state)
-      c₂ = 0.000000 (first excited)
-      c₃ = 0.000000 (second excited)
-      ...
-      
-The system has COLLAPSED to the unique ground state configuration.
-No phason fluctuations remain. Vacuum-debt = ZERO.
-
-════════════════════════════════════════════════════════════════════════════════
-                   SECTION 5: FABRICATION PROTOCOL
-════════════════════════════════════════════════════════════════════════════════
-
-PROCESS             : ${fabProtocol.process}
-PRESSURE            : ${fabProtocol.pressure}
-TEMPERATURE         : ${tempK} K ${currentTemp === 'CRYO' ? '(cryogenic)' : '(ambient)'}
-SEED                : ${fabProtocol.seed}
-ATMOSPHERE          : ${fabProtocol.atmosphere}
-VERIFICATION        : ${fabProtocol.verification}
-
-════════════════════════════════════════════════════════════════════════════════
-                   SECTION 6: DETAILED FABRICATION INSTRUCTIONS
-════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           REQUIRED EQUIPMENT                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-PRIMARY SYNTHESIS:
-${fabProtocol.equipment.map(eq => `  • ${eq}`).join('\n')}
-
-CLOCK REFERENCE SYSTEM:
-  • Stanford Research PRS10 Rubidium Standard
-  • Microsemi 5071A Cesium Standard  
-  • Deuterium Phase Clock (327.384 MHz)
-
-CHARACTERIZATION:
-  • High-Resolution TEM (HRTEM)
-  • Selected Area Electron Diffraction (SAED)
-  • X-Ray Diffraction (XRD)
-  • Raman Spectroscopy
-  • ${fabProtocol.specialAnalysis}
-
-${currentTemp === 'CRYO' ? `CRYOGENIC EQUIPMENT:
-  • Liquid Helium Dewar (50L minimum)
-  • Vacuum-jacketed transfer lines
-  • Cryostat with optical access
-  • Temperature controller (±0.1 K stability)
-  • Radiation shields (77 K and 4 K stages)
-` : `ENVIRONMENTAL CONTROL:
-  • Climate-controlled cleanroom (Class 1000 or better)
-  • Optical isolation table
-  • Faraday cage for EMI shielding
-  • Laminar flow hood
-`}
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                      STEP-BY-STEP FABRICATION PROCESS                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-PHASE 1: PREPARATION
-────────────────────
-${fabProtocol.steps.preparation.map((s, i) => `  ${i+1}. ${s}`).join('\n')}
-
-PHASE 2: CLOCK SYSTEM INITIALIZATION
-─────────────────────────────────────
-  1. Power on Cesium standard, wait 30 minutes for thermal equilibrium
-  2. Power on Rubidium standard, phase-lock to Cesium 10 MHz output
-  3. Verify Rb-Cs phase alignment: jitter < 1 ps
-  4. Initialize Deuterium gas cell at 327.384 MHz
-  5. Lock Deuterium phase to Cesium reference
-  6. Confirm all three clocks synchronized: jitter < ${tempParams.clockJitter}
-  7. Begin continuous lock angle monitoring
-
-${currentTemp === 'CRYO' ? `PHASE 3: CRYOGENIC COOLDOWN
-────────────────────────────
-  1. Evacuate sample chamber to < 10⁻⁶ Torr
-  2. Begin LN2 pre-cooling of radiation shield (77 K)
-  3. Wait for thermal equilibrium (approximately 2 hours)
-  4. Begin LHe transfer to main stage
-  5. Cool to 4 K over 4-6 hours (controlled rate)
-  6. Verify temperature stability: 4 K ± 0.1 K
-  7. Confirm vacuum maintained throughout cooldown
-
-` : ''}PHASE ${currentTemp === 'CRYO' ? '4' : '3'}: SYNTHESIS
-────────────────────
-${fabProtocol.steps.synthesis.map((s, i) => `  ${i+1}. ${s}`).join('\n')}
-
-PHASE ${currentTemp === 'CRYO' ? '5' : '4'}: LOCK ANGLE VERIFICATION
-──────────────────────────────────
-  1. Initiate SAED measurement at multiple zone axes
-  2. Measure diffraction peak positions to ±0.001°
-  3. Calculate experimental lock angle from τ-scaling ratios
-  4. Compare to target: ${angle.toFixed(6)}°
-  5. Acceptable tolerance: ±0.0001°
-  6. If out of spec: adjust synthesis parameters and repeat
-
-PHASE ${currentTemp === 'CRYO' ? '6' : '5'}: CHARACTERIZATION
-─────────────────────────────
-${fabProtocol.steps.characterization.map((s, i) => `  ${i+1}. ${s}`).join('\n')}
-
-PHASE ${currentTemp === 'CRYO' ? '7' : '6'}: QUALITY VERIFICATION
-──────────────────────────────
-  1. Confirm zero phason strain via diffraction analysis
-  2. Verify ground state collapse (no satellite peaks)
-  3. Measure vacuum-debt: must be ZERO
-  4. Document all measurements with timestamps
-  5. Archive samples for long-term stability studies
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         FINAL PRODUCT SPECIFICATION                          │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-PRODUCT NAME:     ${data.name}
-FORM:             ${data.lattice} quasicrystalline structure
-COMPOSITION:      ${data.elements.join('-')}
-LOCK ANGLE:       ${angle.toFixed(6)}°
-ENVIRONMENT:      Fabricated at ${tempK} K (${currentTemp})
-
-PHYSICAL DESCRIPTION:
-${fabProtocol.description}
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    APPLICATION & DEPLOYMENT                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-PRIMARY APPLICATION:
-${data.claim || fabProtocol.applications}
-
-DEPLOYMENT METHOD:
-${fabProtocol.deployment}
-
-EXPECTED PERFORMANCE IMPROVEMENTS:
-${fabProtocol.improvements}
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 7: QUALITY ASSURANCE
-════════════════════════════════════════════════════════════════════════════════
-
-VERIFICATION CHECKLIST:
-□ All source materials verified ≥99.99% purity
-□ Clock system synchronized (jitter < ${tempParams.clockJitter})
-□ Process temperature maintained: ${tempK} K ± ${currentTemp === 'CRYO' ? '0.1' : '2'} K
-□ ${data.lattice} symmetry confirmed via HRTEM
-□ SAED pattern shows τ-scaling diffraction peaks
-□ Lock angle measured: ${angle.toFixed(6)}° ± 0.0001°
-□ Phason strain: < 0.01
-□ Zero excess vacuum-debt confirmed
-□ No detectable phason fluctuations
-□ Ground state wavefunction collapse verified
-□ ${fabProtocol.specialCheck}
-
-ACCEPTANCE CRITERIA:
-✓ Lock angle within 0.0001° of calculated value: ${angle.toFixed(6)}°
-✓ Phason strain < 0.01
-✓ τ-scaling ratio = ${PHI.toFixed(6)} ± 0.0001
-✓ All ${data.lattice.toLowerCase()} symmetry operations satisfied
-✓ Thermal stability confirmed at ${tempK} K
-✓ Coherence factor: ${tempParams.coherence}
-
-REJECTION CRITERIA:
-✗ Lock angle deviation > 0.001°
-✗ Phason strain > 0.1
-✗ τ-scaling ratio deviation > 0.001
-✗ Symmetry breaking detected
-✗ Vacuum-debt > 0
-
-════════════════════════════════════════════════════════════════════════════════
-                      SECTION 8: CERTIFICATION
-════════════════════════════════════════════════════════════════════════════════
-
-This fabrication follows Graves-Law Quasicrystalline Zero-Slack protocols.
-
-The structure described herein:
-  • Incurs ZERO excess vacuum-debt
-  • Represents the UNIQUE ground-state configuration
-  • Is ENFORCED by the laws of physics at this composition
-  • Cannot be achieved at any other angle
-
-LOCK ANGLE ${angle.toFixed(6)}° is the ONLY valid configuration for:
-  System: ${data.name}
-  Elements: ${data.elements.join(', ')}
-  Lattice: ${data.lattice}
-  Environment: ${currentTemp} (${tempK} K)
+WAAM: ${calc.waam.toFixed(4)} g/mol
 
 ────────────────────────────────────────────────────────────────────────────────
+SUPERPOSITION STATES
+────────────────────────────────────────────────────────────────────────────────
+
+At lock angle ${uniqueAngle.toFixed(6)}°:
+Mode Φ₁: COLLAPSED - Ground State
+Mode Φ₂: COLLAPSED - Ground State
+Mode Φ₃: COLLAPSED - Ground State
+Mode Φ₄: COLLAPSED - Ground State
+Mode Φ₅: COLLAPSED - Ground State
+
+TOTAL PHASON STRAIN: 0.000000 (ZERO-SLACK)
+VACUUM DEBT: ZERO
+
+────────────────────────────────────────────────────────────────────────────────
+CERTIFICATION
+────────────────────────────────────────────────────────────────────────────────
+
+This structure:
+• Incurs ZERO excess vacuum-debt
+• Represents the UNIQUE ground-state configuration
+• Is ENFORCED by the laws of physics at this composition
+• Cannot be achieved at any other angle
+
 Generated:  ${timestamp}
-System:     Graves Validation Suite v32.0
-Rank:       ${String(currentRank).padStart(3, '0')} of 040
-────────────────────────────────────────────────────────────────────────────────
-                         END OF FABRICATION DOCUMENT
+System:     Graves Validation Suite v33.0
+
 ════════════════════════════════════════════════════════════════════════════════
 `;
+const blob = new Blob([txt], { type: ‘text/plain;charset=utf-8’ });
+const url = URL.createObjectURL(blob);
+const a = document.createElement(‘a’);
+a.href = url;
+a.download = “FABRICATION_” + String(currentRank).padStart(3, ‘0’) + “*” + data.name.replace(/[^a-zA-Z0-9]/g, ’*’) + “.txt”;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+log(‘FABRICATION PROTOCOL EXPORTED’, ‘gold’);
+setButtonState(“reset”);
+}
 
-        const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = "FABRICATION_" + String(currentRank).padStart(3, '0') + "_" + data.name.replace(/[^a-zA-Z0-9]/g, '_') + ".txt";
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 100);
-
-        log('FABRICATION PROTOCOL EXPORTED', 'gold');
-        setButtonState("reset");
-    }
-    
-    // Helper function to generate vertex positions
-    function generateVertexPositions(lockAngle, lattice) {
-        const phi = 1.6180339887498948482;
-        const angleRad = lockAngle * Math.PI / 180;
-        const cosA = Math.cos(angleRad);
-        const sinA = Math.sin(angleRad);
-        
-        // Base icosahedral vertices
-        const baseVertices = [
-            [0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi],
-            [1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0],
-            [phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]
-        ];
-        
-        // Normalize and apply rotation
-        const norm = Math.sqrt(1 + phi * phi);
-        let result = "VERTEX │     X          Y          Z      │ ELEMENT SITE\n";
-        result += "───────┼─────────────────────────────────────┼──────────────\n";
-        
-        const sites = ['Primary', 'Primary', 'Primary', 'Primary', 
-                       'Secondary', 'Secondary', 'Secondary', 'Secondary',
-                       'Tertiary', 'Tertiary', 'Tertiary', 'Tertiary'];
-        
-        baseVertices.forEach((v, i) => {
-            const x = v[0] / norm;
-            const y = v[1] / norm;
-            const z = v[2] / norm;
-            
-            // Apply lock angle rotation about z-axis
-            const xRot = x * cosA - y * sinA;
-            const yRot = x * sinA + y * cosA;
-            
-            result += "  V" + String(i+1).padStart(2, '0') + "  │ " + xRot.toFixed(6).padStart(10) + " " + yRot.toFixed(6).padStart(10) + " " + z.toFixed(6).padStart(10) + " │ " + sites[i] + "\n";
-        });
-        
-        result += "───────┴─────────────────────────────────────┴──────────────";
-        return result;
-    }
-    
-    // Helper function to generate ASCII structure
-    function generateASCIIStructure(elements, lattice) {
-        // Pad all elements to exactly 4 chars: (XX)
-        const pad = (el) => el ? "(" + (el.length === 1 ? el + " " : el) + ")" : "    ";
-        const el1 = pad(elements[0]);
-        const el2 = pad(elements[1]);
-        const el3 = pad(elements[2]);
-        const el4 = pad(elements[3]);
-        
-        if (elements.length === 2) {
-            return "" +
-"+--------------------------------------------------------------+\n" +
-"|                                                              |\n" +
-"|                           " + el2 + "                            |\n" +
-"|                           /  \\                               |\n" +
-"|                          /    \\                              |\n" +
-"|                         /      \\                             |\n" +
-"|                     " + el2 + "--------" + el2 + "                         |\n" +
-"|                       |\\      /|                             |\n" +
-"|                       | \\    / |                             |\n" +
-"|                       |  \\  /  |                             |\n" +
-"|                       |  " + el1 + "  |                             |\n" +
-"|                       |  /  \\  |                             |\n" +
-"|                       | /    \\ |                             |\n" +
-"|                       |/      \\|                             |\n" +
-"|                     " + el2 + "--------" + el2 + "                         |\n" +
-"|                         \\      /                             |\n" +
-"|                          \\    /                              |\n" +
-"|                           " + el2 + "                            |\n" +
-"|                                                              |\n" +
-"+--------------------------------------------------------------+";
-        } else if (elements.length === 3) {
-            return "" +
-"+--------------------------------------------------------------+\n" +
-"|                                                              |\n" +
-"|                           " + el3 + "                            |\n" +
-"|                           /  \\                               |\n" +
-"|                          /    \\                              |\n" +
-"|                         / " + el1 + " \\                            |\n" +
-"|                     " + el2 + "--------" + el2 + "                         |\n" +
-"|                       |\\      /|                             |\n" +
-"|                       | \\" + el1 + "/ |                             |\n" +
-"|                       |  \\  /  |                             |\n" +
-"|                     " + el3 + "--" + el1 + "--" + el3 + "                         |\n" +
-"|                       |  /  \\  |                             |\n" +
-"|                       | /" + el1 + "\\ |                             |\n" +
-"|                       |/      \\|                             |\n" +
-"|                     " + el2 + "--------" + el2 + "                         |\n" +
-"|                         \\ " + el1 + " /                            |\n" +
-"|                          \\    /                              |\n" +
-"|                           " + el3 + "                            |\n" +
-"|                                                              |\n" +
-"+--------------------------------------------------------------+";
-        } else {
-            return "" +
-"+--------------------------------------------------------------+\n" +
-"|                                                              |\n" +
-"|                     " + el4 + "------" + el4 + "                         |\n" +
-"|                      /|\\      /|\\                            |\n" +
-"|                     / | \\    / | \\                           |\n" +
-"|                    /  |  \\  /  |  \\                          |\n" +
-"|                " + el3 + "---|--" + el1 + "--|---" + el3 + "                      |\n" +
-"|                  \\   |  /  \\  |   /                          |\n" +
-"|                   \\  | /    \\ |  /                           |\n" +
-"|                    \\ |/ " + el2 + " \\| /                           |\n" +
-"|                     " + el3 + "------" + el3 + "                          |\n" +
-"|                    / |\\      /| \\                            |\n" +
-"|                   /  | \\" + el2 + "/ |  \\                           |\n" +
-"|                  /   |  \\  /  |   \\                          |\n" +
-"|                " + el3 + "---|--" + el1 + "--|---" + el3 + "                      |\n" +
-"|                    \\  |  /  \\  |  /                          |\n" +
-"|                     \\ | /    \\ | /                           |\n" +
-"|                      \\|/      \\|/                            |\n" +
-"|                     " + el4 + "------" + el4 + "                         |\n" +
-"|                                                              |\n" +
-"+--------------------------------------------------------------+";
-        }
-    }
-    
-    // Helper function to get fabrication protocol based on system type
-    function getFabricationProtocol(data) {
-        const protocols = {
-            'SUPERCONDUCTOR': {
-                process: 'High-temperature solid-state synthesis',
-                pressure: 'Ambient to 10 GPa',
-                seed: 'Oxide precursor mixture',
-                atmosphere: 'Oxygen-controlled (pO₂ = 0.21 atm)',
-                verification: 'SQUID magnetometry, R vs T, Meissner effect',
-                equipment: ['Box furnace (1200°C max)', 'Hydraulic press', 'Ball mill', 'Pellet die'],
-                specialAnalysis: 'SQUID Magnetometer for Tc determination',
-                specialCheck: 'Superconducting transition verified via Meissner effect',
-                applications: 'Power transmission, magnetic levitation, quantum computing, medical imaging',
-                deployment: 'Wire drawing or thin film deposition for device integration',
-                improvements: 'Higher Tc, improved current density, reduced cooling requirements',
-                description: 'Bulk pellet or thin film with characteristic metallic luster. Exhibits complete diamagnetic response below Tc.',
-                steps: {
-                    preparation: [
-                        'Weigh stoichiometric amounts of oxide precursors (±0.1 mg precision)',
-                        'Ball mill for 24 hours to achieve <1 μm particle size',
-                        'Calcine at 900°C for 12 hours in flowing O₂',
-                        'Re-grind and press into 13mm pellets at 500 MPa',
-                        'Prepare crucible with sacrificial powder bed'
-                    ],
-                    synthesis: [
-                        'Load pellets into tube furnace',
-                        'Ramp to synthesis temperature (10°C/min)',
-                        'Hold at peak temperature for 24-72 hours',
-                        'Slow cool in oxygen atmosphere (1°C/min to 500°C)',
-                        'Anneal at 500°C for oxygen loading (48 hours)',
-                        'Furnace cool to room temperature'
-                    ],
-                    characterization: [
-                        'XRD for phase purity and lattice parameters',
-                        'SQUID magnetometry for Tc and Meissner fraction',
-                        'Four-probe resistivity vs temperature',
-                        'SEM/EDS for microstructure and composition',
-                        'HRTEM for atomic-scale structure verification'
-                    ]
-                }
-            },
-            'METAL': {
-                process: 'Arc melting or high-pressure synthesis',
-                pressure: '10-500 GPa (composition dependent)',
-                seed: 'Elemental metal ingots',
-                atmosphere: 'Ultra-high purity Argon',
-                verification: 'XRD, resistivity, optical reflectance',
-                equipment: ['Arc melter with water-cooled hearth', 'Diamond anvil cell', 'Induction furnace', 'Glove box (O₂ < 1 ppm)'],
-                specialAnalysis: 'Optical reflectance for metallic character',
-                specialCheck: 'Metallic reflectance and conductivity confirmed',
-                applications: 'Energy storage, catalysis, structural materials, electronics',
-                deployment: 'Casting, powder metallurgy, or thin film deposition',
-                improvements: 'Enhanced conductivity, novel magnetic properties, improved mechanical strength',
-                description: 'Metallic solid with high reflectance. May exhibit unusual electronic or magnetic properties due to quasicrystalline order.',
-                steps: {
-                    preparation: [
-                        'Source elemental metals ≥99.99% purity',
-                        'Clean and etch metal pieces (HCl/HNO₃ treatment)',
-                        'Weigh to stoichiometric ratios (±0.01 mg)',
-                        'Load into arc melter crucible under Ar',
-                        'Getter titanium button to remove residual oxygen'
-                    ],
-                    synthesis: [
-                        'Strike arc on titanium getter first',
-                        'Melt sample 5x, flipping between each melt',
-                        'Check mass loss (<0.1% acceptable)',
-                        'If high-pressure phase: load into DAC',
-                        'Compress to target pressure with ruby fluorescence monitoring',
-                        'Heat with laser to induce phase transition'
-                    ],
-                    characterization: [
-                        'Synchrotron XRD for structure determination',
-                        'Four-probe resistivity measurement',
-                        'Hall effect for carrier concentration',
-                        'Optical reflectance spectroscopy',
-                        'SAED for quasicrystalline verification'
-                    ]
-                }
-            },
-            'CERAMIC': {
-                process: 'Sol-gel or solid-state reaction',
-                pressure: 'Ambient',
-                seed: 'Metal alkoxide precursors',
-                atmosphere: 'Air or controlled pO₂',
-                verification: 'XRD, Raman, impedance spectroscopy',
-                equipment: ['Sol-gel reactor', 'Spray dryer', 'Muffle furnace', 'Impedance analyzer'],
-                specialAnalysis: 'Impedance spectroscopy for ionic conductivity',
-                specialCheck: 'Ceramic phase purity and density verified',
-                applications: 'Thermal barriers, ionic conductors, catalysts, biomedical implants',
-                deployment: 'Powder processing, tape casting, or plasma spraying',
-                improvements: 'Enhanced ionic conductivity, improved thermal stability, better mechanical properties',
-                description: 'Dense polycrystalline ceramic with characteristic color depending on composition. High hardness and thermal stability.',
-                steps: {
-                    preparation: [
-                        'Prepare metal alkoxide solutions in anhydrous ethanol',
-                        'Mix in stoichiometric ratios under N₂',
-                        'Add water slowly to initiate hydrolysis',
-                        'Age gel for 24-48 hours',
-                        'Dry at 80°C to form xerogel'
-                    ],
-                    synthesis: [
-                        'Calcine xerogel at 500°C to remove organics',
-                        'Grind to fine powder (<1 μm)',
-                        'Press into pellets or form green body',
-                        'Sinter at 1200-1600°C for densification',
-                        'Control atmosphere for desired oxidation state',
-                        'Cool at controlled rate to prevent cracking'
-                    ],
-                    characterization: [
-                        'XRD for phase identification',
-                        'Raman spectroscopy for local structure',
-                        'SEM for microstructure and grain size',
-                        'Archimedes density measurement',
-                        'Microhardness testing'
-                    ]
-                }
-            },
-            'SEMICONDUCTOR': {
-                process: 'Molecular beam epitaxy (MBE) or CVD',
-                pressure: 'Ultra-high vacuum (10⁻¹⁰ Torr)',
-                seed: 'Single crystal substrate (Si, GaAs, sapphire)',
-                atmosphere: 'UHV with precursor gases',
-                verification: 'RHEED, PL, Hall effect, STM',
-                equipment: ['MBE system', 'MOCVD reactor', 'Photoluminescence setup', 'Hall system'],
-                specialAnalysis: 'Photoluminescence for bandgap and defects',
-                specialCheck: 'Bandgap and carrier mobility verified',
-                applications: 'Photovoltaics, LEDs, thermoelectrics, quantum devices',
-                deployment: 'Wafer-scale growth for device fabrication',
-                improvements: 'Tunable bandgap, enhanced carrier mobility, novel quantum effects',
-                description: 'Epitaxial thin film or bulk crystal with controlled electronic properties. Color depends on bandgap.',
-                steps: {
-                    preparation: [
-                        'Clean substrate (RCA clean or equivalent)',
-                        'Load into MBE chamber, bake at 200°C overnight',
-                        'Flash substrate to remove oxide (850°C for Si)',
-                        'Verify surface reconstruction via RHEED',
-                        'Prepare effusion cells and calibrate fluxes'
-                    ],
-                    synthesis: [
-                        'Cool substrate to growth temperature',
-                        'Open shutters in sequence for desired composition',
-                        'Monitor RHEED oscillations for layer-by-layer growth',
-                        'Grow buffer layer if needed',
-                        'Deposit active layers at optimized conditions',
-                        'Cap with protective layer if air-sensitive'
-                    ],
-                    characterization: [
-                        'In-situ RHEED for surface quality',
-                        'Ex-situ XRD for crystallinity and orientation',
-                        'AFM for surface morphology',
-                        'Photoluminescence for optical quality',
-                        'Hall effect for carrier concentration and mobility'
-                    ]
-                }
-            },
-            'ALLOY': {
-                process: 'Rapid solidification or mechanical alloying',
-                pressure: 'Ambient',
-                seed: 'Elemental powders or master alloys',
-                atmosphere: 'Inert (Ar/He)',
-                verification: 'XRD, DSC, mechanical testing',
-                equipment: ['Melt spinner', 'Ball mill (SPEX 8000)', 'Drop calorimeter', 'Nanoindenter'],
-                specialAnalysis: 'DSC for thermal stability and glass transition',
-                specialCheck: 'Quasicrystalline phase confirmed stable',
-                applications: 'Aerospace components, thermal spray coatings, wear-resistant surfaces',
-                deployment: 'Powder consolidation, casting, or surface coating',
-                improvements: 'Exceptional hardness, low friction, corrosion resistance',
-                description: 'Metallic alloy with icosahedral or decagonal quasicrystalline structure. Exhibits unusual combination of hardness and brittleness.',
-                steps: {
-                    preparation: [
-                        'Weigh elemental metals to ±0.001 g precision',
-                        'Pre-alloy by arc melting if needed',
-                        'Crush to <100 mesh powder for melt spinning',
-                        'Or load directly into ball mill for MA',
-                        'Ensure inert atmosphere throughout'
-                    ],
-                    synthesis: [
-                        'For melt spinning: heat to 100°C above liquidus',
-                        'Eject onto Cu wheel at 40 m/s surface speed',
-                        'Collect ribbons under Ar',
-                        'For MA: mill for 20-100 hours with WC media',
-                        'Monitor XRD periodically for phase formation',
-                        'Anneal at optimized temperature if needed'
-                    ],
-                    characterization: [
-                        'XRD for phase identification and QC verification',
-                        'TEM with SAED for local structure',
-                        'DSC for thermal stability',
-                        'Nanoindentation for hardness',
-                        'Tribological testing for friction coefficient'
-                    ]
-                }
-            }
-        };
-        
-        return protocols[data.type] || protocols['ALLOY'];
-    }
-
-    // Initialize
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+if (document.readyState === ‘loading’) { document.addEventListener(‘DOMContentLoaded’, init); } else { init(); }
 </script>
-<!-- Default Statcounter code for Main Console
-DARPA-PA-26-03
-https://protodynamics01.github.io/zero_slack_simulator/index.html
--->
-<script type="text/javascript">
-var sc_project=13194911; 
-var sc_invisible=1; 
-var sc_security="0878b6a9"; 
-</script>
-<script type="text/javascript"
-src="https://www.statcounter.com/counter/counter.js"
-async></script>
-<noscript><div class="statcounter"><a title="Web Analytics"
-href="https://statcounter.com/" target="_blank"><img
-class="statcounter"
-src="https://c.statcounter.com/13194911/0/0878b6a9/1/"
-alt="Web Analytics"
-referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
-<!-- End of Statcounter Code -->
+
 </body>
 </html>
