@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v40.0 | 40 SYSTEMS</title>
+    <title>GRAVES VALIDATION SUITE v40.0 | 40 SYSTEMS | KJLC HARDWARE</title>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -385,14 +385,14 @@ function getDetailedFab(id, data, angle, avgMass) {
         const dosage = (2.0 + avgMass * 0.008).toFixed(1);
         return {
             equipment: {
-                primary: "Magnetron Sputtering System - AJA Orion 8-target co-sputter",
-                secondary: "Planetary Ball Mill - Retsch PM400 with ZrO2 media",
-                tertiary: "Spray Dryer - Buchi B-290 with N2 inerting",
-                analysis: "Cs-corrected STEM, ICP-MS, SAXS, DLS (Malvern)"
+                primary: "KJLC PVD-75 PRO Line with TORUS® 8-target co-sputter magnetrons",
+                secondary: "KJLC MagiDrive™ precision rotary feedthrough for lock angle indexing",
+                tertiary: "Planetary Ball Mill with ZrO2 media + Spray Dryer with N2 inerting",
+                analysis: "Cs-corrected STEM, ICP-MS, SAXS, DLS | KJLC eKLipse™ process control"
             },
             process: {
-                step1: "TARGET PREP: Mount 99.99% pure Ir (45%), Os (35%), Rh (20%) targets. Add 10B target (0.0004 wt%). Chamber base: <5×10⁻⁸ Torr.",
-                step2: "CO-SPUTTERING: Ar plasma 3 mTorr, 150W RF per target. Substrate 300°C. Rate 0.5 Å/s. Lock angle " + angle.toFixed(6) + "° via indexed rotation.",
+                step1: "TARGET PREP: Mount 99.99% pure Ir (45%), Os (35%), Rh (20%) KJLC TORUS® targets. Add 10B target (0.0004 wt%). KJLC chamber base: <5×10⁻⁸ Torr.",
+                step2: "CO-SPUTTERING: Ar plasma 3 mTorr, 150W RF per TORUS® target. Substrate 300°C. Rate 0.5 Å/s. Lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™ indexed rotation.",
                 step3: "HARVEST: Scrape film from Si wafer. Transfer to ball mill jar with ZrO2 media. Mill 4h at 400 RPM in anhydrous hexane.",
                 step4: "SIZE SELECTION: Centrifuge 2,000g×10min (discard pellet), then 20,000g×30min (collect pellet). Target: " + size + " nm ± 10%.",
                 step5: "GRAPHENE COATING: PECVD CH4/H2 (10:90) at 600°C, 1 Torr, 100W, 30 min. Forms 1-2 monolayer shell.",
@@ -418,15 +418,15 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 1 && rank <= 10) {
         return {
             equipment: {
-                primary: "Vacuum Induction Melting (VIM) Furnace - Consarc/ALD 500kg",
-                secondary: "Bridgman DS Furnace - 100°C/cm gradient capability",
-                tertiary: "Hot Isostatic Press - Quintus QIH-122",
-                analysis: "HRTEM, XRD, EBSD, mechanical testing"
+                primary: "KJLC Custom Vacuum Induction Melting (VIM) Chamber - 500kg capacity",
+                secondary: "KJLC Bridgman DS System with MagiDrive™ - 100°C/cm gradient capability",
+                tertiary: "Hot Isostatic Press (HIP) - 200 MPa capability",
+                analysis: "HRTEM, XRD, EBSD, mechanical testing | KJLC eKLipse™ process control"
             },
             process: {
                 step1: "CHARGE PREP: Weigh " + data.elements.join(", ") + " to ±0.01%. Use ≥99.95% purity stock.",
-                step2: "VIM MELT: Load into YSZ crucible. Evacuate to <10⁻⁴ mbar. Backfill 500 mbar Ar. Heat to liquidus+100°C. Hold 45 min with EM stir.",
-                step3: "DS CAST: Pour to preheated mold. Gradient 80-100°C/cm. Withdraw 3-8 mm/min. Seed at lock angle " + angle.toFixed(6) + "°.",
+                step2: "VIM MELT: Load into YSZ crucible in KJLC chamber. Evacuate to <10⁻⁴ mbar. Backfill 500 mbar Ar. Heat to liquidus+100°C. Hold 45 min with EM stir.",
+                step3: "DS CAST: Pour to preheated mold. Gradient 80-100°C/cm. Withdraw 3-8 mm/min. Seed at lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™.",
                 step4: "HEAT TREAT: Solution anneal + aging per alloy spec. Atmosphere: Ar or vacuum.",
                 step5: "HIP (if needed): 1180-1260°C / 150-200 MPa / 4h in Ar.",
                 step6: "MACHINING: EDM rough, CBN/diamond finish. Inspect per aerospace specs."
@@ -449,10 +449,10 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 11 && rank <= 20) {
         return {
             equipment: {
-                primary: "High-P/T Synthesis - DAC, multi-anvil, or custom reactor",
+                primary: "High-P/T Synthesis - DAC, multi-anvil, or KJLC custom reactor",
                 secondary: "Synchrotron XRD access - APS/ESRF",
                 tertiary: "SQUID magnetometer for Tc measurement",
-                analysis: "In-situ XRD, Raman, electrical transport"
+                analysis: "In-situ XRD, Raman, electrical transport | KJLC vacuum components"
             },
             process: {
                 step1: "PRECURSOR: Source " + data.elements.join(", ") + " at ≥99.99% purity.",
@@ -478,7 +478,7 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 21 && rank <= 40) {
         return {
             equipment: {
-                primary: "GMP Nanoparticle Reactor - 50L jacketed vessel",
+                primary: "GMP Nanoparticle Reactor - 50L jacketed vessel with KJLC vacuum system",
                 secondary: "TFF System - Sartorius Sartoflow",
                 tertiary: "Lyophilizer - SP Scientific Genesis",
                 analysis: "DLS, TEM, ICP-MS, Endotoxin LAL, Sterility USP<71>"
@@ -508,13 +508,13 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 41 && rank <= 50) {
         return {
             equipment: {
-                primary: "Nanoparticle/Membrane Synthesis Reactor",
-                secondary: "Module Fabrication Equipment",
+                primary: "KJLC PVD-75 PRO Line for membrane/catalyst synthesis",
+                secondary: "Module Fabrication Equipment with KJLC vacuum system",
                 tertiary: "Performance Testing Station",
-                analysis: "BET, pore size, flux testing"
+                analysis: "BET, pore size, flux testing | KJLC eKLipse™ control"
             },
             process: {
-                step1: "SYNTHESIS: Prepare " + data.elements.join("-") + " " + data.lattice + " material at lock angle " + angle.toFixed(6) + "°.",
+                step1: "SYNTHESIS: KJLC TORUS® sputter prepare " + data.elements.join("-") + " " + data.lattice + " material at lock angle " + angle.toFixed(6) + "° via MagiDrive™.",
                 step2: "CHARACTERIZATION: Verify surface area, porosity, phase.",
                 step3: "INCORPORATION: Embed in membrane or pack in column.",
                 step4: "MODULE ASSEMBLY: Pot into housing, install fittings.",
@@ -537,14 +537,14 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 51 && rank <= 60) {
         return {
             equipment: {
-                primary: "GMP Biopharmaceutical Suite",
-                secondary: "Conjugation Reactor",
+                primary: "GMP Biopharmaceutical Suite with KJLC vacuum deposition",
+                secondary: "KJLC PVD-75 PRO Line for nanocarrier synthesis",
                 tertiary: "Aseptic Fill-Finish Line",
-                analysis: "LC-MS/MS, flow cytometry, potency assays"
+                analysis: "LC-MS/MS, flow cytometry, potency assays | KJLC eKLipse™ control"
             },
             process: {
                 step1: "ACTIVE PREP: Source/synthesize therapeutic payload.",
-                step2: "CARRIER: Prepare " + data.lattice + " NP at lock angle " + angle.toFixed(6) + "°.",
+                step2: "CARRIER: KJLC TORUS® sputter prepare " + data.lattice + " NP at lock angle " + angle.toFixed(6) + "° via MagiDrive™.",
                 step3: "CONJUGATION: Link active to carrier.",
                 step4: "PURIFICATION: Remove free active.",
                 step5: "FORMULATION: Buffer exchange, stabilizers.",
@@ -566,16 +566,16 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 61 && rank <= 70) {
         return {
             equipment: {
-                primary: "Semiconductor Cleanroom - Class 100",
-                secondary: "E-beam Lithography System",
+                primary: "Semiconductor Cleanroom - Class 100 with KJLC deposition systems",
+                secondary: "KJLC PVD-75 PRO Line for electrode metallization",
                 tertiary: "Wire Bonding Equipment",
                 analysis: "Impedance spectroscopy, accelerated life testing"
             },
             process: {
                 step1: "SUBSTRATE: Start with " + (data.elements[0] || "Si") + " wafer.",
                 step2: "DIELECTRIC: Deposit insulation layer.",
-                step3: "PATTERNING: E-beam litho for " + data.lattice + " electrode array at " + angle.toFixed(6) + "°.",
-                step4: "METALLIZATION: Deposit Au/Pt electrodes.",
+                step3: "PATTERNING: E-beam litho for " + data.lattice + " electrode array at " + angle.toFixed(6) + "° via KJLC MagiDrive™.",
+                step4: "METALLIZATION: KJLC TORUS® sputter Au/Pt electrodes.",
                 step5: "PASSIVATION: Apply biocompatible coating.",
                 step6: "ASSEMBLY: Dice, wire bond, encapsulate, sterilize."
             },
@@ -595,16 +595,16 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 71 && rank <= 80) {
         return {
             equipment: {
-                primary: "5-Axis CNC - DMG Mori",
-                secondary: "Metal AM - EOS M400",
-                tertiary: "Assembly Cell with robotics",
-                analysis: "CMM, surface metrology, functional testing"
+                primary: "5-Axis CNC Machining Center",
+                secondary: "Metal AM System for complex geometries",
+                tertiary: "KJLC PVD-75 PRO Line for wear-resistant coatings",
+                analysis: "CMM, surface metrology, functional testing | KJLC eKLipse™ control"
             },
             process: {
                 step1: "MATERIAL: Source " + data.elements.join(", ") + ".",
                 step2: "FORMING: CNC or AM with " + data.lattice + " structure.",
-                step3: "HEAT TREAT: Develop φ-lattice at lock angle " + angle.toFixed(6) + "°.",
-                step4: "PRECISION MACHINING: Critical interfaces.",
+                step3: "HEAT TREAT: Develop φ-lattice at lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™ indexed rotation.",
+                step4: "COATING: Apply KJLC TORUS® sputtered wear coating.",
                 step5: "ASSEMBLY: Integrate motors, sensors, electronics.",
                 step6: "TEST: Calibration, functional verification."
             },
@@ -624,13 +624,13 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 81 && rank <= 90) {
         return {
             equipment: {
-                primary: "Electrode Coating Line",
-                secondary: "Dry Room Cell Assembly",
+                primary: "KJLC PVD-75 PRO Line for electrode active material deposition",
+                secondary: "Electrode Coating Line with KJLC vacuum components",
                 tertiary: "Formation/Testing Cycler",
-                analysis: "EIS, cycle life, safety per UN38.3"
+                analysis: "EIS, cycle life, safety per UN38.3 | KJLC eKLipse™ control"
             },
             process: {
-                step1: "ACTIVE MATERIAL: Synthesize " + data.elements.join("-") + " at lock angle " + angle.toFixed(6) + "°.",
+                step1: "ACTIVE MATERIAL: KJLC TORUS® sputter synthesize " + data.elements.join("-") + " at lock angle " + angle.toFixed(6) + "° via MagiDrive™.",
                 step2: "SLURRY: Mix active, carbon, binder.",
                 step3: "COATING: Slot die onto current collector.",
                 step4: "CALENDERING: Target density and porosity.",
@@ -653,16 +653,16 @@ function getDetailedFab(id, data, angle, avgMass) {
     if(rank >= 91 && rank <= 100) {
         return {
             equipment: {
-                primary: "Large-Scale Fabrication Facility",
-                secondary: "Marine Coating System",
-                tertiary: "Heavy Lift Vessel",
-                analysis: "NDT, load testing, marine surveys"
+                primary: "Large-Scale Fabrication Facility with KJLC coating systems",
+                secondary: "KJLC PVD-75 PRO Line for marine coating deposition",
+                tertiary: "Heavy Lift Vessel for deployment",
+                analysis: "NDT, load testing, marine surveys | KJLC eKLipse™ control"
             },
             process: {
                 step1: "ENGINEERING: Finalize design with " + data.lattice + " at " + angle.toFixed(6) + "°.",
                 step2: "PROCUREMENT: Source " + data.elements.join(", ") + ".",
                 step3: "FABRICATION: Cut, form, weld per drawings.",
-                step4: "COATING: Apply φ-lattice surface treatment.",
+                step4: "COATING: Apply KJLC TORUS® sputtered φ-lattice surface treatment via MagiDrive™ at lock angle.",
                 step5: "SYSTEMS: Install M&E, controls.",
                 step6: "DEPLOYMENT: Transport and offshore install."
             },
@@ -681,15 +681,15 @@ function getDetailedFab(id, data, angle, avgMass) {
     // DEFAULT
     return {
         equipment: {
-            primary: "Application-specific synthesis equipment",
-            secondary: "Characterization: TEM, XRD, SAED",
-            tertiary: "Processing as required",
-            analysis: "Lock angle verification"
+            primary: "KJLC PVD-75 PRO Line with TORUS® magnetron sputtering",
+            secondary: "KJLC MagiDrive™ precision rotary feedthrough",
+            tertiary: "Characterization: TEM, XRD, SAED",
+            analysis: "Lock angle verification | KJLC eKLipse™ process control"
         },
         process: {
-            step1: "SOURCE: " + data.elements.join(", ") + " at ≥99.99% purity.",
-            step2: "SYNTHESIZE: Process for " + data.lattice + " lattice.",
-            step3: "VERIFY: Lock angle " + angle.toFixed(6) + "° via SAED.",
+            step1: "SOURCE: " + data.elements.join(", ") + " at ≥99.99% purity. Mount as KJLC TORUS® targets.",
+            step2: "SYNTHESIZE: KJLC PVD-75 process for " + data.lattice + " lattice.",
+            step3: "VERIFY: Lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™ indexed rotation. Confirm via SAED.",
             step4: "OPTIMIZE: Post-processing as needed.",
             step5: "QC: Full characterization.",
             step6: "PACKAGE: Per material requirements."
