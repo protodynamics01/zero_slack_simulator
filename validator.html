@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAVES VALIDATION SUITE v40.0 | 40 SYSTEMS | KJLC HARDWARE</title>
+    <title>GRAVES VALIDATION SUITE v40.0 | 40 SYSTEMS </title>
     <style>
         :root {
             --cyan: #00ffcc;
@@ -14,6 +14,90 @@
             --border: 1px solid rgba(0, 255, 204, 0.2);
             --font-main: "Inter", system-ui, sans-serif;
             --font-mono: 'Courier New', monospace;
+        }
+        /* PASSWORD OVERLAY */
+        #password-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        #password-overlay.hidden { display: none; }
+        .password-box {
+            background: rgba(10, 15, 20, 0.95);
+            border: 1px solid var(--cyan);
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
+        }
+        .password-title {
+            font-family: var(--font-mono);
+            font-size: 1.2em;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .password-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.7em;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+        .password-input {
+            background: #000;
+            border: 1px solid #333;
+            color: var(--cyan);
+            font-family: var(--font-mono);
+            font-size: 1.2em;
+            padding: 12px 20px;
+            width: 280px;
+            text-align: center;
+            letter-spacing: 3px;
+            outline: none;
+        }
+        .password-input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+        .password-input::placeholder {
+            color: #444;
+            letter-spacing: 1px;
+        }
+        .password-btn {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .password-btn:hover {
+            background: var(--cyan);
+            color: #000;
+        }
+        .password-error {
+            color: var(--red);
+            font-family: var(--font-mono);
+            font-size: 0.75em;
+            margin-top: 15px;
+            height: 20px;
+            letter-spacing: 1px;
+        }
+        .password-footer {
+            font-family: var(--font-mono);
+            font-size: 0.6em;
+            color: #333;
+            margin-top: 30px;
+            letter-spacing: 1px;
         }
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -149,6 +233,18 @@
     </style>
 </head>
 <body>
+<!-- PASSWORD PROTECTION OVERLAY -->
+<div id="password-overlay">
+    <div class="password-box">
+        <div class="password-title">LFGKC VALIDATION SUITE</div>
+        <div class="password-subtitle">AUTHORIZED ACCESS ONLY</div>
+        <input type="password" id="password-input" class="password-input" placeholder="ENTER ACCESS CODE" autocomplete="off">
+        <button class="password-btn" onclick="checkPassword()">AUTHENTICATE</button>
+        <div id="password-error" class="password-error"></div>
+        <div class="password-footer">PROTODYNAMICS // CONFIDENTIAL</div>
+    </div>
+</div>
+
 <header>
     <div>GRAVES VALIDATION SUITE <span style="color:#666">// v40.0 | 40 SYSTEMS</span></div>
     <div id="industry-indicator" style="color:#666; font-size:0.85em; font-family:var(--font-mono);"></div>
@@ -249,6 +345,33 @@
     </div>
 </div>
 <script>
+// PASSWORD PROTECTION
+const VALID_PASSWORD = "2026#GPC001";
+
+function checkPassword() {
+    const input = document.getElementById('password-input').value;
+    const errorEl = document.getElementById('password-error');
+    
+    if (input === VALID_PASSWORD) {
+        document.getElementById('password-overlay').classList.add('hidden');
+        errorEl.textContent = '';
+    } else {
+        errorEl.textContent = 'ACCESS DENIED — INVALID CODE';
+        document.getElementById('password-input').value = '';
+        document.getElementById('password-input').focus();
+    }
+}
+
+// Allow Enter key to submit
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('password-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkPassword();
+        }
+    });
+    document.getElementById('password-input').focus();
+});
+
 const ATOMIC_MASS={"H":1.008,"Li":6.94,"B":10.81,"C":12.01,"N":14.007,"O":15.999,"Mg":24.305,"Al":26.98,"Si":28.085,"S":32.06,"Ca":40.078,"Ti":47.867,"Cr":51.996,"Mn":54.938,"Fe":55.845,"Co":58.933,"Ni":58.693,"Cu":63.546,"Zn":65.38,"Ge":72.63,"Y":88.906,"Zr":91.224,"Nb":92.906,"Mo":95.95,"Rh":102.91,"Pd":106.42,"Ag":107.868,"La":138.91,"Gd":157.25,"Hf":178.49,"Ta":180.948,"W":183.84,"Re":186.207,"Os":190.23,"Ir":192.217,"Pt":195.084,"Au":196.967,"Pb":207.2,"U":238.029,"Th":232.04};
 const ELEMENT_COLORS={"C":"#888888","Si":"#b0b0ff","Fe":"#ff8844","Al":"#aaaaff","Ti":"#ccccff","Ni":"#99ff99","Co":"#ff99dd","Cr":"#ffaa44","W":"#ffff66","Mo":"#cc99ff","Nb":"#88ddff","Cu":"#ff9955","Zr":"#aaffaa","Ag":"#dddddd","B":"#ffaacc","Re":"#ffcc88","Hf":"#99ccff","Ta":"#bb99ff","Au":"#ffd700","H":"#ffffff","O":"#ff4444","N":"#3333ff","Y":"#aaffcc","Gd":"#ffaaff","Ir":"#ffff99","Os":"#ccff99","Rh":"#ffccff","La":"#aaccff","Li":"#ff6666","Ge":"#88aaff","Pd":"#ccddff","Ca":"#ffccaa","S":"#ffff00","Mg":"#aaddaa"};
 const DB={
@@ -1343,12 +1466,12 @@ var sc_security="7ec92958";
 <script type="text/javascript"
 src="https://www.statcounter.com/counter/counter.js"
 async></script>
-<noscript><div class="statcounter"><a title="Web Analytics
-Made Easy - Statcounter" href="https://statcounter.com/"
-target="_blank"><img class="statcounter"
+<noscript><div class="statcounter"><a title="Web Analytics"
+href="https://statcounter.com/" target="_blank"><img
+class="statcounter"
 src="https://c.statcounter.com/13194905/0/7ec92958/1/"
-alt="Web Analytics Made Easy - Statcounter"
+alt="Web Analytics"
 referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
-<!-- End of Statcounter Code -->    
+<!-- End of Statcounter Code -->
 </body>
 </html>
