@@ -392,7 +392,7 @@ function getDetailedFab(id, data, angle, avgMass) {
             },
             process: {
                 step1: "TARGET PREP: Mount 99.99% pure Ir (45%), Os (35%), Rh (20%) KJLC TORUS® targets. Add 10B target (0.0004 wt%). KJLC chamber base: <5×10⁻⁸ Torr.",
-                step2: "CO-SPUTTERING: Ar plasma 3 mTorr, 150W RF per TORUS® target. Substrate 300°C. Rate 0.5 Å/s. Lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™ indexed rotation.",
+                step2: "CO-SPUTTERING: Ar plasma 3 mTorr, 150W RF per TORUS® target. Substrate 300°C. Rate 0.5 Å/s. Lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™ indexed rotation. [SEE 'AEP 5.1 LFGKC ACTIVATION' SECTION BELOW FOR FIELD PARAMETERS]",
                 step3: "HARVEST: Scrape film from Si wafer. Transfer to ball mill jar with ZrO2 media. Mill 4h at 400 RPM in anhydrous hexane.",
                 step4: "SIZE SELECTION: Centrifuge 2,000g×10min (discard pellet), then 20,000g×30min (collect pellet). Target: " + size + " nm ± 10%.",
                 step5: "GRAPHENE COATING: PECVD CH4/H2 (10:90) at 600°C, 1 Torr, 100W, 30 min. Forms 1-2 monolayer shell.",
@@ -426,7 +426,7 @@ function getDetailedFab(id, data, angle, avgMass) {
             process: {
                 step1: "CHARGE PREP: Weigh " + data.elements.join(", ") + " to ±0.01%. Use ≥99.95% purity stock.",
                 step2: "VIM MELT: Load into YSZ crucible in KJLC chamber. Evacuate to <10⁻⁴ mbar. Backfill 500 mbar Ar. Heat to liquidus+100°C. Hold 45 min with EM stir.",
-                step3: "DS CAST: Pour to preheated mold. Gradient 80-100°C/cm. Withdraw 3-8 mm/min. Seed at lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™.",
+                step3: "DS CAST: Pour to preheated mold. Gradient 80-100°C/cm. Withdraw 3-8 mm/min. Seed at lock angle " + angle.toFixed(6) + "° via KJLC MagiDrive™. [SEE 'AEP 5.1 LFGKC ACTIVATION' SECTION BELOW FOR FIELD PARAMETERS]",
                 step4: "HEAT TREAT: Solution anneal + aging per alloy spec. Atmosphere: Ar or vacuum.",
                 step5: "HIP (if needed): 1180-1260°C / 150-200 MPa / 4h in Ar.",
                 step6: "MACHINING: EDM rough, CBN/diamond finish. Inspect per aerospace specs."
@@ -1047,8 +1047,10 @@ txt += `┌───────────────────────
 │                    AEP 5.1 RETROFIT — LFGKC ACTIVATION                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-This section describes what the AEP 5.1 retrofit hardware is doing during the
-critical synthesis/growth phase to achieve Zero-Slack deterministic control.
+Unlike conventional deposition processes where crystallinity emerges statistically,
+the AEP 5.1 retrofit ACTIVELY ENFORCES growth conditions throughout synthesis.
+The following section describes the real-time control actions performed by the
+system during the critical growth phase to achieve Zero-Slack deterministic control.
 
 HARDWARE CONFIGURATION:
   ├─ KJLC PVD-75 PRO Line (or compatible chamber)
