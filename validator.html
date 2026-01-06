@@ -1042,6 +1042,79 @@ Object.keys(fabDetails.process).forEach((key, idx) => {
 `;
 });
 
+// Add LFGKC Activation Block - THE CRITICAL MISSING PIECE
+txt += `┌─────────────────────────────────────────────────────────────────────────────┐
+│                    AEP 5.1 RETROFIT — LFGKC ACTIVATION                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+This section describes what the AEP 5.1 retrofit hardware is doing during the
+critical synthesis/growth phase to achieve Zero-Slack deterministic control.
+
+HARDWARE CONFIGURATION:
+  ├─ KJLC PVD-75 PRO Line (or compatible chamber)
+  ├─ KJLC TORUS® Magnetron Cathodes (multi-target co-sputter capable)
+  ├─ KJLC MagiDrive™ Precision Rotary Feedthrough (±0.001° resolution)
+  ├─ Deuterium Phase Clock (327.384 MHz hyperfine reference)
+  ├─ 32×32 Quadrupole Emitter Grid
+  └─ KJLC eKLipse™ Process Control with AEP Module
+
+LFGKC ACTIVATION SEQUENCE:
+  1. PRE-RUN CALIBRATION
+     • Zero-Slack Validator audit confirms system ready
+     • MagiDrive™ encoder zeroed to reference index
+     • Phase Clock locked to Deuterium hyperfine transition (327.384 MHz)
+     • Chamber base pressure verified: <5×10⁻⁸ Torr
+
+  2. LOCK ANGLE ENGAGEMENT
+     • MagiDrive™ indexes substrate to ${angle.toFixed(6)}° ± 0.001°
+     • Position held in "Stiff Mode" — closed-loop encoder feedback
+     • Rotary stability confirmed before proceeding
+
+  3. FIELD ACTIVATION (CRITICAL)
+     • Quadrupole emitter grid energizes
+     • 327.384 MHz RF field broadcasts into growth zone
+     • Field phase-locks to Deuterium clock reference
+     • eKLipse™ synchronizes deposition rate to clock pulse train
+
+  4. DETERMINISTIC GROWTH
+     • Atoms arriving at growth front experience field guidance
+     • Trajectories constrained to ground-state landing positions
+     • Phason strain energetically forbidden at lock angle
+     • Zero-Slack condition maintained throughout deposition
+
+  5. REAL-TIME MONITORING
+     • MagiDrive™ position logged continuously (±0.0001° resolution)
+     • Phase clock stability monitored (<1 Hz drift)
+     • Chamber pressure, temperature, power logged time-synced
+     • Any deviation triggers immediate alarm/abort
+
+  6. RUN COMPLETION
+     • Field ramps down in controlled sequence
+     • MagiDrive™ returns to home position
+     • Run report generated: traces, parameters, calibration status
+     • Sample tagged with unique Run ID for traceability
+
+OPERATOR ACTIONS DURING LFGKC PHASE:
+  □ Verify "LFGKC ACTIVE" status on eKLipse™ display
+  □ Monitor Phase Lock indicator (must remain GREEN)
+  □ Confirm rotary position within ±0.001° of ${angle.toFixed(6)}°
+  □ Log any alarms or deviations immediately
+  □ Do NOT interrupt run unless safety interlock triggers
+
+VERIFICATION GATES (must pass for valid run):
+  ✓ Gate 1: Rotary stability maintained for entire deposition
+  ✓ Gate 2: Phase lock held continuously (no unlock events)
+  ✓ Gate 3: Pressure stability within ±5% of setpoint
+  ✓ Gate 4: Temperature stability within ±2°C of setpoint
+
+POST-RUN PROOF PACKAGE:
+  • Run Report (PDF): Recipe, calibration, time-synced traces, operator ID
+  • XRD Data: Raw files + FWHM analysis (must be ≤0.3°)
+  • SAED Pattern: Confirms τ-scaling and ${d.lattice} symmetry
+  • Chain-of-Custody: Sample labeled with Run ID
+
+`;
+
 txt += `┌─────────────────────────────────────────────────────────────────────────────┐
 │                           FINAL PRODUCT                                      │
 └─────────────────────────────────────────────────────────────────────────────┘
