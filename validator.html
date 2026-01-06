@@ -1042,30 +1042,118 @@ Object.keys(fabDetails.process).forEach((key, idx) => {
 `;
 });
 
-// Add LFGKC Activation Block - THE CRITICAL MISSING PIECE
-txt += `┌─────────────────────────────────────────────────────────────────────────────┐
-│                    AEP 5.1 RETROFIT — LFGKC ACTIVATION                      │
-└─────────────────────────────────────────────────────────────────────────────┘
+// Add LFGKC Activation Block - PROCESS-SPECIFIC VERSION
+const rank = parseInt(currentRank);
 
-Unlike conventional deposition processes where crystallinity emerges statistically,
-the AEP 5.1 retrofit ACTIVELY ENFORCES growth conditions throughout synthesis.
-The following section describes the real-time control actions performed by the
-system during the critical growth phase to achieve Zero-Slack deterministic control.
+// Determine process type for correct hardware configuration
+let hardwareConfig, activationSequence, processType;
 
-HARDWARE CONFIGURATION:
-  ├─ KJLC PVD-75 PRO Line (or compatible chamber)
-  ├─ KJLC TORUS® Magnetron Cathodes (multi-target co-sputter capable)
+if(rank >= 1 && rank <= 10) {
+    // AEROSPACE METALS - Casting/DS process
+    processType = "DIRECTIONAL SOLIDIFICATION";
+    hardwareConfig = `HARDWARE CONFIGURATION (VIM/DS CASTING):
+  ├─ KJLC Custom VIM/DS Chamber (500kg capacity)
+  ├─ Precision Withdrawal Ram (Active Feedback Control)
+  ├─ KJLC MagiDrive™ Seed Holder Rotary Feedthrough (±0.001° resolution)
+  ├─ Deuterium Phase Clock (327.384 MHz hyperfine reference)
+  ├─ Quadrupole Induction Coil Assembly (Field Emitter)
+  └─ KJLC eKLipse™ Process Control with AEP Module`;
+    activationSequence = `LFGKC ACTIVATION SEQUENCE (CASTING MODE):
+  1. PRE-RUN CALIBRATION
+     • Zero-Slack Validator audit confirms system ready
+     • MagiDrive™ seed holder zeroed to thermal gradient axis
+     • Phase Clock locked to Deuterium hyperfine transition (327.384 MHz)
+     • Chamber vacuum verified: <10⁻⁴ mbar
+
+  2. LOCK ANGLE ENGAGEMENT
+     • MagiDrive™ orients Seed Crystal to ${angle.toFixed(6)}° ± 0.001°
+     • Position held in "Stiff Mode" relative to lattice plane
+     • Rotary stability confirmed before pour
+
+  3. FIELD ACTIVATION (CRITICAL)
+     • Quadrupole induction coils energize around solidification zone
+     • 327.384 MHz RF field broadcasts into melt interface
+     • Field phase-locks to Deuterium clock reference
+     • eKLipse™ synchronizes Withdrawal Rate to clock pulse train
+
+  4. DETERMINISTIC SOLIDIFICATION
+     • Atoms transitioning from Liquid → Solid experience field guidance
+     • Trajectories constrained to ground-state lattice positions
+     • Phason strain energetically forbidden at lock angle
+     • Zero-Slack condition maintained throughout withdrawal
+
+  5. REAL-TIME MONITORING
+     • MagiDrive™ seed position logged continuously (±0.0001° resolution)
+     • Phase clock stability monitored (<1 Hz drift)
+     • Melt temperature, withdrawal rate, vacuum logged time-synced
+     • Any deviation triggers immediate alarm/abort
+
+  6. RUN COMPLETION
+     • Field ramps down in controlled sequence
+     • Withdrawal complete; allow controlled cool-down
+     • Run report generated: traces, parameters, calibration status
+     • Casting tagged with unique Run ID for traceability`;
+} else if(d.type === "catalyst" || (rank >= 101 && rank <= 130)) {
+    // CATALYSTS - PVD/Sputtering process
+    processType = "MAGNETRON SPUTTERING";
+    hardwareConfig = `HARDWARE CONFIGURATION (PVD SPUTTERING):
+  ├─ KJLC PVD-75 PRO Line (multi-target co-sputter chamber)
+  ├─ KJLC TORUS® Magnetron Cathodes (8-target capability)
   ├─ KJLC MagiDrive™ Precision Rotary Feedthrough (±0.001° resolution)
   ├─ Deuterium Phase Clock (327.384 MHz hyperfine reference)
   ├─ 32×32 Quadrupole Emitter Grid
-  └─ KJLC eKLipse™ Process Control with AEP Module
-
-LFGKC ACTIVATION SEQUENCE:
+  └─ KJLC eKLipse™ Process Control with AEP Module`;
+    activationSequence = `LFGKC ACTIVATION SEQUENCE (SPUTTERING MODE):
   1. PRE-RUN CALIBRATION
      • Zero-Slack Validator audit confirms system ready
      • MagiDrive™ encoder zeroed to reference index
      • Phase Clock locked to Deuterium hyperfine transition (327.384 MHz)
      • Chamber base pressure verified: <5×10⁻⁸ Torr
+
+  2. LOCK ANGLE ENGAGEMENT
+     • MagiDrive™ indexes substrate to ${angle.toFixed(6)}° ± 0.001°
+     • Position held in "Stiff Mode" — closed-loop encoder feedback
+     • Rotary stability confirmed before plasma ignition
+
+  3. FIELD ACTIVATION (CRITICAL)
+     • Quadrupole emitter grid energizes
+     • 327.384 MHz RF field broadcasts into deposition zone
+     • Field phase-locks to Deuterium clock reference
+     • eKLipse™ synchronizes sputter rate to clock pulse train
+
+  4. DETERMINISTIC DEPOSITION
+     • Sputtered atoms arriving at substrate experience field guidance
+     • Trajectories constrained to ground-state landing positions
+     • Phason strain energetically forbidden at lock angle
+     • Zero-Slack condition maintained throughout deposition
+
+  5. REAL-TIME MONITORING
+     • MagiDrive™ position logged continuously (±0.0001° resolution)
+     • Phase clock stability monitored (<1 Hz drift)
+     • Chamber pressure, RF power, deposition rate logged time-synced
+     • Any deviation triggers immediate alarm/abort
+
+  6. RUN COMPLETION
+     • Plasma extinguished; field ramps down
+     • MagiDrive™ returns to home position
+     • Run report generated: traces, parameters, calibration status
+     • Film/powder tagged with unique Run ID for traceability`;
+} else {
+    // DEFAULT - Generic PVD/CVD process
+    processType = "VAPOR DEPOSITION";
+    hardwareConfig = `HARDWARE CONFIGURATION (VAPOR DEPOSITION):
+  ├─ KJLC PVD-75 PRO Line (or compatible CVD/PVD chamber)
+  ├─ KJLC TORUS® Magnetron Cathodes or CVD Injectors
+  ├─ KJLC MagiDrive™ Precision Rotary Feedthrough (±0.001° resolution)
+  ├─ Deuterium Phase Clock (327.384 MHz hyperfine reference)
+  ├─ 32×32 Quadrupole Emitter Grid
+  └─ KJLC eKLipse™ Process Control with AEP Module`;
+    activationSequence = `LFGKC ACTIVATION SEQUENCE (DEPOSITION MODE):
+  1. PRE-RUN CALIBRATION
+     • Zero-Slack Validator audit confirms system ready
+     • MagiDrive™ encoder zeroed to reference index
+     • Phase Clock locked to Deuterium hyperfine transition (327.384 MHz)
+     • Chamber base pressure verified per process spec
 
   2. LOCK ANGLE ENGAGEMENT
      • MagiDrive™ indexes substrate to ${angle.toFixed(6)}° ± 0.001°
@@ -1091,10 +1179,25 @@ LFGKC ACTIVATION SEQUENCE:
      • Any deviation triggers immediate alarm/abort
 
   6. RUN COMPLETION
-     • Field ramps down in controlled sequence
+     • Process gases/plasma shut down; field ramps down
      • MagiDrive™ returns to home position
      • Run report generated: traces, parameters, calibration status
-     • Sample tagged with unique Run ID for traceability
+     • Sample tagged with unique Run ID for traceability`;
+}
+
+txt += `┌─────────────────────────────────────────────────────────────────────────────┐
+│                    AEP 5.1 RETROFIT — LFGKC ACTIVATION                      │
+│                    Process Type: ${processType.padEnd(36)}│
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Unlike conventional ${processType.toLowerCase()} processes where crystallinity emerges 
+statistically, the AEP 5.1 retrofit ACTIVELY ENFORCES growth conditions throughout
+synthesis. The following section describes the real-time control actions performed
+by the system during the critical growth phase to achieve Zero-Slack deterministic control.
+
+${hardwareConfig}
+
+${activationSequence}
 
 OPERATOR ACTIONS DURING LFGKC PHASE:
   □ Verify "LFGKC ACTIVE" status on eKLipse™ display
@@ -1104,7 +1207,7 @@ OPERATOR ACTIONS DURING LFGKC PHASE:
   □ Do NOT interrupt run unless safety interlock triggers
 
 VERIFICATION GATES (must pass for valid run):
-  ✓ Gate 1: Rotary stability maintained for entire deposition
+  ✓ Gate 1: Rotary stability maintained for entire process
   ✓ Gate 2: Phase lock held continuously (no unlock events)
   ✓ Gate 3: Pressure stability within ±5% of setpoint
   ✓ Gate 4: Temperature stability within ±2°C of setpoint
