@@ -1332,5 +1332,23 @@ function setEnv(e){currentEnv=e;document.querySelectorAll('.env-btn').forEach(b=
 function init(){Object.keys(DB).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(k=>{const d=DB[k],el=document.createElement('div');el.className='inv-item';el.dataset.id=k;el.innerHTML=`<span class="inv-id">${k}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</span>`;el.onclick=()=>selectRank(k);invList.appendChild(el);});document.querySelectorAll('.industry-btn').forEach(b=>b.onclick=()=>applyFilter(b.dataset.filter));document.querySelectorAll('.env-btn').forEach(b=>b.onclick=()=>setEnv(b.dataset.env));drawGrid(scanCtx);initAtoms();requestAnimationFrame(drawLoop);log("SYSTEM INITIALIZED.","cyan");log("40 SYSTEMS LOADED.","gold");}
 init();
 </script>
+<!-- Default Statcounter code for Validator
+https://protodynamics01.github.io/zero_slack_simulator/validator.html
+-->
+<script type="text/javascript">
+var sc_project=13194905; 
+var sc_invisible=1; 
+var sc_security="7ec92958"; 
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - Statcounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/13194905/0/7ec92958/1/"
+alt="Web Analytics Made Easy - Statcounter"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->    
 </body>
 </html>
